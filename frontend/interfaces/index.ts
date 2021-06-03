@@ -15,6 +15,7 @@ export interface Category {
 }
 
 export interface ProductImage {
+  id: number;
   image: string | undefined;
   alt_text: string | undefined;
 }
