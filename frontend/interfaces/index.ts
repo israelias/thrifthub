@@ -8,3 +8,22 @@ export type User = {
   id: number;
   name: string;
 };
+
+export interface Category {
+  name: string;
+  slug: string;
+}
+
+export interface ProductImage {
+  image: string | undefined;
+  alt_text: string | undefined;
+}
+
+export interface Product {
+  id: number;
+  category: number;
+  title: string;
+  slug: string;
+  regular_price: string;
+  product_image: ProductImage[];
+}
