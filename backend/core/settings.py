@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "account",
     "corsheaders",
     "mptt",
+    "rest_framework",
     "graphene_django",
 ]
 
@@ -133,6 +134,12 @@ MEDIA_ROOT = BASE_DIR / "media/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"]
+}
+
 GRAPHENE = {
     # Where our Graphene schema lives
     "SCHEMA": "core.schema.schema",
@@ -151,4 +158,5 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8001",
 ]
 
+# CORS_EXPOSE_HEADERS = ["Content-Type", 'X-CSRFToken', "Authorization"]
 CORS_ALLOW_CREDENTIALS = True

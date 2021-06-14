@@ -33,20 +33,20 @@ class Query(graphene.ObjectType):
     all_Products = graphene.List(ProductType)
     all_Products_by_name = graphene.Field(ProductType, slug=graphene.String(required=True))
 
-    def resolve_category_by_name(self, root, info, name):
+    def resolve_category_by_name(self, info, name):
         try:
             return Category.objects.get(name=name)
         except Category.DoesNotExist:
             return None
 
-    def resolve_all_Products_by_name(self, root, info, slug):
+    def resolve_all_Products_by_name(self, info, slug):
         try:
             return Product.objects.get(slug=slug)
         except Product.DoesNotExist:
             return None
 
-    def resolve_all_Categories(self, root, info):
+    def resolve_all_Categories(self, info):
         return Category.objects.filter(level=1)
 
-    def resolve_all_Products(self, root, info):
+    def resolve_all_Products(self, info):
         return Product.objects.all()

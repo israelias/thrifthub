@@ -13,8 +13,9 @@ class UserType(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     user_details = graphene.Field(UserType)
+    # user_details = graphene.List(UserType)
 
-    def resolve_user_details(self, info, **kwargs):
+    def resolve_user_details(root, info, **kwargs):
         user = info.context.user
         if not user.is_authenticated:
             raise Exception("Authentication credentials were not provided")
@@ -25,6 +26,3 @@ class Mutation(graphene.ObjectType):
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()
     verify_token = graphql_jwt.Verify.Field()
     refresh_token = graphql_jwt.Refresh.Field()
-
-
-
