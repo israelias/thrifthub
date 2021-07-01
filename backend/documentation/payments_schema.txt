@@ -1,0 +1,159 @@
+https://dbdiagram.io/d
+
+Table User as U {
+  id int [pk, increment]
+  username varchar
+  email varchar
+}
+
+
+Table UserProfile as UP {
+  id int [pk, increment]
+  user varchar [ref: - U.username]
+  stripe_customer_id varchar
+  one_click_purchasing boolean
+}
+
+Table Category as C {
+  id int [pk, increment]
+  name varchar
+  slug slug
+  parent varchar
+  is_active boolean
+}
+
+// Table ItemType as IT {
+//   id int [pk, increment]
+//   name varchar
+//   is_active boolean
+// }
+
+// Table ItemSpecification as IS {
+//   id int [pk, increment]
+//   type varchar
+//   name varchar
+// } 
+
+// Ref: IT.name < IS.type  
+
+Table Item as I {
+  id int [pk, increment]
+  type varchar
+  category varchar
+  title varchar
+  description varchar
+  slug slug
+  regular_price decimal
+  discount_price decimal
+  is_active boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+// Ref: IT.name < I.type
+Ref: C.name < I.category
+
+// Table ItemSpecificationValue as ISV {
+//   id int [pk, increment]
+//   item varchar
+//   specification varchar
+//   value varchar
+// }
+
+// Ref: I.title < ISV.item
+// Ref: IS.name < ISV.specification
+
+Table ItemImage as IM {
+  id int [pk, increment]
+  item int
+  image image
+  is_feature boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: I.id < IM.item
+
+Table OrderItem as OI {
+  id int [pk, increment]
+  user varchar
+  item varchar
+  quantity int
+  ordered boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Ref: U.username < OI.user
+Ref: I.title - OI.item
+
+Table Order as O {
+  id int [pk, increment]
+  user varchar
+  ref_code varchar
+  items int
+  start_date timestamp
+  ordered boolean
+  shipping_address int
+  billing_address int
+  payment int 
+  coupon int
+  being_delivered boolean
+  received boolean
+  refund_requested boolean
+  refun_granted boolean
+}
+
+Ref: U.username < O.user
+Ref: OI.id > O.items
+Ref: O.shipping_address - A.id
+Ref: O.billing_address - A.id
+Ref: O.payment - PY.id
+Ref: O.coupon - CP.id
+
+Table AddressType as AT {
+  id int [pk, increment]
+  type varchar [default: "Billing Address"]
+}
+
+Table Address as A {
+  id int [pk, increment]
+  user varchar
+  street_address varchar
+  apartment_address varchar
+  country varchar
+  zip varchar
+  address_type varchar
+  default boolean
+}
+
+Ref: U.username < A.user
+Ref: A.address_type > AT.type
+
+Table Payment as PY {
+  id int [pk, increment]
+  stripe_charge_id varchar
+  user varchar
+  amount decimal
+  timestamp timestamp
+}
+
+Ref: U.username < PY.user
+
+Table Coupon as CP {
+  id int [pk, increment]
+  code varchar
+  amount decimal
+}
+
+Table Refund as RF {
+  id int [pk, increment]
+  order int
+  reason varchar
+  accepted boolean
+  email varchar
+}
+
+Ref: O.id - RF.order
+
+
