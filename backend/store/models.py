@@ -1,12 +1,16 @@
 from django.db import models
 from django.urls import reverse
+from django.core.files import File
 from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
+from vendor.models import Vendor
+from PIL import Image
+from io import BytesIO
 
 
 class Category(MPTTModel):
     """
-    Category Table implimented with MPTT.
+    Category Table as MPTT model.
     """
 
     name = models.CharField(
@@ -17,12 +21,14 @@ class Category(MPTTModel):
     )
     slug = models.SlugField(verbose_name=_("Category safe URL"), max_length=255, unique=True)
     parent = TreeForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name="children")
+    ordering = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
     class MPTTMeta:
         order_insertion_by = ["name"]
 
     class Meta:
+        ordering = ["ordering"]
         verbose_name = _("Category")
         verbose_name_plural = _("Categories")
 
@@ -33,53 +39,19 @@ class Category(MPTTModel):
         return self.name
 
 
-class ProductType(models.Model):
-    """
-    ProductType Table will provide a list of the different types
-    of products that are for sale.
-    """
-
-    name = models.CharField(verbose_name=_("Product Name"), help_text=_("Required"), max_length=255, unique=True)
-    is_active = models.BooleanField(default=True)
-
-    class Meta:
-        verbose_name = _("Product Type")
-        verbose_name_plural = _("Product Types")
-
-    def __str__(self):
-        return self.name
-
-
-class ProductSpecification(models.Model):
-    """
-    The Product Specification Table contains product
-    specifiction or features for the product types.
-    """
-
-    product_type = models.ForeignKey(ProductType, on_delete=models.RESTRICT)
-    name = models.CharField(verbose_name=_("Name"), help_text=_("Required"), max_length=255)
-
-    class Meta:
-        verbose_name = _("Product Specification")
-        verbose_name_plural = _("Product Specifications")
-
-    def __str__(self):
-        return self.name
-
-
 class Product(models.Model):
     """
     The Product table contining all product items.
     """
 
-    product_type = models.ForeignKey(ProductType, on_delete=models.RESTRICT)
-    category = models.ForeignKey(Category, on_delete=models.RESTRICT)
+    category = models.ForeignKey(Category, related_name="products", on_delete=models.CASCADE)
+    vendor = models.ForeignKey(Vendor, related_name="products", on_delete=models.CASCADE)
     title = models.CharField(
         verbose_name=_("title"),
         help_text=_("Required"),
         max_length=255,
     )
-    description = models.TextField(verbose_name=_("description"), help_text=_("Not Required"), blank=True)
+    description = models.TextField(verbose_name=_("description"), help_text=_("Not Required"), blank=True, null=True)
     slug = models.SlugField(max_length=255)
     regular_price = models.DecimalField(
         verbose_name=_("Regular price"),
@@ -113,6 +85,7 @@ class Product(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
+        # unique_together = ['album', 'order']
         verbose_name = _("Product")
         verbose_name_plural = _("Products")
 
@@ -121,28 +94,6 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
-
-
-class ProductSpecificationValue(models.Model):
-    """
-    The Product Specification Value table holds each of the
-    products individual specification or bespoke features.
-    """
-
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    specification = models.ForeignKey(ProductSpecification, on_delete=models.RESTRICT)
-    value = models.CharField(
-        verbose_name=_("value"),
-        help_text=_("Product specification value (maximum of 255 words"),
-        max_length=255,
-    )
-
-    class Meta:
-        verbose_name = _("Product Specification Value")
-        verbose_name_plural = _("Product Specification Values")
-
-    def __str__(self):
-        return self.value
 
 
 class ProductImage(models.Model):
@@ -156,6 +107,13 @@ class ProductImage(models.Model):
         help_text=_("Upload a product image"),
         upload_to="images/",
         default="images/default.png",
+    )
+    thumbnail = models.ImageField(
+        verbose_name=_("thumbnail"),
+        help_text=_("Upload a thumbnail image"),
+        upload_to="images/",
+        blank=True,
+        null=True,
     )
     alt_text = models.CharField(
         verbose_name=_("Alternative text"),
@@ -171,3 +129,27 @@ class ProductImage(models.Model):
     class Meta:
         verbose_name = _("Product Image")
         verbose_name_plural = _("Product Images")
+
+    def get_thumbnail(self):
+        if self.thumbnail:
+            return self.thumbnail.url
+        else:
+            if self.image:
+                self.thumbnail = self.make_thumbnail(self.image)
+                self.save()
+
+                return self.thumbnail.url
+            else:
+                return "https://via.placeholder.com/240x180.jpg"
+
+    def make_thumbnail(self, image, size=(300, 200)):
+        img = Image.open(image)
+        img.convert("RGB")
+        img.thumbnail(size)
+
+        thumb_io = BytesIO()
+        img.save(thumb_io, "JPEG", quality=85)
+
+        thumbnail = File(thumb_io, name=image.name)
+
+        return thumbnail

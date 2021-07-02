@@ -24,7 +24,7 @@ class ProductImageType(DjangoObjectType):
 class ProductType(DjangoObjectType):
     class Meta:
         model = Product
-        fields = ("id", "title", "description", "regular_price", "slug", "product_image")
+        fields = ("id", "title", "category", "vendor",  "description", "regular_price", "slug", "product_image")
 
 
 class Query(graphene.ObjectType):
