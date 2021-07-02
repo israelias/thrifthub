@@ -26,6 +26,7 @@ urlpatterns = [
     # Cookies automatically save and no need to add to authorization request
     path("graphql/", jwt_cookie(csrf_exempt(GraphQLView.as_view(graphiql=True)))),
     path("", include("store.urls", namespace="store")),
+    path("", include("vendor.urls", namespace="vendor")),
 ]
 
 if settings.DEBUG:
