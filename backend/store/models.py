@@ -1,11 +1,19 @@
+import random
+import string
+from io import BytesIO
+
+from django.core.files import File
 from django.db import models
 from django.urls import reverse
-from django.core.files import File
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
-from vendor.models import Vendor
 from PIL import Image
-from io import BytesIO
+from vendor.models import Vendor
+
+
+def rand_slug():
+    return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
 
 
 class Category(MPTTModel):
@@ -35,7 +43,15 @@ class Category(MPTTModel):
     def get_absolute_url(self):
         return reverse("store:category_list", args=[self.slug])
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(rand_slug() + "-" + self.name)
+        super(Category, self).save(*args, **kwargs)
+
     def __str__(self):
+        return self.name
+
+    def __unicode__(self):
         return self.name
 
 
@@ -52,7 +68,7 @@ class Product(models.Model):
         max_length=255,
     )
     description = models.TextField(verbose_name=_("description"), help_text=_("Not Required"), blank=True, null=True)
-    slug = models.SlugField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True, null=True, blank=True)
     regular_price = models.DecimalField(
         verbose_name=_("Regular price"),
         help_text=_("Maximum 999.99"),
@@ -85,14 +101,23 @@ class Product(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
-        # unique_together = ['album', 'order']
         verbose_name = _("Product")
         verbose_name_plural = _("Products")
 
     def get_absolute_url(self):
         return reverse("store:product_detail", args=[self.slug])
 
+    def save(self, *args, **kwargs):
+
+        if not self.slug:
+            self.slug = slugify(rand_slug() + "-" + self.title)
+
+        super(Product, self).save(*args, **kwargs)
+
     def __str__(self):
+        return self.title
+
+    def __unicode__(self):
         return self.title
 
 
