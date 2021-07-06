@@ -48,6 +48,18 @@ class Category(MPTTModel):
             self.slug = slugify(rand_slug() + "-" + self.name)
         super(Category, self).save(*args, **kwargs)
 
+    def get_slug_list(self):
+        try:
+            ancestors = self.get_ancestors(include_self=True)
+        except:
+            ancestors = []
+        else:
+            ancestors = [i.slug for i in ancestors]
+        slugs = []
+        for i in range(len(ancestors)):
+            slugs.append("/".join(ancestors[: i + 1]))
+        return slugs
+
     def __str__(self):
         return self.name
 
@@ -98,11 +110,50 @@ class Product(models.Model):
     )
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
+    image = models.ImageField(
+        verbose_name=_("single image"),
+        help_text=_("Upload a dedicated product image"),
+        upload_to="images/",
+        default="images/default.png",
+        blank=True,
+        null=True,
+    )
+    thumbnail = models.ImageField(
+        verbose_name=_("single thumbnail"),
+        help_text=_("Upload a dedicated thumbnail image"),
+        upload_to="images/",
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         ordering = ("-created_at",)
         verbose_name = _("Product")
         verbose_name_plural = _("Products")
+
+    def get_thumbnail(self):
+        if self.thumbnail:
+            return self.thumbnail.url
+        else:
+            if self.image:
+                self.thumbnail = self.make_thumbnail(self.image)
+                self.save()
+
+                return self.thumbnail.url
+            else:
+                return "https://via.placeholder.com/240x180.jpg"
+
+    def make_thumbnail(self, image, size=(300, 200)):
+        img = Image.open(image)
+        img.convert("RGB")
+        img.thumbnail(size)
+
+        thumb_io = BytesIO()
+        img.save(thumb_io, "JPEG", quality=85)
+
+        thumbnail = File(thumb_io, name=image.name)
+
+        return thumbnail
 
     def get_absolute_url(self):
         return reverse("store:product_detail", args=[self.slug])
@@ -140,6 +191,7 @@ class ProductImage(models.Model):
         blank=True,
         null=True,
     )
+
     alt_text = models.CharField(
         verbose_name=_("Alternative text"),
         help_text=_("Please add alternative text"),
@@ -152,6 +204,7 @@ class ProductImage(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        ordering = ["is_feature"]
         verbose_name = _("Product Image")
         verbose_name_plural = _("Product Images")
 
@@ -178,3 +231,10 @@ class ProductImage(models.Model):
         thumbnail = File(thumb_io, name=image.name)
 
         return thumbnail
+
+    def save(self, *args, **kwargs):
+
+        if not self.alt_text:
+            self.alt_text = slugify(rand_slug() + "-" + self.product.title)
+
+        super(ProductImage, self).save(*args, **kwargs)
