@@ -1,15 +1,15 @@
+import datetime
 import random
 import string
-from io import BytesIO
 
-from django.core.files import File
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
-from PIL import Image
 from vendor.models import Vendor
+from versatileimagefield.fields import PPOIField, VersatileImageField
+from versatileimagefield.placeholder import OnStoragePlaceholderImage
 
 
 def rand_slug():
@@ -69,7 +69,7 @@ class Category(MPTTModel):
 
 class Product(models.Model):
     """
-    The Product table contining all product items.
+    The Product table for all product items.
     """
 
     category = models.ForeignKey(Category, related_name="products", on_delete=models.CASCADE)
@@ -110,21 +110,6 @@ class Product(models.Model):
     )
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
-    image = models.ImageField(
-        verbose_name=_("single image"),
-        help_text=_("Upload a dedicated product image"),
-        upload_to="images/",
-        default="images/default.png",
-        blank=True,
-        null=True,
-    )
-    thumbnail = models.ImageField(
-        verbose_name=_("single thumbnail"),
-        help_text=_("Upload a dedicated thumbnail image"),
-        upload_to="images/",
-        blank=True,
-        null=True,
-    )
 
     class Meta:
         ordering = ("-created_at",)
@@ -143,20 +128,12 @@ class Product(models.Model):
             else:
                 return "https://via.placeholder.com/240x180.jpg"
 
-    def make_thumbnail(self, image, size=(300, 200)):
-        img = Image.open(image)
-        img.convert("RGB")
-        img.thumbnail(size)
+    def make_thumbnail(self, image, size=("240x180")):
 
-        thumb_io = BytesIO()
-        img.save(thumb_io, "JPEG", quality=85)
-
-        thumbnail = File(thumb_io, name=image.name)
-
-        return thumbnail
+        return image.thumbnail[size].url
 
     def get_absolute_url(self):
-        return reverse("store:product_detail", args=[self.slug])
+        return reverse("store:product-detail", args=[self.slug])
 
     def save(self, *args, **kwargs):
 
@@ -170,6 +147,72 @@ class Product(models.Model):
 
     def __unicode__(self):
         return self.title
+
+
+class Image(models.Model):
+    """
+    The Product Versatile Image table.
+    """
+
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_images")
+    name = models.CharField(max_length=255, null=True, blank=True)
+    image = VersatileImageField(
+        "Image",
+        help_text=_("Upload a product image"),
+        upload_to="images/",
+        ppoi_field="image_ppoi",
+        null=True,
+        blank=True,
+        placeholder_image=OnStoragePlaceholderImage(path="images/default.png"),
+    )
+    image_ppoi = PPOIField("Image PPOI")
+    alt_text = models.CharField(
+        verbose_name=_("Alternative text"),
+        help_text=_("Please add alternative text"),
+        max_length=255,
+        null=True,
+        blank=True,
+    )
+    is_feature = models.BooleanField(
+        default=False,
+        verbose_name=_("Feature Image"),
+        help_text=_("Assign this as the feature image"),
+    )
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
+
+    class Meta:
+        ordering = ["is_feature"]
+        verbose_name = _("Versatile Image")
+        verbose_name_plural = _("Versatile Images")
+
+    def get_thumbnail(self):
+        if self.image:
+            thumbnail = self.make_thumbnail(self.image)
+            return thumbnail
+        else:
+            return "https://via.placeholder.com/240x180.jpg"
+
+    def make_thumbnail(self, image, size=("240x180")):
+        return image.thumbnail[size].url
+
+    def __str__(self):
+        return self.name
+
+    def __unicode__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.name:
+            if self.is_feature:
+                self.name = self.product.title + "-" + "feature" + "-" + rand_slug()
+
+            self.name = self.product.title + "-" + "image" + "-" + rand_slug()
+
+        if not self.alt_text:
+            self.alt_text = self.product.title + " photo"
+
+        super(Image, self).save(*args, **kwargs)
 
 
 class ProductImage(models.Model):
