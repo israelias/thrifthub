@@ -1,130 +1,69 @@
-from django.db.models import Q
-from django.shortcuts import get_object_or_404, render
-from django.utils.text import slugify
-from order.cart import Cart
-from order.serializers import CartSerializer
-from rest_framework import generics, viewsets
-from rest_framework.decorators import api_view
+from django.shortcuts import redirect, render, reverse
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_flex_fields import FlexFieldsModelViewSet, is_expanded
+from rest_framework import filters, generics, viewsets
 from rest_framework.response import Response
+from vendor.models import Vendor
 
 from . import models
 from .models import Category, Product
-from .serializers import (  # VendorAdminSerializer,; VendorProductSerializer,; VendorSerializer,
+from .serializers import (
+    CategoryFullSerializer,
     CategorySerializer,
     ProductCartSerializer,
     ProductSerializer,
+    ProductVersatileSerializer,
 )
 
 
-@api_view(["GET"])
-def product(request, pk):
-    instance = Product.objects.get(pk=pk)
-    serializer = ProductCartSerializer(instance)
-    return Response(serializer.data)
-
-
-class ProductCartViewSet(viewsets.ViewSet):
+class ProductViewSet(FlexFieldsModelViewSet):
     """
-    A simple ViewSet for listing or retrieving users.
-    """
+    Product View Set.
+    With Flex-Expandable fields.
+    With search fields.
 
-    def list(self, request):
-        queryset = Product.objects.all()
-        serializer = ProductSerializer(queryset, many=True)
-        return Response(serializer.data)
+    Flex Endpoint Options: `api/store/?expand=category,product_images`
+    @see https://github.com/rsinger86/drf-flex-fieldshttps://github.com/rsinger86/drf-flex-fields
 
-    def retrieve(self, request, category_slug, product_slug, pk=None):
-        queryset = Product.objects.all()
-        cart = Cart(request)
-        product = get_object_or_404(queryset, category__slug=category_slug, slug=product_slug, pk=pk)
-        cart_serializer = CartSerializer()
-        quantity = cart_serializer.cleaned_data["quantity"]
-        cart.add(product_id=product.id, quantity=quantity, update_quantity=False)
-        serializer = ProductCartSerializer(product)
-        return Response(serializer.data)
+    Search Endpoint: `api/store/?search=<query>`
 
-    def create(self, request, category_slug, product_slug, pk=None):
-        queryset = Product.objects.all()
-        product = get_object_or_404(queryset, category__slug=category_slug, slug=product_slug, pk=pk)
-        serializer = ProductCartSerializer(product)
-        return Response(serializer.data)
-
-
-class ProductCreateApi(generics.CreateAPIView):
-    """
-    Create a product.
-    This API view supports only post requests.
     """
 
+    permit_list_expands = ["vendor", "image", "category", "product_image"]
+    lookup_field = "slug"
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    serializer_class = ProductVersatileSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["title", "description"]
 
+    # api/?search=kicks
+    # api/kicks/?expand=category,product_images
 
-class ProductApi(generics.ListAPIView):
-    """
-    Get a list of all vendors.
-    This API view supports only get requests.
-    """
-
-    # queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-    def get_queryset(self):
-        """
-        Optionally restricts the returned products to a given user,
-        by filtering against a `query` query parameter in the URL.
-        """
-        queryset = Product.objects.all()
-        query = self.request.query_params.get("query")
-        if query is not None:
-            queryset = queryset.filter(Q(title__icontains=query) | Q(description__icontains=query))
-        return queryset
-
-
-class ProductUpdateApi(generics.RetrieveUpdateAPIView):
-    """
-    Updating can be performed simply by replacing
-    the ListAPIView with RetriveUpdateAPIView.
-    This API view supports both get, put, and patch requests.
-    """
-
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-
-class ProductDeleteApi(generics.DestroyAPIView):
-    """
-    Provides get and post method handlers
-    """
-
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-
-
-class ProductListView(generics.ListCreateAPIView):
-    """
-    Provides get and post method handlers
-    """
-
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+    # def get_queryset(self):
+    #     queryset = models.Product.objects.all()
+    #     if is_expanded(self.request, "category"):
+    #         queryset = queryset.select_related("category")
+    #     return queryset
 
     def perform_create(self, serializer):
         serializer.save(vendor=self.request.user.vendor)
 
 
-class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
-    """
-    Provides get, put, patch and delete method handlers
-    """
-
-    lookup_field = "slug"
-    queryset = Product.objects.all()
+class ProductsByVendorView(generics.ListAPIView):
     serializer_class = ProductSerializer
 
+    def get_queryset(self):
+        return models.Product.objects.filter(vendor__in=models.Vendor.objects.get(slug=self.kwargs["slug"]))
 
-class CategoryItemView(generics.ListAPIView):
+
+class ProductsByCategory(generics.ListAPIView):
+
     serializer_class = ProductSerializer
+
+    """
+    Returns products under a single category in `slug`
+    Endpoint: `api/store/category/<slug>`
+    """
 
     def get_queryset(self):
         return models.Product.objects.filter(
@@ -132,54 +71,78 @@ class CategoryItemView(generics.ListAPIView):
         )
 
 
+class ProductsByCategories(generics.ListAPIView):
+    serializer_class = ProductVersatileSerializer
+    queryset = Product.objects.all()
+
+    """
+    Returns products hierarchically for every sub-category in `hierarchy` arg
+    Endpoint: `api/store/category/<hierarchy>/<hierarchy/<hierarchy`
+    where every node in the `MPTT` Category model is slug arguments that filters
+    products per URL arg
+    """
+
+    def get_queryset(self):
+        print("this", self.kwargs, self)
+        category_slug = self.kwargs.get("hierarchy", None)
+        parent = None
+        root = Category.objects.all()
+
+        print("this", category_slug)
+
+        if category_slug is not None:
+            category_slug = category_slug.split("/")
+
+            for slug in category_slug[:-1]:
+                print("next", slug)
+                parent = Category.objects.get(parent=parent, slug=slug)
+
+            try:
+                instance = models.Product.objects.filter(
+                    category__in=Category.objects.get(parent=parent, slug=category_slug[-1]).get_descendants(
+                        include_self=True
+                    )
+                )
+            except:
+
+                instance = models.Product.objects.filter(
+                    category__in=Category.objects.get(slug=category_slug[-1]).get_descendants(include_self=True)
+                )
+                print("except", instance)
+                return instance
+            else:
+                print("else", instance)
+                return instance
+        print("last")
+        redirect(reverse("product-list"))
+
+
+class CategoryViewSet(FlexFieldsModelViewSet):
+    """
+    View set for Category Crud operations
+    With Flex-Expandable fields.
+    With search fields.
+
+    Flex Endpoint Options: `api/category/?
+    @see https://github.com/rsinger86/drf-flex-fieldshttps://github.com/rsinger86/drf-flex-fields
+    """
+
+    lookup_field = "slug"
+    queryset = Category.objects.all()
+    serializer_class = CategoryFullSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["name"]
+
+    # api/category/?search=kicks
+    # add filters
+
+
 class CategoryListView(generics.ListAPIView):
+    """
+    Returns all existing categories filtered from sub-parent, onwards
+    """
+
     queryset = Category.objects.filter(level=1)
+
+    # queryset = Category.objects.all()
     serializer_class = CategorySerializer
-
-
-# class VendorList(generics.ListCreateAPIView):
-#     """
-#     All Vendors
-#     This API view supports post and get requests.
-#     """
-
-#     queryset = Vendor.objects.all()
-#     serializer_class = VendorSerializer
-
-#     """
-#     Endpoint to become a vendor.
-#     """
-
-#     def perform_create(self, serializer):
-#         serializer.save(name=self.request.user.username, created_by=self.request.user)
-
-
-# class VendorDetail(generics.RetrieveUpdateDestroyAPIView):
-#     """
-#     Retrieve, update, delete a vendor.
-#     """
-
-#     queryset = Vendor.objects.all()
-#     serializer_class = VendorAdminSerializer
-
-
-# class VendorProductListView(generics.ListCreateAPIView):
-#     """
-#     Provides get and post method handlers
-#     """
-
-#     queryset = Product.objects.all()
-#     serializer_class = VendorProductSerializer
-
-#     def perform_create(self, serializer):
-#         serializer.save(vendor=self.request.user)
-
-
-# class VendorProductDetail(generics.RetrieveUpdateDestroyAPIView):
-#     """
-#     Provides get, put, patch and delete method handlers
-#     """
-
-#     lookup_field = "slug"
-#     queryset = Product.objects.all()
-#     serializer_class = VendorProductSerializer
