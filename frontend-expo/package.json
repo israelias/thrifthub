@@ -17,21 +17,29 @@
   "dependencies": {
     "expo": "~42.0.0",
     "next": "latest",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-37.0.1.tar.gz",
-    "react-native-web": "~0.17.1"
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-42.0.0.tar.gz",
+    "react-native-web": "~0.13.12"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.0",
+    "@babel/core": "~7.9.0",
     "@expo/next-adapter": "2.1.83",
     "@types/node": "16.3.1",
-    "@types/react": "^17.0.2",
-    "@types/react-dom": "^17.0.1",
-    "@types/react-native": "~0.64.11",
-    "babel-preset-expo": "~8.4.0",
+    "@types/react": "~16.9.35",
+    "@types/react-dom": "~16.9.8",
+    "@types/react-native": "~0.63.2",
+    "babel-preset-expo": "8.3.0",
     "eslint": "^7.30.0",
-    "typescript": "4.3.5"
+    "next-compose-plugins": "^2.2.1",
+    "next-transpile-modules": "^8.0.0",
+    "typescript": "~4.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "resolutions": {
+    "html-webpack-plugin": "5.3.1",
+    "webpack": "^5"
+  }
 }
