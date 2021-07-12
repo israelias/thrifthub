@@ -1,22 +1,8 @@
 name: Deploy
 
-# on:
-#   push:
-#     branches:
-#       - master
-
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2
-#       - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
-#         with:
-#           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-#           heroku_app_name: "thrifthub-backend" #Must be unique in Heroku
-#           heroku_email: "israelias.js@gmail.com"
-#           appdir: backend # <- This will point to the api folder in your project
-#           working-directory: ./backend
+# https://github.com/nyakaz73/heroku-django-deploy/blob/master/.github/workflows/main.yml
+# https://github.com/marketplace/actions/deploy-to-heroku#deploy-subdirectory
+# https://github.com/nyakaz73/heroku-django-deploy
 
 on:
   push:
