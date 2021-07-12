@@ -2,10 +2,9 @@ from django.shortcuts import render
 from rest_framework import generics
 
 from . import models
-from .models import Order as OrderModel, OrderItem
-from .serializers import OrderItemSerializer, OrderSerializer
-
-from .cart import Cart
+from .models import Order as OrderModel
+from .models import OrderDetail
+from .serializers import OrderDetailSerializer, OrderSerializer
 
 
 class OrderListView(generics.ListAPIView):
@@ -20,8 +19,8 @@ class Order(generics.RetrieveAPIView):
 
 
 class OrderItemListView(generics.ListAPIView):
-    queryset = OrderItem.objects.all()
-    serializer_class = OrderItemSerializer
+    queryset = OrderDetail.objects.all()
+    serializer_class = OrderDetailSerializer
 
 
 class OrderItem(generics.RetrieveAPIView):
@@ -37,26 +36,32 @@ class OrderItemCheckout(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         body = request.POST.get("body")
-        order = OrderModel.objects.create(
+        order_item = OrderModel.objects.create(
+            product=body["product"],
+            vendor=body["product"].vendor,
+            buyer=request.user.vendor,
+        )
+        order_detail = OrderDetail.objects.create(
             first_name=body["first_name"],
             last_name=body["last_name"],
             email=body["email"],
             address=body["address"],
             zipcode=body["zipcode"],
-            place=body["place"],
+            country=body["country"],
             phone=body["phone"],
-            paid_amount=body["paid_amount"],
+            amount=body["amount"],
+            order=order_item,
         )
 
-        for item in Cart(request):
-            OrderItem.objects.create(
-                order=order,
-                product=item["product"],
-                vendor=item["product"].vendor,
-                price=item["product"].price,
-                quantity=item["quantity"],
-            )
+        # for item in Cart(request):
+        #     OrderItem.objects.create(
+        #         order=order,
+        #         product=item["product"],
+        #         vendor=item["product"].vendor,
+        #         price=item["product"].price,
+        #         quantity=item["quantity"],
+        #     )
 
-            order.vendors.add(item["product"].vendor)
+        #     order.vendors.add(item["product"].vendor)
 
         return self.create(request, *args, **kwargs)
