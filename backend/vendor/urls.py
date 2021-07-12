@@ -5,6 +5,7 @@ from . import views
 app_name = "vendor"
 
 urlpatterns = [
+    path("vendor/home/<int:pk>", views.VendorDetailView.as_view()),
     # includes favorites, and friends' products
     path("vendor/<int:pk>/", views.OtherVendorDetailView.as_view()),
     path("vendor/<int:pk>/favorites/", views.VendorFavoriteListView.as_view()),

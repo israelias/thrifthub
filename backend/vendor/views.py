@@ -23,8 +23,12 @@ from .serializers import (
     VendorSerializer,
 )
 
+class VendorDetailAuthView(generics.RetrieveAPIView):
+    """
+    This view should return the profile 
+    for the currently authenticated user.
+    """
 
-class VendorDetailView(generics.RetrieveAPIView):
     permission_classes = [
         permissions.AllowAny,
     ]
@@ -32,6 +36,21 @@ class VendorDetailView(generics.RetrieveAPIView):
 
     def get_object(self):
         return Vendor.objects.get(created_by=self.request.user)
+
+
+
+class VendorDetailView(generics.RetrieveAPIView):
+    """
+    This view should return the profile 
+    for for vendor with matching id.
+    """
+
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+    serializer_class = CurrentVendorSerializer
+    lookup_field = "id"
+    queryset = Vendor.objects.all()
 
 
 class OtherVendorDetailView(generics.RetrieveUpdateAPIView):
