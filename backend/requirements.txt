@@ -10,6 +10,7 @@ coreapi==2.3.3
 coreschema==0.0.4
 cryptography==3.4.7
 decorator==5.0.9
+dj-database-url==0.5.0
 Django==3.2.3
 django-cors-headers==3.7.0
 django-filter==2.4.0
@@ -41,6 +42,7 @@ packaging==21.0
 pathspec==0.8.1
 Pillow==8.3.1
 promise==2.3
+psycopg2-binary==2.9.1
 pycparser==2.20
 PyJWT==1.7.1
 pyparsing==2.4.7
