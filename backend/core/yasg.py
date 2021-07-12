@@ -3,7 +3,6 @@ from drf_yasg.generators import OpenAPISchemaGenerator
 from drf_yasg.inspectors import SwaggerAutoSchema
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
-from rest_framework_swagger.views import get_swagger_view
 
 
 # https://github.com/axnsan12/drf-yasg/issues/146
@@ -36,4 +35,4 @@ schema_view = get_schema_view(
    
 )
 
-schema_swagger_view = get_swagger_view(title="ThriftHub API")
+
