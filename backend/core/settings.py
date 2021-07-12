@@ -10,7 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,19 +23,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-c+1b6t3x%=&n0_y^h&9wzl1_!nr-e9%200tqyl&-$u2_^pytz1"
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["thrifthub-backend.herokuapp.com", "localhost"]
 
-STRIPE_PUB_KEY = (
-    "pk_test_51J2BHrIPDTNVSO6kqBTaTI8e0kXrWpRbZa89Hb7M5ydv5onBDdondvujfY5xzOjSRr9EUobHYpeUt2u7krvjm3hS00yzAJCyf8"
-)
-STRIPE_SECRET_KEY = (
-    "sk_test_51J2BHrIPDTNVSO6kKo7Brsue8UK0jGsN32tIaTMPeGhoL2x2kO571NSH56SbvFNfFNZKUXcFT3beJfCPCXMAvpB6005lF8gN3M"
-)
+STRIPE_PUB_KEY = os.environ.get("STRIPE_PUB_KEY")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
 
 # LOGIN_URL = "login"
 # LOGIN_REDIRECT_URL = "vendor_admin"
@@ -41,12 +40,12 @@ STRIPE_SECRET_KEY = (
 SESSION_COOKIE_AGE = 86400
 CART_SESSION_ID = "cart"
 
-EMAIL_HOST = "smtp.sendgrid.net"
-EMAIL_HOST_USER = "apikey"
-EMAIL_HOST_PASSWORD = "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"
-EMAIL_PORT = 587
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT"))
 EMAIL_USE_TLS = True
-DEFAULT_EMAIL_FROM = "Interiorstore <noreply@codewithstein.com>"
+DEFAULT_EMAIL_FROM = "ThriftHub <noreply@thrifthub.com>"
 
 # Application definition
 
@@ -68,7 +67,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     "knox",
-    # "rest_framework_swagger",
     "graphene_django",
 ]
 
@@ -106,7 +104,6 @@ WSGI_APPLICATION = "core.wsgi.application"
 SWAGGER_SETTINGS = {
     "DEFAULT_AUTO_SCHEMA_CLASS": "core.yasg.CompoundTagsSchema",
     "DEFAULT_GENERATOR_CLASS": "core.yasg.CustomOpenAPISchemaGenerator",
-    # "DEFAULT_API_URL":
 }
 
 VERSATILEIMAGEFIELD_SETTINGS = {
@@ -155,13 +152,16 @@ VERSATILEIMAGEFIELD_SETTINGS = {
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
 
+if "DATABASE_URL" in os.environ:
+    DATABASES = {"default": dj_database_url.parse(os.environ.get("DATABASE_URL"))}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -241,6 +241,11 @@ AUTHENTICATION_BACKENDS = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:8001",
+    "https://thrifthub.vercel.app",
+    "https://thrift-hub.vercel.app",
+    "https://thrifthub-dev.vercel.app",
+    "https://thrifthub-prod.vercel.app",
+    "https://thrifthub-test.vercel.app",
 ]
 
 # CORS_EXPOSE_HEADERS = ["Content-Type", 'X-CSRFToken', "Authorization"]

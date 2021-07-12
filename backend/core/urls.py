@@ -24,7 +24,7 @@ from drf_yasg.views import get_schema_view
 from graphene_django.views import GraphQLView
 from graphql_jwt.decorators import jwt_cookie
 
-from .yasg import schema_swagger_view, schema_view
+from .yasg import schema_view
 
 # ---------- Django REST ----------#
 
