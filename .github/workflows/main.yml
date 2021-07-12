@@ -23,6 +23,10 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+
+defaults:
+  run:
+    working-directory: ./backend
 jobs:
   heroku_git_deploy_job:
       runs-on: ubuntu-latest
@@ -37,3 +41,11 @@ jobs:
             heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
             heroku_email_address: "israelias.js@gmail.com"
             working-directory: ./backend
+            use_git: true
+            force_push: true
+
+          #Use the output from the hello step
+        - name: Get the output status
+          run: echo "${{ steps.deploy.outputs.status }}"
+        - name: Getting the files in directory
+          run: pwd
