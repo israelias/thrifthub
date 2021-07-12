@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework",
     "drf_yasg",
+    "knox",
     # "rest_framework_swagger",
     "graphene_django",
 ]
@@ -209,6 +210,8 @@ MEDIA_ROOT = BASE_DIR / "media/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
+    # knox auth
+    "DEFAULT_AUTHENTICATION_CLASSES": ("knox.auth.TokenAuthentication",),
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"],

@@ -29,6 +29,7 @@ from .yasg import schema_swagger_view, schema_view
 # ---------- Django REST ----------#
 
 urlpatterns_root = [
+    path("", include("account.urls", namespace="account")),
     path("", include("store.urls", namespace="store")),
     path("", include("vendor.urls", namespace="vendor")),
     path("", include("order.urls", namespace="order")),
