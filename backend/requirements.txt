@@ -2,6 +2,8 @@ aniso8601==7.0.0
 appdirs==1.4.4
 asgiref==3.3.4
 black==21.5b2
+boto3==1.17.109
+botocore==1.20.109
 certifi==2021.5.30
 cffi==1.14.6
 chardet==4.0.0
@@ -18,6 +20,7 @@ django-graphql-jwt==0.3.1
 django-js-asset==1.2.2
 django-mptt==0.12.0
 django-rest-knox==4.1.0
+django-storages==1.11.1
 django-truncate==0.1
 django-versatileimagefield==2.1
 djangorestframework==3.12.4
@@ -35,6 +38,7 @@ inflection==0.5.1
 isort==5.8.0
 itypes==1.2.0
 Jinja2==3.0.1
+jmespath==0.10.0
 loguru==0.5.3
 MarkupSafe==2.0.1
 mypy-extensions==0.4.3
@@ -47,6 +51,7 @@ psycopg2-binary==2.9.1
 pycparser==2.20
 PyJWT==1.7.1
 pyparsing==2.4.7
+python-dateutil==2.8.1
 python-magic==0.4.24
 pytz==2021.1
 regex==2021.4.4
@@ -54,6 +59,7 @@ requests==2.25.1
 ruamel.yaml==0.17.10
 ruamel.yaml.clib==0.2.6
 Rx==1.6.1
+s3transfer==0.4.2
 shortuuid==1.0.1
 simplejson==3.17.2
 singledispatch==3.6.2
