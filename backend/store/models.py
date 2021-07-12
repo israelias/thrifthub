@@ -81,29 +81,19 @@ class Product(models.Model):
     )
     description = models.TextField(verbose_name=_("description"), help_text=_("Not Required"), blank=True, null=True)
     slug = models.SlugField(max_length=255, unique=True, null=True, blank=True)
-    regular_price = models.DecimalField(
-        verbose_name=_("Regular price"),
-        help_text=_("Maximum 999.99"),
+    price = models.DecimalField(
+        verbose_name=_("Price"),
+        help_text=_("Maximum 999,999.99"),
         error_messages={
             "name": {
-                "max_length": _("The price must be between 0 and 999.99."),
+                "max_length": _("The price must be between 0 and 999,999.99."),
             },
         },
-        max_digits=5,
+        max_digits=8,
         decimal_places=2,
     )
-    discount_price = models.DecimalField(
-        verbose_name=_("Discount price"),
-        help_text=_("Maximum 999.99"),
-        error_messages={
-            "name": {
-                "max_length": _("The price must be between 0 and 999.99."),
-            },
-        },
-        max_digits=5,
-        decimal_places=2,
-    )
-    is_active = models.BooleanField(
+
+    is_available = models.BooleanField(
         verbose_name=_("Product visibility"),
         help_text=_("Change product visibility"),
         default=True,
@@ -213,3 +203,11 @@ class Image(models.Model):
             self.alt_text = self.product.title + " photo"
 
         super(Image, self).save(*args, **kwargs)
+
+
+class Favorite(models.Model):
+    vendor = models.OneToOneField(Vendor, related_name="favorites", on_delete=models.CASCADE)
+    favorites = models.ManyToManyField(Product, related_name="favorites")
+
+    def __str__(self):
+        return "%s's favorites" % self.vendor.name

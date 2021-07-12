@@ -1,6 +1,6 @@
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
-from order.admin import OrderItemInline
+
 
 from .models import Category, Image, Product
 
@@ -16,5 +16,5 @@ class ImageInline(admin.StackedInline):
 class ProductAdmin(admin.ModelAdmin):
     inlines = [
         ImageInline,
-        OrderItemInline,
+      
     ]

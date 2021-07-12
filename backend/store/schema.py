@@ -1,7 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 
-from .models import Category, Product, ProductImage
+from .models import Category, Product, Image
 
 
 class CategoryType(DjangoObjectType):
@@ -12,8 +12,8 @@ class CategoryType(DjangoObjectType):
 
 class ProductImageType(DjangoObjectType):
     class Meta:
-        model = ProductImage
-        field = ("id", "image", "alt_text")
+        model = Image
+        field = ("id", "name", "image", "alt_text", "is_feature")
 
     def resolve_image(self, info):
         if self.image:
@@ -24,7 +24,7 @@ class ProductImageType(DjangoObjectType):
 class ProductType(DjangoObjectType):
     class Meta:
         model = Product
-        fields = ("id", "title", "category", "vendor",  "description", "regular_price", "slug", "product_image")
+        fields = ("id", "title", "category", "vendor", "description", "regular_price", "slug", "product_image")
 
 
 class Query(graphene.ObjectType):

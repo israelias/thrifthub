@@ -69,7 +69,8 @@ class ProductSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "slug",
-            "regular_price",
+            "price",
+            "is_available",
             "product_images",
         ]
 
@@ -88,7 +89,8 @@ class ProductDetailSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "slug",
-            "regular_price",
+            "price",
+            "is_available",
             "product_images",
         ]
 
@@ -147,7 +149,8 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
             "category",
             "description",
             "slug",
-            "regular_price",
+            "price",
+            "is_available",
             "product_images",
             "similar_products",
             "absolute_url",
@@ -160,14 +163,10 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
         }
 
     def get_similar_products(self, obj):
-        print("obj", list(obj.category.products.exclude(id=obj.id)))
         similar_products = list(obj.category.products.exclude(id=obj.id))
 
-        print("sim", similar_products)
         if len(similar_products) >= 4:
             similar_products = random.sample(similar_products, 4)
 
-        print("sim2", similar_products)
         product_serializer = ProductDetailSerializer(similar_products, many=True)
-        print("simser", product_serializer.data)
         return product_serializer.data
