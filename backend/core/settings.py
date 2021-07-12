@@ -26,26 +26,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = "DEVELOPMENT" in os.environ
 
 ALLOWED_HOSTS = ["thrifthub-backend.herokuapp.com", "localhost"]
-
-STRIPE_PUB_KEY = os.environ.get("STRIPE_PUB_KEY")
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
-
-# LOGIN_URL = "login"
-# LOGIN_REDIRECT_URL = "vendor_admin"
-# LOGOUT_REDIRECT_URL = "frontpage"
-
-SESSION_COOKIE_AGE = 86400
-CART_SESSION_ID = "cart"
-
-EMAIL_HOST = os.environ.get("EMAIL_HOST")
-EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT"))
-EMAIL_USE_TLS = True
-DEFAULT_EMAIL_FROM = "ThriftHub <noreply@thrifthub.com>"
 
 # Application definition
 
@@ -67,6 +50,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     "knox",
+    "storages",
     "graphene_django",
 ]
 
@@ -200,9 +184,34 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = "/static/"
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+if "USE_AWS" in os.environ:
+    # Cache control
+    AWS_S3_OBJECT_PARAMETERS = {
+        "Expires": "Thu, 31 Dec 2099 20:00:00 GMT",
+        "CacheControl": "max-age=94608000",
+    }
+
+    # Bucket Config
+    AWS_STORAGE_BUCKET_NAME = "thrifthub"
+    AWS_S3_REGION_NAME = "ap-southeast-1"
+    AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+
+    # Static and media files
+    STATICFILES_STORAGE = "core.storages.StaticStorage"
+    STATICFILES_LOCATION = "static"
+    DEFAULT_FILE_STORAGE = "core.storages.MediaStorage"
+    MEDIAFILES_LOCATION = "media"
+
+    # Override static and media URLs in production
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{STATICFILES_LOCATION}/"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -224,6 +233,20 @@ REST_FRAMEWORK = {
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
     "VALIDATOR_URL": "http://localhost:8000",
 }
+
+# Stripe
+STRIPE_PUB_KEY = os.environ.get("STRIPE_PUB_KEY")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+
+SESSION_COOKIE_AGE = 86400
+CART_SESSION_ID = "cart"
+
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT"))
+EMAIL_USE_TLS = True
+DEFAULT_EMAIL_FROM = "ThriftHub <noreply@thrifthub.com>"
 
 GRAPHENE = {
     # Where our Graphene schema lives
