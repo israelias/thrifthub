@@ -7,16 +7,102 @@ from order.models import Order
 from order.serializers import OrderSerializer
 from rest_framework import generics, permissions, serializers, views, viewsets
 from rest_framework.response import Response
-from store.models import Image, Product
+from store.models import Favorite, Image, Product
 from store.serializers import ProductSerializer
 
 from . import models
-from .models import Vendor
+from .models import Friend, Vendor
 from .serializers import (
+    CurrentVendorSerializer,
+    OtherVendorSerializer,
     VendorAdminSerializer,
+    VendorFavoritesSerializer,
+    VendorFriendSerializer,
     VendorProductSerializer,
+    VendorSearchSerializer,
     VendorSerializer,
 )
+
+
+class VendorDetailView(generics.RetrieveAPIView):
+    permission_classes = [
+        permissions.AllowAny,
+    ]
+    serializer_class = CurrentVendorSerializer
+
+    def get_object(self):
+        return Vendor.objects.get(created_by=self.request.user)
+
+
+class OtherVendorDetailView(generics.RetrieveUpdateAPIView):
+    queryset = Vendor.objects.all()
+    serializer_class = OtherVendorSerializer
+
+
+class VendorListView(generics.ListAPIView):
+    queryset = Vendor.objects.all()
+    serializer_class = CurrentVendorSerializer
+
+
+class VendorFavoriteListView(generics.ListCreateAPIView):
+    serializer_class = ProductSerializer
+    queryset = Favorite.objects.all()
+
+    def get_queryset(self):
+        vendor = Vendor.objects.get(id=self.kwargs["pk"])
+        favorites_obj = get_object_or_404(self.queryset, vendor=vendor)
+        return favorites_obj.favorites.all()
+
+    def post(self, request, pk):
+        vendor = Vendor.objects.get(id=pk)
+        favorites_obj = get_object_or_404(self.queryset, vendor=vendor)
+        product = Product.objects.get(id=request.data["product_id"])
+        if favorites_obj:
+            favorites_obj.favorites.add(product)
+        return Response(json.dumps({}))
+
+    def delete(self, request, pk):
+        vendor = Vendor.objects.get(id=pk)
+        favorites_obj = get_object_or_404(self.queryset, vendor=vendor)
+        product = Product.objects.get(id=request.data["product_id"])
+        if favorites_obj:
+            favorites_obj.favorites.remove(product)
+        return Response(json.dumps({}))
+
+
+class VendorFriendsListView(generics.ListCreateAPIView):
+    serializer_class = CurrentVendorSerializer
+    queryset = Friend.objects.all()
+
+    def get_queryset(self):
+        vendor = Vendor.objects.get(id=self.kwargs["pk"])
+        friends_obj = Friend.objects.get_or_create(current_vendor=vendor)
+        return friends_obj.vendors.all()
+
+    def post(self, request, pk):
+        vendor = Vendor.objects.get(id=pk)
+        friends_obj = Friend.objects.get_or_create(current_vendor=vendor)[0]
+        friend = Vendor.objects.get(id=request.data["other_vendor_id"])
+        if friends_obj:
+            friends_obj.vendors.add(friend)
+        return Response(json.dumps({}))
+
+    def delete(self, request, pk):
+        vendor = Vendor.objects.get(id=pk)
+        friends_obj = Friend.objects.get_or_create(current_vendor=vendor)[0]
+        friend = Vendor.objects.get(id=request.data["other_vendor_id"])
+        if friends_obj:
+            friends_obj.vendors.remove(friend)
+        return Response(json.dumps({}))
+
+
+class VendorSearchListView(generics.ListAPIView):
+    serializer_class = VendorSearchSerializer
+
+    def get_queryset(self):
+        query = self.kwargs["query"]
+        queryset = Vendor.objects.filter(name__contains=query)
+        return queryset
 
 
 class VendorList(generics.ListCreateAPIView):

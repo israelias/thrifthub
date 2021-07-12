@@ -31,3 +31,29 @@ class Vendor(models.Model):
     def get_paid_amount(self):
         items = self.items.filter(vendor_paid=True, order__vendors__in=[self.id])
         return sum((item.product.price * item.quantity) for item in items)
+
+
+# class Favorite(models.Model):
+#     vendor = models.OneToOneField(Vendor, related_name="favorites", on_delete=models.CASCADE)
+#     favorites = models.ManyToManyField(Product, related_name="favorites")
+
+#     def __str__(self):
+#         return "%s's favorites" % self.vendor.name
+
+
+class Friend(models.Model):
+    vendors = models.ManyToManyField(Vendor, related_name="vendors")
+    current_vendor = models.ForeignKey(Vendor, related_name="owner", null=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "%s's friends" % self.current_vendor.name
+
+    @classmethod
+    def make_friend(cls, current_vendor, other_vendor):
+        friend, created = cls.objects.get_or_create(current_vendor=current_vendor)
+        friend.vendors.add(other_vendor)
+
+    @classmethod
+    def lose_friend(cls, current_vendor, other_vendor):
+        friend, created = cls.objects.get_or_create(current_vendor=current_vendor)
+        friend.vendors.remove(other_vendor)
