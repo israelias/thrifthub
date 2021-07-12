@@ -1,6 +1,7 @@
 import graphene
 import graphql_jwt
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from .models import User
 from graphene_django import DjangoObjectType
 from graphql_jwt.decorators import login_required
 
