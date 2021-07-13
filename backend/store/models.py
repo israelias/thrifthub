@@ -1,7 +1,9 @@
 import datetime
+import os
 import random
 import string
 
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
@@ -9,7 +11,14 @@ from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
 from vendor.models import Vendor
 from versatileimagefield.fields import PPOIField, VersatileImageField
-from versatileimagefield.placeholder import OnStoragePlaceholderImage
+from versatileimagefield.placeholder import (
+    OnDiscPlaceholderImage,
+    OnStoragePlaceholderImage,
+)
+
+
+def upload_path(instance, filename):
+    return "/".join(["images", str(instance.name), filename])
 
 
 def rand_slug():
@@ -149,11 +158,13 @@ class Image(models.Model):
     image = VersatileImageField(
         "Image",
         help_text=_("Upload a product image"),
-        upload_to="images/",
+        upload_to=upload_path,
+        # storage=settings.DEFAULT_FILE_STORAGE,
         ppoi_field="image_ppoi",
         null=True,
         blank=True,
-        placeholder_image=OnStoragePlaceholderImage(path="images/default.png"),
+        placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default.png")
+        # placeholder_image=OnStoragePlaceholderImage(path="images/default.png", storage=settings.DEFAULT_FILE_STORAGE),
     )
     image_ppoi = PPOIField("Image PPOI")
     alt_text = models.CharField(
