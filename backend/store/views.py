@@ -29,7 +29,7 @@ class ProductViewSet(FlexFieldsModelViewSet):
 
     """
 
-    permit_list_expands = ["vendor", "image", "category", "product_image"]
+    permit_list_expands = ["vendor", "image", "category", "product_images"]
     lookup_field = "slug"
     queryset = Product.objects.all()
     serializer_class = ProductVersatileSerializer
