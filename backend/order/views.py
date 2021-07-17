@@ -1,5 +1,9 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_flex_fields import FlexFieldsModelViewSet, is_expanded
+from rest_framework import generics, status
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+from store.models import Product
 
 from . import models
 from .models import Order as OrderModel
@@ -10,6 +14,38 @@ from .serializers import OrderDetailSerializer, OrderSerializer
 class OrderListView(generics.ListAPIView):
     queryset = OrderModel.objects.all()
     serializer_class = OrderSerializer
+
+
+class VendorOrderViewSet(FlexFieldsModelViewSet):
+    """
+    Vendo Order View Set.
+    With Flex-Expandable fields.
+    With search fields.
+
+    A viewset that provides default `create()`, `retrieve()`, `update()`,
+    `partial_update()`, `destroy()` and `list()` actions.
+
+
+    Flex Endpoint Options: `api/order/?expand=vendor,buyer,product`
+    @see https://github.com/rsinger86/drf-flex-fieldshttps://github.com/rsinger86/drf-flex-fields
+
+    Search Endpoint: `api/order/?search=<query>`
+    Sample Request:
+    {
+        "product": "1",
+        "buyer": "4",
+        "amount": "10.00",
+        "access": <ACCESS TOKEN>,
+        "refresh": <REFRESH TOKEN>
+    }
+
+    """
+
+    permit_list_expands = ["vendor", "product", "buyer"]
+    lookup_field = "id"
+    queryset = OrderModel.objects.all()
+    serializer_class = OrderSerializer
+    permission_classes = (AllowAny,)
 
 
 class Order(generics.RetrieveAPIView):
@@ -52,16 +88,5 @@ class OrderItemCheckout(generics.CreateAPIView):
             amount=body["amount"],
             order=order_item,
         )
-
-        # for item in Cart(request):
-        #     OrderItem.objects.create(
-        #         order=order,
-        #         product=item["product"],
-        #         vendor=item["product"].vendor,
-        #         price=item["product"].price,
-        #         quantity=item["quantity"],
-        #     )
-
-        #     order.vendors.add(item["product"].vendor)
 
         return self.create(request, *args, **kwargs)
