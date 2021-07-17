@@ -75,6 +75,25 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
 
+class ProductPreviewSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    vendor = VendorSlugSerializer(read_only=True)
+    product_images = ImageNewSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "category",
+            "vendor",
+            "title",
+            "slug",
+            "price",
+            "is_available",
+            "product_images",
+        ]
+
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     category = serializers.StringRelatedField(read_only=True)
     vendor = serializers.StringRelatedField(read_only=True)
@@ -95,35 +114,6 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         ]
 
 
-class ProductCartSerializer(FlexFieldsModelSerializer):
-    category = CategorySerializer(read_only=True)
-    vendor = serializers.StringRelatedField(read_only=True)
-    similar_products = ProductSerializer(many=True)
-    imagesstring = serializers.CharField()
-    product = ProductSerializer()
-
-    def to_representation(self, instance):
-        all_images = []
-
-        if instance.product_images is not None:
-            for image in instance.product_images.all():
-                all_images.append({"thumbnail": image.get_thumbnail(), "image": image.image.url, "id": image.id})
-
-        similar_products = list(instance.category.products.exclude(id=instance.id))
-
-        if len(similar_products) >= 4:
-            similar_products = random.sample(similar_products, 4)
-
-        all_products = ProductDetailSerializer(similar_products, many=True)
-
-        current_product = ProductDetailSerializer(instance)
-
-        return {
-            "product": current_product.data,
-            "similar_products": all_products.data,
-        }
-
-
 class VendorFullSerializer(serializers.ModelSerializer):
     class Meta:
         model = vendor_models.Vendor
@@ -134,6 +124,27 @@ class CategoryFullSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = "__all__"
+
+
+class ProductSimilarSerializer(FlexFieldsModelSerializer):
+    class Meta:
+        model = Product
+        fields = [
+            "id",
+            "title",
+            "vendor",
+            "category",
+            "description",
+            "slug",
+            "price",
+            "is_available",
+            "product_images",
+        ]
+        expandable_fields = {
+            "category": CategoryFullSerializer,
+            "vendor": VendorFullSerializer,
+            # "product_images": (ImageNewSerializer, {"many": True}),
+        }
 
 
 class ProductVersatileSerializer(FlexFieldsModelSerializer):
@@ -168,5 +179,5 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
         if len(similar_products) >= 4:
             similar_products = random.sample(similar_products, 4)
 
-        product_serializer = ProductDetailSerializer(similar_products, many=True)
+        product_serializer = ProductSimilarSerializer(similar_products, many=True)
         return product_serializer.data
