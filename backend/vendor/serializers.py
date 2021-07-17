@@ -5,7 +5,7 @@ from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import serializers
 from store import models as store_models
 from store import serializers as store_serializers
-from store.models import Category, Image, Product, Favorite
+from store.models import Category, Favorite, Image, Product
 from store.serializers import CategorySerializer, ImageNewSerializer, ProductSerializer
 
 from .models import Friend, Vendor

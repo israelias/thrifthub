@@ -5,14 +5,14 @@ from . import views
 app_name = "vendor"
 
 urlpatterns = [
-    path("vendor/home/<int:pk>", views.VendorDetailView.as_view()),
+    path("vendor/home/<id>", views.VendorDetailView.as_view()),
     # includes favorites, and friends' products
-    path("vendor/<int:pk>/", views.OtherVendorDetailView.as_view()),
-    path("vendor/<int:pk>/favorites/", views.VendorFavoriteListView.as_view()),
-    path("vendor/<int:pk>/friends/", views.VendorFriendsListView.as_view()),
-    path("vendor/search/<str:query>/", views.VendorSearchListView.as_view()),
+    path("vendor/", views.VendorList.as_view(), name="vendors_profiles"),
+    path("vendor/<id>/", views.OtherVendorDetailView.as_view()),
+    path("vendor/<id>/favorites/", views.VendorFavoriteListView.as_view()),
+    path("vendor/<id>/friends/", views.VendorFriendsListView.as_view()),
+
     # previous
-    # path("vendors/", views.VendorList.as_view(), name="vendors_profiles"),
     # path("vendors/<int:pk>/", views.VendorDetail.as_view(), name="vendor_profile"),
     # path("vendors/profile/", views.VendorProductListView.as_view(), name="vendors_profiles_test"),
     # path("vendors/profile/<int:pk>/", views.VendorProductDetail.as_view(), name="vendor_profile_test"),
