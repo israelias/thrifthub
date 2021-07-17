@@ -4,10 +4,17 @@
  */
 
 import * as React from "react";
-import { Text as DefaultText, View as DefaultView } from "react-native";
+import {
+  Text as DefaultText,
+  View as DefaultView,
+  ITextProps,
+} from "native-base";
+
+import { ViewProps as DefaultViewProps } from "react-native";
 
 import Colors from "../constants/colors.constants";
 import useColorScheme from "../hooks/useColorScheme";
+import { useColorModeValue } from "native-base";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
@@ -28,22 +35,37 @@ type ThemeProps = {
   darkColor?: string;
 };
 
-export type TextProps = ThemeProps & DefaultText["props"];
-export type ViewProps = ThemeProps & DefaultView["props"];
+export type TextProps = ITextProps;
+// export type ViewProps = DefaultViewProps & React.ReactNode;
+// export type TextProps = ThemeProps & DefaultText["props"];
+// export type ViewProps = ThemeProps & DefaultView["props"];
 
-export function Text(props: TextProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
+export function Text(props: ITextProps) {
+  // const { style, lightColor, darkColor, ...otherProps } = props;
+  // const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
 
-  return <DefaultText style={[{ color }, style]} {...otherProps} />;
+  return <DefaultText color={useColorModeValue("black", "white")} {...props} />;
 }
 
-export function View(props: ViewProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
-  const backgroundColor = useThemeColor(
-    { light: lightColor, dark: darkColor },
-    "background"
-  );
+export function View({
+  props,
+  children,
+}: {
+  props?: DefaultViewProps;
+  children?: React.ReactNode;
+}) {
+  // const { style, lightColor, darkColor, ...otherProps } = props;
+  // const backgroundColor = useThemeColor(
+  //   { light: lightColor, dark: darkColor },
+  //   "background"
+  // );
 
-  return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
+  return (
+    <DefaultView
+      bg={useColorModeValue("#eee", "rgba(255,255,255,0.1)")}
+      {...props}
+    >
+      {children}
+    </DefaultView>
+  );
 }

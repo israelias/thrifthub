@@ -2,8 +2,9 @@ import React from "react";
 import { NativeBaseProvider, ColorMode } from "native-base";
 import type { StorageManager } from "native-base";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import theme from "../constants/theme.constants";
 
-export default ({ children, theme }: any) => {
+export default ({ children }: { children: React.ReactNode }) => {
   const colorModeManager: StorageManager = {
     get: async () => {
       try {

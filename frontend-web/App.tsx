@@ -4,9 +4,7 @@ import "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { extendTheme } from "native-base";
 import NativeBaseProvider from "./context/nativebase.context";
-import { Platform } from "react-native";
 
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
