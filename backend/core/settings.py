@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import dj_database_url
@@ -47,6 +48,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "dj_rest_auth",
+    "django_countries",
     "store",
     "account",
     "vendor",
@@ -57,7 +62,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework",
     "drf_yasg",
-    "knox",
+    # "knox",
     "storages",
     "graphene_django",
 ]
@@ -90,6 +95,11 @@ TEMPLATES = [
         },
     },
 ]
+
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_MIN_LENGTH = 4
+
 
 WSGI_APPLICATION = "core.wsgi.application"
 
@@ -193,15 +203,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     # knox auth
-    "DEFAULT_AUTHENTICATION_CLASSES": ("knox.auth.TokenAuthentication",),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        # "rest_framework_simplejwt.authentication.JWTTokenUserAuthentication",
+    ),
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly"],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly",
+    ],
     # The django-filter library includes a DjangoFilterBackend class
     # which supports highly customizable field filtering for REST framework.
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
-        # "rest_flex_fields.filter_backends.FlexFieldsFilterBackend",
     ],
     "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
@@ -272,6 +286,15 @@ VERSATILEIMAGEFIELD_SETTINGS = {
     "progressive_jpeg": False,
 }
 
+# VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
+#     'product_headshot': [
+#         ('full_size', 'url'),
+#         ('thumbnail', 'thumbnail__100x100'),
+#         ('medium_square_crop', 'crop__400x400'),
+#         ('small_square_crop', 'crop__50x50')
+#     ]
+# }
+
 GRAPHENE = {
     # Where our Graphene schema lives
     "SCHEMA": "core.schema.schema",
@@ -293,7 +316,17 @@ CORS_ALLOWED_ORIGINS = [
     "https://thrifthub-dev.vercel.app",
     "https://thrifthub-prod.vercel.app",
     "https://thrifthub-test.vercel.app",
+    "http://localhost:19006",
 ]
 
 # CORS_EXPOSE_HEADERS = ["Content-Type", 'X-CSRFToken', "Authorization"]
 CORS_ALLOW_CREDENTIALS = True
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=15),
+    # "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ALGORITHM": "HS512",
+    "SIGNING_KEY": SECRET_KEY,
+}
