@@ -5,7 +5,8 @@ from vendor.models import Vendor
 from .models import Order as OrderModel
 from .models import OrderDetail
 
-class OrderDetailInline(admin.TabularInline):
+
+class OrderDetailInline(admin.StackedInline):
     model = OrderDetail
 
 
