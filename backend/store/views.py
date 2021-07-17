@@ -2,6 +2,7 @@ from django.shortcuts import redirect, render, reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_flex_fields import FlexFieldsModelViewSet, is_expanded
 from rest_framework import filters, generics, viewsets
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from vendor.models import Vendor
 
@@ -10,7 +11,6 @@ from .models import Category, Product
 from .serializers import (
     CategoryFullSerializer,
     CategorySerializer,
-    ProductCartSerializer,
     ProductSerializer,
     ProductVersatileSerializer,
 )
@@ -143,6 +143,7 @@ class CategoryListView(generics.ListAPIView):
     """
 
     queryset = Category.objects.filter(level=1)
+    permission_classes = (AllowAny,)
 
     # queryset = Category.objects.all()
     serializer_class = CategorySerializer
