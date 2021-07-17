@@ -3,17 +3,19 @@ import { StyleSheet } from "react-native";
 
 import EditScreenInfo from "../components/EditScreenInfo";
 import { Text, View } from "../components/Themed";
+import { Box, Divider } from "native-base";
+
+import { ProductCardPreview } from "../components/card";
 
 export default function TabOneScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Home</Text>
-      <View
-        style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
-      />
-      <EditScreenInfo path="/screens/home.screen.tsx" />
+    <View>
+      <Box style={styles.container}>
+        <Text style={styles.title}>Home</Text>
+        <Divider />
+        {/* <ProductCardPreview /> */}
+        <EditScreenInfo path="/screens/home.screen.tsx" />
+      </Box>
     </View>
   );
 }
