@@ -1,17 +1,35 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django_countries.fields import CountryField
 from store.models import Product
 from vendor.models import Vendor
 
 
 class Order(models.Model):
-    product = models.ForeignKey(Product, related_name="ordered", on_delete=models.CASCADE)
-    vendor = models.ForeignKey(Vendor, related_name="order_requests", on_delete=models.CASCADE)
+    ORDER_STATUS = (
+        ("PENDING", _("Pending")),
+        ("OFFERED", _("Offer Made")),
+        ("ACCEPTED", _("Offer Accepted")),
+        ("DENIED", _("Offer Denied")),
+        ("PROCESSING", _("Payment Processing")),
+        ("COMPLETED", _("Payment Completed")),
+    )
+
+    product = models.ForeignKey(Product, related_name="ordered_product", on_delete=models.CASCADE)
+    vendor = models.ForeignKey(Vendor, related_name="order_requests", on_delete=models.CASCADE, null=True, blank=True)
     buyer = models.ForeignKey(Vendor, related_name="orders_made", on_delete=models.CASCADE)
-    paid = models.BooleanField(
-        verbose_name=_("Payment processed"),
-        default=False,
+
+    status = models.CharField(max_length=32, choices=ORDER_STATUS, default="PENDING")
+
+    amount = models.DecimalField(
+        verbose_name=_("Amount to offer"),
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -20,8 +38,21 @@ class Order(models.Model):
         verbose_name = _("Order")
         verbose_name_plural = _("Orders")
 
-    def __str__(self):
-        return "%s" % self.id
+    def save(self, *args, **kwargs):
+        """
+        If the Order instance is an immediate purchase and not an offer,
+        set the amount to be the price of the product.
+
+        """
+
+        if not self.amount:
+            self.amount = self.product.price
+            self.status = "PROCESSING"
+
+        if not self.vendor:
+            self.vendor = self.product.vendor
+
+        super(Order, self).save(*args, **kwargs)
 
     def get_total_price(self):
         return self.product.price
@@ -30,19 +61,24 @@ class Order(models.Model):
         return reverse("order:order_list", args=[self.id])
 
     def __str__(self):
-        return "%s" % self.id
+        return f"Product {self.product.title} ordered by {self.buyer.name}"
 
 
 class OrderDetail(models.Model):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.CharField(max_length=100)
-    address = models.CharField(max_length=100)
-    zipcode = models.CharField(max_length=100)
-    country = models.CharField(max_length=100)
-    phone = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=50, null=False, blank=False)
+    email = models.EmailField(max_length=254, null=False, blank=False)
+    phone_number = models.CharField(max_length=20, null=False, blank=False)
+    country = CountryField(blank_label="Country *", null=False, blank=False)
+    zipcode = models.CharField(max_length=20, null=True, blank=True)
+    town_or_city = models.CharField(max_length=40, null=False, blank=False)
+    street_address1 = models.CharField(max_length=80, null=False, blank=False)
+    street_address2 = models.CharField(max_length=80, null=True, blank=True)
+    county = models.CharField(max_length=80, null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
-    amount = models.DecimalField(max_digits=8, decimal_places=2)
+
+    stripe_pid = models.CharField(max_length=254, null=False, blank=False, default="")
+
     order = models.ForeignKey(Order, related_name="order_detail", on_delete=models.CASCADE)
 
     class Meta:
@@ -54,4 +90,4 @@ class OrderDetail(models.Model):
         return reverse("orderdetails:orderdetails_list", args=[self.id])
 
     def __str__(self):
-        return self.first_name
+        return f"Order Details of {self.full_name} on order {self.order.id}"
