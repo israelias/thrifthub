@@ -14,6 +14,8 @@ sold = ("PROCESSING", "ACCEPTED", "COMPLETED")
 
 
 class OrderSerializer(FlexFieldsModelSerializer):
+    status = serializers.CharField(source="get_status_display")
+
     class Meta:
         model = Order
         fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at"]
@@ -27,6 +29,7 @@ class OrderSerializer(FlexFieldsModelSerializer):
     def validate(self, data):
         """
         Check if product is avaialable or if it is already in the buyer's orders.
+        Ensure an offer is never more than the price of the product.
         """
         if self.context["request"]._request.method == "POST":
 
@@ -35,7 +38,9 @@ class OrderSerializer(FlexFieldsModelSerializer):
 
             if Order.objects.filter(buyer=data["buyer"], product=data["product"]).exists():
                 raise MethodNotAllowed({"message": "This product is already in your orders."})
-
+            
+        if float(data['amount']) > float(data['product'].price):
+            raise MethodNotAllowed({"message": f"Your offer must not be greater than {data['product'].price}"})
         return data
 
     def create(self, validated_data):

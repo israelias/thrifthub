@@ -26,6 +26,12 @@ class Order(models.Model):
 
     amount = models.DecimalField(
         verbose_name=_("Amount to offer"),
+        help_text=_("Maximum is the price of the product."),
+        error_messages={
+            "name": {
+                "max_length": _("The price must be between 0.01 and the price of the product"),
+            },
+        },
         max_digits=8,
         decimal_places=2,
         null=True,
@@ -54,7 +60,7 @@ class Order(models.Model):
 
         super(Order, self).save(*args, **kwargs)
 
-    def get_total_price(self):
+    def get_price(self):
         return self.product.price
 
     def get_absolute_url(self):
