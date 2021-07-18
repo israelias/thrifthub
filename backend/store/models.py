@@ -4,7 +4,9 @@ import random
 import string
 
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
+from django.db.models import Q
+from django.db.models.constraints import UniqueConstraint
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -81,10 +83,23 @@ class Product(models.Model):
     The Product table for all product items.
     """
 
+    CONDITION_CHOICES = (
+        (5, _("Mint")),
+        (4, _("New")),
+        (3, _("Good")),
+        (2, _("Fair")),
+        (1, _("Damaged")),
+    )
+    # Mint: New In Box (NIB) or New With Tags (NWT). Perfect condition.
+    # Excellent: Not in original packaging or in packaging that is slightly less than perfect. Item has no visible flaws.
+    # Good: Minimal cosmetic damage and is still functional.
+    # Fair: Visibly used and may have slight damage.
+    # Poor: Heavily used with possible significant damage.
+
     category = models.ForeignKey(Category, related_name="products", on_delete=models.CASCADE)
     vendor = models.ForeignKey(Vendor, related_name="products", on_delete=models.CASCADE)
     title = models.CharField(
-        verbose_name=_("title"),
+        verbose_name=_("Title"),
         help_text=_("Required"),
         max_length=255,
     )
@@ -103,10 +118,11 @@ class Product(models.Model):
     )
 
     is_available = models.BooleanField(
-        verbose_name=_("Product visibility"),
-        help_text=_("Change product visibility"),
+        verbose_name=_("Product availability"),
+        help_text=_("Change product availability"),
         default=True,
     )
+    condition = models.PositiveIntegerField(choices=CONDITION_CHOICES, default=3)
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
 
@@ -137,7 +153,7 @@ class Product(models.Model):
     def save(self, *args, **kwargs):
 
         if not self.slug:
-            self.slug = slugify(rand_slug() + "-" + self.title)
+            self.slug = slugify(self.title)
 
         super(Product, self).save(*args, **kwargs)
 
@@ -159,12 +175,10 @@ class Image(models.Model):
         "Image",
         help_text=_("Upload a product image"),
         upload_to=upload_path,
-        # storage=settings.DEFAULT_FILE_STORAGE,
         ppoi_field="image_ppoi",
         null=True,
         blank=True,
-        placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default.png")
-        # placeholder_image=OnStoragePlaceholderImage(path="images/default.png", storage=settings.DEFAULT_FILE_STORAGE),
+        placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default.png"),
     )
     image_ppoi = PPOIField("Image PPOI")
     alt_text = models.CharField(
@@ -186,6 +200,7 @@ class Image(models.Model):
         ordering = ["is_feature"]
         verbose_name = _("Versatile Image")
         verbose_name_plural = _("Versatile Images")
+        UniqueConstraint(fields=["is_feature"], condition=Q(is_feature=True), name="is_feature_is_unique")
 
     def get_thumbnail(self):
         if self.image:
@@ -212,6 +227,12 @@ class Image(models.Model):
 
         if not self.alt_text:
             self.alt_text = self.product.title + " photo"
+
+        # if not self.is_feature:
+        #     return super(Image, self).save(*args, **kwargs)
+        #     with transaction.atomic():
+        #         Image.objects.filter(is_feature=True).update(is_feature=False)
+        #         return super(Image, self).save(*args, **kwargs)
 
         super(Image, self).save(*args, **kwargs)
 
