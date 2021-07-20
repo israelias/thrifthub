@@ -16,6 +16,6 @@ def create_or_update_vendor(sender, instance, created, **kwargs):
     print("CREATED", created)
     if created:
         Vendor.objects.create(
-            name=instance.get_username().lower(), created_by=instance, slug=instance.get_username().lower()
+            name=instance.get_username().lower(), created_by=instance, slug=instance.get_username().lower(), online=True
         )
     instance.vendor.save()

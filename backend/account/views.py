@@ -44,6 +44,7 @@ class AccountRegisterDetailView(generics.GenericAPIView):
 
     """
 
+    serializer_class = AccountRegisterSerializer
     permission_classes = (AllowAny,)
 
     @swagger_auto_schema(responses={200: user_response})
@@ -79,6 +80,9 @@ class AccountLoginDetailView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
         refresh = RefreshToken.for_user(user)
+   
+        Vendor.objects.filter(created_by=user).update(online=True)
+
         return Response(
             {
                 "user": CurrentVendorSerializer(user.vendor, context=self.get_serializer_context()).data,
@@ -126,6 +130,8 @@ class AccountLogoutView(views.APIView):
             token = RefreshToken(refresh_token)
             token.blacklist()
 
+            Vendor.objects.filter(created_by=request.user).update(online=False)
+
             return Response(
                 data={"message": "Successful Logout"},
                 status=status.HTTP_200_OK,
@@ -157,6 +163,8 @@ class AccountLogoutAllView(views.APIView):
             tokens = OutstandingToken.objects.filter(user_id=request.user.id)
             for token in tokens:
                 t, _ = BlacklistedToken.objects.get_or_create(token=token)
+
+            Vendor.objects.filter(created_by=request.user).update(online=False)
 
             return Response(
                 data={"message": "Successful Logout from all devices"},
