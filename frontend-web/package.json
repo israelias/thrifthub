@@ -6,7 +6,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "test": "jest"
+    "test": "jest",
+    "predeploy": "expo build:web",
+    "deploy": "vercel -d web-build"
   },
   "jest": {
     "preset": "jest-expo",
@@ -23,6 +25,7 @@
     "@react-navigation/stack": "^5.14.5",
     "dayjs": "^1.10.6",
     "expo": "~42.0.1",
+    "expo-cli": "~4.7.3",
     "expo-app-loading": "^1.1.2",
     "expo-linking": "~2.3.1",
     "expo-splash-screen": "~0.11.2",
