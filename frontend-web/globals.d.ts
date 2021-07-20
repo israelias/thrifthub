@@ -15,13 +15,23 @@ type Vendor = {
   slug: string;
   created_at: string;
   created_by: User;
+  image?: Image;
   products: Product[];
   favorites: Product[];
   friends: Vendor[];
   friends_products: Product[];
   order_requests: Order[];
   orders_made: Order[];
-  online?: boolean;
+  online: boolean;
+};
+
+type VendorPreview = {
+  id: number;
+  name: string;
+  online: boolean;
+  image: Image;
+  product_count: number;
+  order_count: number;
 };
 
 type Category = {
@@ -50,6 +60,37 @@ type Product = {
   similiar_products?: Product[];
 };
 
+type ProductPreview = {
+  id: number;
+  category: Category["name"];
+  vendor: Vendor["name"];
+  title: string;
+  slug: string;
+  price: number;
+  condition: string;
+  is_available: boolean;
+  image: Image;
+  created_at?: string;
+  updated_at?: string;
+};
+
+type ProductDetail = {
+  id: number;
+  category: Category["id"];
+  vendor: VendorPreview;
+  title: string;
+  description: string;
+  slug: string;
+  price: number;
+  condition: string;
+  is_available: boolean;
+  created_at?: string;
+  updated_at?: string;
+  image: Image;
+  product_images?: Image[];
+  similiar_products?: ProductPreview[];
+};
+
 type Image = {
   id?: number;
   name?: string;
@@ -66,9 +107,9 @@ type Image = {
 
 type Order = {
   id: number;
-  product: Product["id"];
-  vendor: Vendor["id"];
-  buyer: Vendor["id"];
+  product: ProductPreview;
+  vendor: VendorPreview;
+  buyer: VendorPreview;
   status: string;
   amount?: string;
   created_at?: string;
