@@ -57,7 +57,7 @@ jobs:
        
             expo-cache: true
          
-        - run: yarn install
+        - run: npm install
         - run: expo build:web
 
         - run: cd web-build
