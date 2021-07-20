@@ -57,7 +57,7 @@ jobs:
             # expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
             # expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
             expo-cache: true
-            working-directory: ./frontend-web
+         
         - run: yarn install
         - run: expo build:web
 
