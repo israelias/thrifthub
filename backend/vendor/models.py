@@ -1,4 +1,8 @@
+import datetime
+
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -7,7 +11,6 @@ from versatileimagefield.placeholder import (
     OnDiscPlaceholderImage,
     OnStoragePlaceholderImage,
 )
-from django.conf import settings
 
 
 def upload_path(instance, filename):
@@ -19,13 +22,14 @@ class Vendor(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.OneToOneField(User, related_name="vendor", on_delete=models.CASCADE)
     slug = models.SlugField(verbose_name=_("Vendor safe URL"), max_length=255, unique=True)
+    online = models.BooleanField(default=False)
     image = VersatileImageField(
         "Image",
         help_text=_("Upload a profile image"),
         upload_to=upload_path,
         null=True,
         blank=True,
-        # placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default.png"),
+        placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default.png"),
     )
 
     class Meta:
@@ -49,7 +53,6 @@ class Vendor(models.Model):
     def get_paid_amount(self):
         items = self.items.filter(vendor_paid=True, order__vendors__in=[self.id])
         return sum((item.product.price * item.quantity) for item in items)
-
 
 
 class Friend(models.Model):
