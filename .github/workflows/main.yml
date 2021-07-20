@@ -17,6 +17,7 @@ jobs:
 
   Backend_Deploy:
       runs-on: ubuntu-latest
+      if: "!contains(github.event.head_commit.message, 'ci skip')"
       name: Git Deploy job- A job to deploy django app to heroku using git
       steps:
         - name: Checkout
@@ -40,7 +41,10 @@ jobs:
   Expo_Web_Build:
       name: Export a an Expo web build for Vercel deployment
       runs-on: ubuntu-latest
-      needs: Backend_Deploy
+      defaults:
+        run:
+          working-directory: ./frontend-web
+      # needs: Backend_Deploy
       steps:
         - uses: actions/checkout@v1
         - uses: actions/setup-node@v1
@@ -70,5 +74,5 @@ jobs:
             vercel-args: '--prod' #Optional
             vercel-org-id: ${{ secrets.ORG_ID}}  #Required
             vercel-project-id: ${{ secrets.PROJECT_ID}} #Required 
-            working-directory: ./frontend-web
+            working-directory: ./frontend-web/web-build
     
