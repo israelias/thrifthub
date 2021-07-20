@@ -47,13 +47,11 @@ export function Text(props: ITextProps) {
   return <DefaultText color={useColorModeValue("black", "white")} {...props} />;
 }
 
-export function View({
-  props,
-  children,
-}: {
-  props?: DefaultViewProps;
+interface IViewProps extends DefaultViewProps {
   children?: React.ReactNode;
-}) {
+}
+
+export function View({ children, ...props }: IViewProps) {
   // const { style, lightColor, darkColor, ...otherProps } = props;
   // const backgroundColor = useThemeColor(
   //   { light: lightColor, dark: darkColor },

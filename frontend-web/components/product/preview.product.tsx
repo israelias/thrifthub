@@ -99,16 +99,26 @@ export function ProductCardPreview({ product }: { product: Product }) {
             </HStack>
           </Box>
 
-          {product.product_images.length > 0 &&
-            product.product_images.map((product_image) => (
+          {
+            product.product_images.length > 0 && (
+              // product.product_images.map((product_image) => (
+              // <ImageComponent
+              //   uri={product_image.image?.thumbnail}
+              //   alt_text={product_image?.alt_text}
+              //   height={100}
+              //   // rounded="full"
+              //   width={100}
+              // />
               <ImageComponent
-                uri={product_image.image?.thumbnail}
-                alt_text={product_image?.alt_text}
+                uri={product.product_images[0].image.thumbnail}
+                alt_text={product.product_images[0].alt_text}
                 height={100}
                 // rounded="full"
                 width={100}
               />
-            ))}
+            )
+            // ))
+          }
         </HStack>
       </Box>
     </>
