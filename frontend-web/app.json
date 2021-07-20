@@ -24,8 +24,7 @@
       }
     },
     "web": {
-      "favicon": "./assets/images/favicon.png",
-      "publicPath": "./web-build"
+      "favicon": "./assets/images/favicon.png"
     }
   }
 }
