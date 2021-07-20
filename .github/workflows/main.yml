@@ -58,7 +58,7 @@ jobs:
         - run: expo build:web
 
   Frontend_Deploy:
-    name: Deploy to Frontend To Vercel
+      name: Deploy to Frontend To Vercel
       runs-on: ubuntu-latest
       needs: Expo_Web_Build
       steps:
