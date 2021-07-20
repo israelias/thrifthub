@@ -57,10 +57,10 @@ jobs:
        
             expo-cache: true
          
-        - run: npm install
-        - run: expo build:web
+        # - run: npm install
+        # - run: expo build:web
 
-        - run: cd web-build
+        # - run: cd web-build
 
         - uses: amondnet/vercel-action@v20
           with:
