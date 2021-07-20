@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -97,3 +97,15 @@ class OrderDetail(models.Model):
 
     def __str__(self):
         return f"Order Details of {self.full_name} on order {self.order.id}"
+
+
+@receiver(pre_delete, sender=Order)
+def reset_product_is_available(sender, instance, **kwargs):
+    """
+    Reset an product's availability if an order for that product is deleted.
+
+    """
+
+    instance.product.is_available = True
+    instance.product.save()
+
