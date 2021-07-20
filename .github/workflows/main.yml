@@ -1,4 +1,4 @@
-name: Deploy Backend
+name: Deploy
 
 # https://github.com/nyakaz73/heroku-django-deploy/blob/master/.github/workflows/main.yml
 # https://github.com/marketplace/actions/deploy-to-heroku#deploy-subdirectory
@@ -15,28 +15,28 @@ on:
 #     working-directory: ./backend
 jobs:
 
-  Backend_Deploy:
-      runs-on: ubuntu-latest
-      if: "!contains(github.event.head_commit.message, '[ci skip]')"
-      name: Git Deploy job- A job to deploy django app to heroku using git
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-        - name: Deploy django to heroku
-          uses: nyakaz73/heroku-django-deploy@v0.68
-          with: 
-            heroku_app_name : ${{ secrets.HEROKU_APP_NAME }}
-            heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-            heroku_email_address: "israelias.js@gmail.com"
-            working-directory: ./backend
-            use_git: true
-            force_push: true
+  # Backend_Deploy:
+  #     runs-on: ubuntu-latest
+  #     if: "!contains(github.event.head_commit.message, '[ci skip]')"
+  #     name: Git Deploy job- A job to deploy django app to heroku using git
+  #     steps:
+  #       - name: Checkout
+  #         uses: actions/checkout@v2
+  #       - name: Deploy django to heroku
+  #         uses: nyakaz73/heroku-django-deploy@v0.68
+  #         with: 
+  #           heroku_app_name : ${{ secrets.HEROKU_APP_NAME }}
+  #           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+  #           heroku_email_address: "israelias.js@gmail.com"
+  #           working-directory: ./backend
+  #           use_git: true
+  #           force_push: true
 
-          #Use the output from the hello step
-        - name: Get the output status
-          run: echo "${{ steps.deploy.outputs.status }}"
-        - name: Getting the files in directory
-          run: pwd
+  #         #Use the output from the hello step
+  #       - name: Get the output status
+  #         run: echo "${{ steps.deploy.outputs.status }}"
+  #       - name: Getting the files in directory
+  #         run: pwd
 
   Expo_Web_Build:
       name: Export a an Expo web build for Vercel deployment
