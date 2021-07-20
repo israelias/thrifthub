@@ -36,15 +36,6 @@ class ProductViewSet(FlexFieldsModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ["title", "description"]
 
-    # api/?search=kicks
-    # api/kicks/?expand=category,product_images
-
-    # def get_queryset(self):
-    #     queryset = models.Product.objects.all()
-    #     if is_expanded(self.request, "category"):
-    #         queryset = queryset.select_related("category")
-    #     return queryset
-
     def perform_create(self, serializer):
         serializer.save(vendor=self.request.user.vendor)
 
