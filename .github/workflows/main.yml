@@ -78,7 +78,7 @@ jobs:
       runs-on: ubuntu-latest
       defaults:
         run:
-          working-directory: ./frontend-web
+          working-directory: ./frontend-web/web-build
       needs: Expo_Web_Build
       steps:
         - uses: actions/checkout@v2
@@ -91,6 +91,6 @@ jobs:
             vercel-org-id: ${{ secrets.ORG_ID}}  #Required
             vercel-project-id: ${{ secrets.PROJECT_ID}} #Required 
             vercel-project-name: thrifthub
-            working-directory: web-build
+            # working-directory: web-build
          
     
