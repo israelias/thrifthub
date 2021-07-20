@@ -62,33 +62,33 @@ jobs:
 
         # - run: cd web-build
 
-        - uses: amondnet/vercel-action@v20
-          with:
-              vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
-              # github-token: ${{ secrets.GITHUB_TOKEN }} #Optional 
+        # - uses: amondnet/vercel-action@v20
+        #   with:
+        #       vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
+        #       # github-token: ${{ secrets.GITHUB_TOKEN }} #Optional 
 
-              vercel-args: '--prod' #Optional
-              vercel-org-id: ${{ secrets.ORG_ID}}  #Required
-              vercel-project-id: ${{ secrets.PROJECT_ID}} #Required 
+        #       vercel-args: '--prod' #Optional
+        #       vercel-org-id: ${{ secrets.ORG_ID}}  #Required
+        #       vercel-project-id: ${{ secrets.PROJECT_ID}} #Required 
           
 
-  # Frontend_Deploy:
-  #     name: Deploy to Frontend To Vercel
-  #     runs-on: ubuntu-latest
-  #     defaults:
-  #       run:
-  #         working-directory: ./frontend-web
-  #     needs: Expo_Web_Build
-  #     steps:
-  #       - uses: actions/checkout@v2
-  #       - uses: amondnet/vercel-action@v20
-  #         with:
-  #           vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
-  #           # github-token: ${{ secrets.GITHUB_TOKEN }} #Optional 
+  Frontend_Deploy:
+      name: Deploy to Frontend To Vercel
+      runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: ./frontend-web
+      needs: Expo_Web_Build
+      steps:
+        - uses: actions/checkout@v2
+        - uses: amondnet/vercel-action@v20
+          with:
+            vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
+            # github-token: ${{ secrets.GITHUB_TOKEN }} #Optional 
 
-  #           vercel-args: '--prod' #Optional
-  #           vercel-org-id: ${{ secrets.ORG_ID}}  #Required
-  #           vercel-project-id: ${{ secrets.PROJECT_ID}} #Required 
-  #           working-directory: ./web-build
+            # vercel-args: '--prod' #Optional
+            vercel-org-id: ${{ secrets.ORG_ID}}  #Required
+            vercel-project-id: ${{ secrets.PROJECT_ID}} #Required 
+            # working-directory: ./web-build
          
     
