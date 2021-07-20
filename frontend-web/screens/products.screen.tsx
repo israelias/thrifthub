@@ -4,17 +4,11 @@ import { StyleSheet } from "react-native";
 import {
   Box,
   Divider,
-  Flex,
-  VStack,
-  HStack,
-  Stack,
   Wrap,
   useBreakpointValue,
   useMediaQuery,
-  ScrollView,
 } from "native-base";
 
-import EditScreenInfo from "../components/editscreeninfo";
 import { Text, View } from "../components/themed";
 import { ProductCardPreview } from "../components/product/preview.product";
 
@@ -38,7 +32,7 @@ export default function TabTwoScreen() {
   const loadProducts = async () => {
     setLoading(true);
     const data = await getRequest({
-      url: `store?expand=category,vendor,product_images`,
+      url: `store/?expand=product_images,vendor,product,category&include=vendor.name`,
     });
     if (data) {
       setProducts(data);

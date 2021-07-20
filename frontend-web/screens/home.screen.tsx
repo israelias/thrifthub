@@ -5,8 +5,6 @@ import EditScreenInfo from "../components/EditScreenInfo";
 import { Text, View } from "../components/Themed";
 import { Box, Divider } from "native-base";
 
-import { ProductCardPreview } from "../components/card";
-
 export default function TabOneScreen() {
   return (
     <View>
