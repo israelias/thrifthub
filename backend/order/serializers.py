@@ -1,11 +1,18 @@
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import serializers
 
-# from django.core.exceptions import
 from rest_framework.exceptions import MethodNotAllowed, NotFound
+from rest_framework.response import Response
 from rest_framework.validators import UniqueTogetherValidator
 from store.models import Product
-from store.serializers import ProductSerializer, VendorFullSerializer
+from store.serializers import (
+    CategoryPreviewSerializer,
+    ProductPreviewSerializer,
+    ProductSerializer,
+    ProductVersatileSerializer,
+    VendorFullSerializer,
+    VendorPreviewSerializer,
+)
 
 from .models import Order, OrderDetail
 
@@ -13,34 +20,64 @@ available = ("OFFERED", "DENIED", "PENDING")
 sold = ("PROCESSING", "ACCEPTED", "COMPLETED")
 
 
+class OrderDetailSerializer(FlexFieldsModelSerializer):
+    class Meta:
+        model = OrderDetail
+        fields = "__all__"
+
+
 class OrderSerializer(FlexFieldsModelSerializer):
-    status = serializers.CharField(source="get_status_display")
+    # status = serializers.CharField(source="get_status_display", required=False)
+    # products = serializers.StringRelatedField(many=True)
+    order_detail = serializers.SerializerMethodField("get_order_detail")
 
     class Meta:
         model = Order
-        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at"]
+        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at", "order_detail"]
         expandable_fields = {
-            "vendor": VendorFullSerializer,
-            "buyer": VendorFullSerializer,
-            "product": (ProductSerializer, {"many": True}),
+            "vendor": VendorPreviewSerializer,
+            "buyer": VendorPreviewSerializer,
+            "product": ProductPreviewSerializer,
+            "order_detail": OrderDetailSerializer,
         }
-        # validators = [UniqueTogetherValidator(queryset=Order.objects.all(), fields=["buyer", "product"])]
+        extra_kwargs = {
+            "amount": {"required": False},
+        }
+
+    def get_order_detail(self, obj):
+
+        order_detail = OrderDetail.objects.get(order=obj)
+
+        detail_serializer = OrderDetailSerializer(order_detail)
+        return detail_serializer.data
 
     def validate(self, data):
         """
         Check if product is avaialable or if it is already in the buyer's orders.
         Ensure an offer is never more than the price of the product.
         """
+        # If it's a post request
+        instance = getattr(self, "instance", None)
+        print("instance", instance)
         if self.context["request"]._request.method == "POST":
+            # # Reject offer if product is no longer available
+            # if not data["product"].is_available:
+            #     raise NotFound({"message": "This product is no longer available."})
 
-            if not data["product"].is_available:
-                raise NotFound({"message": "This product is no longer available."})
-
+            # Reject offer if buyer has already have a standing offer for the product
             if Order.objects.filter(buyer=data["buyer"], product=data["product"]).exists():
                 raise MethodNotAllowed({"message": "This product is already in your orders."})
-            
-        if float(data['amount']) > float(data['product'].price):
-            raise MethodNotAllowed({"message": f"Your offer must not be greater than {data['product'].price}"})
+
+        # Reject offer if product is no longer available
+        if not data["product"].is_available:
+            raise NotFound({"message": "This product is no longer available."})
+
+        # Ensure an offer is never more than the price of the product
+        if self.context["request"].user.vendor == instance.buyer:
+            print("BUYER,", self)
+            if float(data["amount"]) > float(data["product"].price):
+                raise MethodNotAllowed({"message": f"Your offer must not be greater than {data['product'].price}"})
+
         return data
 
     def create(self, validated_data):
@@ -49,13 +86,6 @@ class OrderSerializer(FlexFieldsModelSerializer):
         product = Product.objects.get(id=self.context["request"].data["product"])
         amount = validated_data.get("amount", product.price)
         instance = Order.objects.create(buyer=buyer, product=product, amount=amount)
-
-        # if not product.is_available:
-        #     return {"message": "This product is no longer available."}
-
-        # if Order.objects.filter(buyer=buyer, product=product).exists():
-        #     # return serializers.ValidationError({"message": "This product is already in your orders."})
-        #     return MethodNotAllowed({"message": "This product is already in your orders."})
 
         if float(instance.amount) < float(product.price):
             instance.status = "OFFERED"
@@ -85,6 +115,7 @@ class OrderSerializer(FlexFieldsModelSerializer):
             # seller can update status
             print("request is from vendor")
             instance.status = validated_data.get("status", instance.status)
+            print("result", instance.status)
 
         if user == instance.buyer:
             # buyer can update amount
@@ -112,9 +143,3 @@ class OrderSerializer(FlexFieldsModelSerializer):
 
         instance.product.save()
         return instance
-
-
-class OrderDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrderDetail
-        fields = "__all__"
