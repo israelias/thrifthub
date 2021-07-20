@@ -8,7 +8,8 @@
     "eject": "expo eject",
     "test": "jest",
     "predeploy": "expo build:web",
-    "deploy": "vercel -d web-build"
+    "deploy": "vercel",
+    "preview": "vercel dev"
   },
   "jest": {
     "preset": "jest-expo",
