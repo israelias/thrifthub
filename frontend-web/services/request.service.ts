@@ -13,8 +13,8 @@
 /**
  * Api backend base URL.
  */
-const API = "http://localhost:8000/api";
-// const API = "https://thrifthub-backend.herokuapp.com/api";
+// const API = "http://localhost:8000/api";
+const API = "https://thrifthub-backend.herokuapp.com/api";
 
 export const RequestTicket = ({
   method,

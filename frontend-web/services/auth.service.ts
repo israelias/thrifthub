@@ -59,11 +59,11 @@ export function signInRequest({
  * @see RequestTicket
  * @return {null} handles revoking of user's authentication passport without explicit return
  */
-export function signOutRequest({ token }: { token: string }) {
+export function signOutRequest({ accessToken }: { accessToken: string }) {
   const request = RequestTicket({
     method: "post",
     url: "account/logout_all",
-    access: token,
+    access: accessToken,
   });
   return fetch(request);
 }

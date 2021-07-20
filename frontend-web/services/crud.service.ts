@@ -16,17 +16,15 @@ import { RequestTicket } from "./request.service";
  */
 export function deleteRequest({
   url,
-  token,
-  refresh,
+  accessToken,
 }: {
-  token: string;
-  refresh?: string;
+  accessToken: string;
   url: string;
 }) {
   const request = RequestTicket({
     method: "delete",
     url,
-    access: token,
+    access: accessToken,
   });
   return fetch(request);
 }
@@ -43,17 +41,17 @@ export function deleteRequest({
  */
 export function putRequest({
   url,
-  token,
+  accessToken,
   body,
 }: {
-  token: string;
+  accessToken: string;
   url: string;
   body: object;
 }) {
   const request = RequestTicket({
     method: "put",
     url,
-    access: token,
+    access: accessToken,
     body,
   });
   return fetch(request);
@@ -70,17 +68,20 @@ export function putRequest({
  */
 export function postRequest({
   url,
-  token,
+  accessToken,
+  refreshToken,
   body,
 }: {
-  token: string;
+  accessToken: string;
+  refreshToken?: string;
   url: string;
   body: object;
 }) {
   const request = RequestTicket({
     method: "post",
     url,
-    access: token,
+    access: accessToken,
+    refresh: refreshToken || "",
     body,
   });
   return fetch(request);
