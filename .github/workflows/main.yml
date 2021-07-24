@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy Backend
 
 # https://github.com/nyakaz73/heroku-django-deploy/blob/master/.github/workflows/main.yml
 # https://github.com/marketplace/actions/deploy-to-heroku#deploy-subdirectory
@@ -10,68 +10,66 @@ on:
   pull_request:
     branches: [ master ]
 
-# defaults:
-#   run:
-#     working-directory: ./backend
+defaults:
+  run:
+    working-directory: ./backend
 jobs:
 
-  # Backend_Deploy:
-  #     runs-on: ubuntu-latest
-  #     if: "!contains(github.event.head_commit.message, '[ci skip]')"
-  #     name: Git Deploy job- A job to deploy django app to heroku using git
-  #     steps:
-  #       - name: Checkout
-  #         uses: actions/checkout@v2
-  #       - name: Deploy django to heroku
-  #         uses: nyakaz73/heroku-django-deploy@v0.68
-  #         with: 
-  #           heroku_app_name : ${{ secrets.HEROKU_APP_NAME }}
-  #           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-  #           heroku_email_address: "israelias.js@gmail.com"
-  #           working-directory: ./backend
-  #           use_git: true
-  #           force_push: true
-
-  #         #Use the output from the hello step
-  #       - name: Get the output status
-  #         run: echo "${{ steps.deploy.outputs.status }}"
-  #       - name: Getting the files in directory
-  #         run: pwd
-
-  Expo_Web_Build:
-      name: Export a an Expo web build for Vercel deployment
+  Backend_Deploy:
       runs-on: ubuntu-latest
-      defaults:
-        run:
-          working-directory: ./frontend-web
-      # needs: Backend_Deploy
+      if: "!contains(github.event.head_commit.message, '[ci skip]')"
+      name: Git Deploy job- A job to deploy django app to heroku using git
       steps:
-        - uses: actions/checkout@v1
-        - uses: actions/setup-node@v1
-          with:
-            node-version: 14.x
-        - uses: expo/expo-github-action@v5
-          with:
-            expo-version: 4.x
-            expo-token: ${{ secrets.EXPO_TOKEN }}
+        - name: Checkout
+          uses: actions/checkout@v2
+        - name: Deploy django to heroku
+          uses: nyakaz73/heroku-django-deploy@v0.68
+          with: 
+            heroku_app_name : ${{ secrets.HEROKU_APP_NAME }}
+            heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+            heroku_email_address: "israelias.js@gmail.com"
+            working-directory: ./backend
+            use_git: true
+            force_push: true
+
+          #Use the output from the hello step
+        - name: Get the output status
+          run: echo "${{ steps.deploy.outputs.status }}"
+        - name: Getting the files in directory
+          run: pwd
+
+  # Expo_Web_Build:
+  #     name: Export a an Expo web build for Vercel deployment
+  #     runs-on: ubuntu-latest
+  #     defaults:
+  #       run:
+  #         working-directory: ./frontend-web
+  #     # needs: Backend_Deploy
+  #     steps:
+  #       - uses: actions/checkout@v1
+  #       - uses: actions/setup-node@v1
+  #         with:
+  #           node-version: 14.x
+  #       - uses: expo/expo-github-action@v5
+  #         with:
+  #           expo-version: 4.x
+  #           expo-token: ${{ secrets.EXPO_TOKEN }}
        
-            expo-cache: true
+  #           expo-cache: true
          
-        - run: yarn install
-        - run: expo build:web
-        # - run: rm -fr .gitignore
-        # - run: deploy
+  #       - run: yarn install
+  #       - run: expo build:web
+  #       # - run: rm -fr .gitignore
+  #       # - run: deploy
 
-        # - run: cd web-build
+  #       # - run: cd web-build
 
-        - uses: amondnet/vercel-action@v20
-          with:
-              vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
-              # github-token: ${{ secrets.GITHUB_TOKEN }} #Optional 
-
-              # vercel-args: '--prod' #Optional
-              vercel-org-id: ${{ secrets.ORG_ID}}  #Required
-              vercel-project-id: ${{ secrets.PROJECT_ID}} #Required 
+  #       - uses: amondnet/vercel-action@v20
+  #         with:
+  #             vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
+         
+  #             vercel-org-id: ${{ secrets.ORG_ID}}  
+  #             vercel-project-id: ${{ secrets.PROJECT_ID}} 
           
 
   # Frontend_Deploy:
