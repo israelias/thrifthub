@@ -42,9 +42,10 @@ class ProductViewSet(FlexFieldsModelViewSet):
 
 class ProductsByVendorView(generics.ListAPIView):
     serializer_class = ProductSerializer
+    queryset = Product.objects.all()
 
     def get_queryset(self):
-        return models.Product.objects.filter(vendor__in=models.Vendor.objects.get(slug=self.kwargs["slug"]))
+        return models.Product.objects.filter(vendor=Vendor.objects.get(slug=self.kwargs["slug"]))
 
 
 class ProductsByCategory(generics.ListAPIView):
@@ -74,18 +75,16 @@ class ProductsByCategories(generics.ListAPIView):
     """
 
     def get_queryset(self):
-        print("this", self.kwargs, self)
+
         category_slug = self.kwargs.get("hierarchy", None)
         parent = None
         root = Category.objects.all()
-
-        print("this", category_slug)
 
         if category_slug is not None:
             category_slug = category_slug.split("/")
 
             for slug in category_slug[:-1]:
-                print("next", slug)
+
                 parent = Category.objects.get(parent=parent, slug=slug)
 
             try:
@@ -99,12 +98,12 @@ class ProductsByCategories(generics.ListAPIView):
                 instance = models.Product.objects.filter(
                     category__in=Category.objects.get(slug=category_slug[-1]).get_descendants(include_self=True)
                 )
-                print("except", instance)
+
                 return instance
             else:
-                print("else", instance)
+
                 return instance
-        print("last")
+
         redirect(reverse("product-list"))
 
 
@@ -123,9 +122,6 @@ class CategoryViewSet(FlexFieldsModelViewSet):
     serializer_class = CategoryFullSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["name"]
-
-    # api/category/?search=kicks
-    # add filters
 
 
 class CategoryListView(generics.ListAPIView):

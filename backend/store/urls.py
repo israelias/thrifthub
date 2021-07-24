@@ -15,6 +15,6 @@ urlpatterns = [
     re_path(
         r"^store/category/(?P<hierarchy>.+)/$", views.ProductsByCategories.as_view(), name="product-category-item"
     ),
-    path("store/vendor/<slug:slug>/", views.ProductsByVendorView.as_view(), name="product-vendor-filter"),
+    path("store/vendor/<slug>/", views.ProductsByVendorView.as_view(), name="product-vendor-filter"),
     path("category/", views.CategoryListView.as_view(), name="category-filter"),
 ]

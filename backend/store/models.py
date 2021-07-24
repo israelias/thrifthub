@@ -7,6 +7,8 @@ from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Q
 from django.db.models.constraints import UniqueConstraint
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -90,11 +92,6 @@ class Product(models.Model):
         (2, _("Fair")),
         (1, _("Damaged")),
     )
-    # Mint: New In Box (NIB) or New With Tags (NWT). Perfect condition.
-    # Excellent: Not in original packaging or in packaging that is slightly less than perfect. Item has no visible flaws.
-    # Good: Minimal cosmetic damage and is still functional.
-    # Fair: Visibly used and may have slight damage.
-    # Poor: Heavily used with possible significant damage.
 
     category = models.ForeignKey(Category, related_name="products", on_delete=models.CASCADE)
     vendor = models.ForeignKey(Vendor, related_name="products", on_delete=models.CASCADE)
@@ -228,12 +225,6 @@ class Image(models.Model):
         if not self.alt_text:
             self.alt_text = self.product.title + " photo"
 
-        # if not self.is_feature:
-        #     return super(Image, self).save(*args, **kwargs)
-        #     with transaction.atomic():
-        #         Image.objects.filter(is_feature=True).update(is_feature=False)
-        #         return super(Image, self).save(*args, **kwargs)
-
         super(Image, self).save(*args, **kwargs)
 
 
@@ -243,3 +234,17 @@ class Favorite(models.Model):
 
     def __str__(self):
         return "%s's favorites" % self.vendor.name
+
+
+@receiver(pre_delete, sender=Product)
+def delete_category_if_null(sender, instance, **kwargs):
+    """
+    Delete category objects if it has no other related products.
+
+    """
+
+    products = instance.category.filter(
+        category__in=Category.objects.get(slug=instance.slug).get_descendants(include_self=True)
+    )
+    if not products.exists():
+        instance.category.delete()
