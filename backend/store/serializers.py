@@ -239,7 +239,7 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
     condition = serializers.CharField(source="get_condition_display")
     absolute_url = serializers.CharField(source="get_absolute_url", read_only=True)
     image = serializers.SerializerMethodField()
-    ordered_product = OrderedProductSerializer(many=True)
+    ordered_product = OrderedProductSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
