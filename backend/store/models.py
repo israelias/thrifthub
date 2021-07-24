@@ -128,22 +128,6 @@ class Product(models.Model):
         verbose_name = _("Product")
         verbose_name_plural = _("Products")
 
-    def get_thumbnail(self):
-        if self.thumbnail:
-            return self.thumbnail.url
-        else:
-            if self.image:
-                self.thumbnail = self.make_thumbnail(self.image)
-                self.save()
-
-                return self.thumbnail.url
-            else:
-                return "https://via.placeholder.com/240x180.jpg"
-
-    def make_thumbnail(self, image, size=("240x180")):
-
-        return image.thumbnail[size].url
-
     def get_absolute_url(self):
         return reverse("store:product-detail", args=[self.slug])
 
@@ -175,7 +159,7 @@ class Image(models.Model):
         ppoi_field="image_ppoi",
         null=True,
         blank=True,
-        placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default.png"),
+        placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default_placeholder.png"),
     )
     image_ppoi = PPOIField("Image PPOI")
     alt_text = models.CharField(

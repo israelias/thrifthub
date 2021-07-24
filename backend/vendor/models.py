@@ -29,7 +29,7 @@ class Vendor(models.Model):
         upload_to=upload_path,
         null=True,
         blank=True,
-        placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default.png"),
+        placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default_avatar.png"),
     )
 
     class Meta:
