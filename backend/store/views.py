@@ -39,7 +39,7 @@ class ProductViewSet(FlexFieldsModelViewSet):
     serializer_class = ProductVersatileSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["title", "description"]
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
 
     def perform_create(self, serializer):
         serializer.save(vendor=self.request.user.vendor)
@@ -130,7 +130,7 @@ class CategoryViewSet(FlexFieldsModelViewSet):
     serializer_class = CategoryFullSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["name"]
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
 
 
 class CategoryListView(generics.ListAPIView):
