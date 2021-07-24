@@ -29,12 +29,15 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
         A vendor's orders as a buyer.
         A vendor's image.
     """
+
     friends = serializers.SerializerMethodField()
     products = serializers.SerializerMethodField()
     friends_products = serializers.SerializerMethodField()
     favorites = serializers.SerializerMethodField()
     order_requests = order_serializers.OrderSerializer(many=True)
     orders_made = order_serializers.OrderSerializer(many=True)
+    order_count = serializers.SerializerMethodField()
+    product_count = serializers.SerializerMethodField()
 
     image = VersatileImageFieldSerializer(
         sizes=[
@@ -49,6 +52,7 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "created_at",
+            "created_by",
             "products",
             "friends",
             "friends_products",
@@ -57,6 +61,8 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
             "order_requests",
             "orders_made",
             "online",
+            "order_count",
+            "product_count",
         ]
 
     def get_friends(self, obj):
@@ -91,6 +97,12 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
         product_serializer = ProductSerializer(favorite_products, many=True)
         return product_serializer.data
 
+    def get_order_count(self, obj):
+        return order_models.Order.objects.filter(buyer=obj).count()
+
+    def get_product_count(self, obj):
+        return Product.objects.filter(vendor=obj).count()
+
 
 class OtherVendorSerializer(serializers.ModelSerializer):
     """
@@ -101,6 +113,7 @@ class OtherVendorSerializer(serializers.ModelSerializer):
         A vendor's count of products posted.
 
     """
+
     products = serializers.SerializerMethodField()
     order_count = serializers.SerializerMethodField()
     product_count = serializers.SerializerMethodField()
@@ -140,6 +153,17 @@ class VendorFriendSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class RawProductSlugSerializer(serializers.BaseSerializer):
+    def to_representation(self, obj):
+        return obj.slug
+
+
+class VendorProductFavoriteSlugPreview(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ["id"]
+
+
 class VendorSerializer(serializers.ModelSerializer):
     products = ProductSerializer(read_only=True, many=True)
     orders_made = order_serializers.OrderSerializer(read_only=True, many=True)
@@ -147,6 +171,7 @@ class VendorSerializer(serializers.ModelSerializer):
     created_by = serializers.StringRelatedField()
     order_count = serializers.SerializerMethodField()
     product_count = serializers.SerializerMethodField()
+    favorites = serializers.SerializerMethodField()
     image = VersatileImageFieldSerializer(
         sizes=[
             ("full_size", "url"),
@@ -164,7 +189,9 @@ class VendorSerializer(serializers.ModelSerializer):
             "order_count",
             "product_count",
             "orders_made",
+            "online",
             "order_requests",
+            "favorites",
             "image",
             "created_at",
             "created_by",
@@ -176,6 +203,12 @@ class VendorSerializer(serializers.ModelSerializer):
 
     def get_product_count(self, obj):
         return Product.objects.filter(vendor=obj).count()
+
+    def get_favorites(self, obj):
+        favorites, created = Favorite.objects.get_or_create(vendor=obj)
+        favorite_products = obj.favorites.favorites.all()
+        product_serializer = RawProductSlugSerializer(favorite_products, many=True)
+        return product_serializer.data
 
 
 class VendorProductSerializer(serializers.ModelSerializer):

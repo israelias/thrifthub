@@ -83,7 +83,7 @@ class OtherVendorDetailView(generics.RetrieveUpdateAPIView):
     """
 
     queryset = Vendor.objects.all()
-    serializer_class = OtherVendorSerializer
+    serializer_class = CurrentVendorSerializer
     lookup_field = "id"
 
 
