@@ -75,6 +75,7 @@ class VendorList(generics.ListAPIView):
     serializer_class = VendorSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["name", "slug"]
+    permission_classes = (AllowAny,)
 
 
 class OtherVendorDetailView(generics.RetrieveUpdateAPIView):
@@ -84,6 +85,7 @@ class OtherVendorDetailView(generics.RetrieveUpdateAPIView):
 
     queryset = Vendor.objects.all()
     serializer_class = CurrentVendorSerializer
+    permission_classes = (AllowAny,)
     lookup_field = "id"
 
 

@@ -2,7 +2,11 @@ from django.shortcuts import redirect, render, reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_flex_fields import FlexFieldsModelViewSet, is_expanded
 from rest_framework import filters, generics, viewsets
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
 from vendor.models import Vendor
 
@@ -35,6 +39,7 @@ class ProductViewSet(FlexFieldsModelViewSet):
     serializer_class = ProductVersatileSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["title", "description"]
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
         serializer.save(vendor=self.request.user.vendor)
@@ -43,6 +48,7 @@ class ProductViewSet(FlexFieldsModelViewSet):
 class ProductsByVendorView(generics.ListAPIView):
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
+    permission_classes = (AllowAny,)
 
     def get_queryset(self):
         return models.Product.objects.filter(vendor=Vendor.objects.get(slug=self.kwargs["slug"]))
@@ -51,6 +57,7 @@ class ProductsByVendorView(generics.ListAPIView):
 class ProductsByCategory(generics.ListAPIView):
 
     serializer_class = ProductSerializer
+    permission_classes = (AllowAny,)
 
     """
     Returns products under a single category in `slug`
@@ -66,6 +73,7 @@ class ProductsByCategory(generics.ListAPIView):
 class ProductsByCategories(generics.ListAPIView):
     serializer_class = ProductVersatileSerializer
     queryset = Product.objects.all()
+    permission_classes = (AllowAny,)
 
     """
     Returns products hierarchically for every sub-category in `hierarchy` arg
@@ -122,6 +130,7 @@ class CategoryViewSet(FlexFieldsModelViewSet):
     serializer_class = CategoryFullSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["name"]
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class CategoryListView(generics.ListAPIView):

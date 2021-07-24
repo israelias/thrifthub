@@ -14,6 +14,7 @@ from .serializers import OrderDetailSerializer, OrderSerializer
 class OrderListView(generics.ListAPIView):
     queryset = OrderModel.objects.all()
     serializer_class = OrderSerializer
+    permission_classes = (AllowAny,)
 
 
 class VendorOrderViewSet(FlexFieldsModelViewSet):
@@ -57,7 +58,7 @@ class VendorOrderViewSet(FlexFieldsModelViewSet):
     lookup_field = "id"
     queryset = OrderModel.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class VendorOrderDetailViewSet(FlexFieldsModelViewSet):
@@ -74,7 +75,7 @@ class VendorOrderDetailViewSet(FlexFieldsModelViewSet):
     lookup_field = "id"
     queryset = OrderDetail.objects.all()
     serializer_class = OrderDetailSerializer
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class Order(generics.RetrieveAPIView):
