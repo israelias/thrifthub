@@ -2,8 +2,10 @@ import random
 
 import order.models as order_models
 import vendor.models as vendor_models
+from django.utils.text import slugify
 from rest_flex_fields import FlexFieldsModelSerializer
-from rest_framework import serializers
+from rest_framework import serializers, status
+from rest_framework.response import Response
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
 from .models import Category, Favorite, Image, Product
@@ -119,7 +121,7 @@ class RawOrderStatusSerializer(serializers.BaseSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     vendor = VendorSlugSerializer(read_only=True)
-    condition = serializers.CharField(source="get_condition_display")
+    condition = serializers.CharField(source="get_condition_display", read_only=True)
     product_images = ImageNewSerializer(many=True, read_only=True)
     image = serializers.SerializerMethodField()
 
@@ -141,12 +143,18 @@ class ProductSerializer(serializers.ModelSerializer):
             "product_images",
         ]
 
+    # def get_image(self, obj):
+    #     images = obj.product_images.all()[0]
+    #     image_serializer = ImageNewSerializer(images)
+    #     # first_image = image_serializer.data["image"]
+    #     print(image_serializer.data)
+    #     return image_serializer.data
     def get_image(self, obj):
-        images = obj.product_images.all()[0]
+        images = Image.objects.filter(product=obj).first()
+        if not images:
+            return {}
         image_serializer = ImageNewSerializer(images)
-        # first_image = image_serializer.data["image"]
-        print(image_serializer.data)
-        return image_serializer.data
+        return image_serializer.data.get("image")
 
 
 class OrderedProductSerializer(FlexFieldsModelSerializer):
@@ -171,8 +179,8 @@ class ProductPreviewSerializer(FlexFieldsModelSerializer):
     # VIEW FOR ORDER ITEMS
     category = serializers.StringRelatedField(read_only=True)
     vendor = serializers.StringRelatedField(read_only=True)
-    image = serializers.SerializerMethodField()
-    condition = serializers.CharField(source="get_condition_display")
+    image = serializers.SerializerMethodField(read_only=True)
+    condition = serializers.CharField(source="get_condition_display", read_only=True)
 
     class Meta:
         model = Product
@@ -195,16 +203,24 @@ class ProductPreviewSerializer(FlexFieldsModelSerializer):
             "vendor": VendorPreviewSerializer,
         }
 
+ 
     def get_image(self, obj):
-        images = obj.product_images.all()[0]
-        image_serializer = ImageNewSerializer(images)
+        images = Image.objects.filter(product=obj).first()
+        if images:
+            image_serializer = ImageNewSerializer(images)
+            return image_serializer.data.get("image")
+        return image_serializer.data
 
-        return image_serializer.data.get("image")
+
+class ImagePostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ("product", "image")
 
 
 class ProductSimilarSerializer(FlexFieldsModelSerializer):
-    condition = serializers.CharField(source="get_condition_display")
-    image = serializers.SerializerMethodField()
+    condition = serializers.CharField(source="get_condition_display", read_only=True)
+    image = serializers.SerializerMethodField(read_only=True)
     category = CategoryPreviewSerializer()
     vendor = VendorPreviewSerializer()
 
@@ -225,20 +241,21 @@ class ProductSimilarSerializer(FlexFieldsModelSerializer):
         expandable_fields = {
             "category": CategoryPreviewSerializer,
             "vendor": VendorPreviewSerializer,
-            # "product_images": (ImageNewSerializer, {"many": True}),
         }
 
     def get_image(self, obj):
-        images = obj.product_images.all()[0]
-        image_serializer = ImageNewSerializer(images)
-        return image_serializer.data.get("image")
+        images = Image.objects.filter(product=obj).first()
+        if images:
+            image_serializer = ImageNewSerializer(images)
+            return image_serializer.data.get("image")
+        return image_serializer.data
 
 
 class ProductVersatileSerializer(FlexFieldsModelSerializer):
     similar_products = serializers.SerializerMethodField()
-    condition = serializers.CharField(source="get_condition_display")
     absolute_url = serializers.CharField(source="get_absolute_url", read_only=True)
-    image = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField(read_only=True)
+    # product_images = serializers.SerializerMethodField()
     ordered_product = OrderedProductSerializer(many=True, read_only=True)
 
     class Meta:
@@ -265,11 +282,8 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
             "category": CategoryFullSerializer,
             "vendor": VendorPreviewSerializer,
             "product_images": (ImageNewSerializer, {"many": True}),
-            # "ordered_product": OrderedProductSerializer,
         }
-        extra_kwargs = {
-            "product_images": {"required": False},
-        }
+        extra_kwargs = {"product_images": {"required": False}, "is_available": {"required": False}}
 
     def get_similar_products(self, obj):
         similar_products = list(obj.category.products.exclude(id=obj.id))
@@ -281,27 +295,82 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
         return product_serializer.data
 
     def get_image(self, obj):
-        images = obj.product_images.all()[0]
-        image_serializer = ImageNewSerializer(images)
-        return image_serializer.data.get("image")
+        images = Image.objects.filter(product=obj).first()
+        if images:
+            image_serializer = ImageNewSerializer(images)
+            return image_serializer.data.get("image")
+        return image_serializer.data
 
-    # def get_order_requests(self, obj):
-    #     images = obj.ordered_product.all()
-    #     order_requests = order_models.Order.objects.filter(vendor=obj)
-    #     order_serializer = RawIdSerializer(order_requests, many=True)
-    #     return order_serializer.data
+    def create(self, validated_data):
+        vendor = self.context["request"].user.vendor
 
-    # def get_order_count(self, obj):
-    #     similar_products = list(obj.category.products.exclude(id=obj.id))
+        product_image_data = dict((self.context["request"].data).lists())["images"]
 
-    #     if len(similar_products) >= 4:
-    #         similar_products = random.sample(similar_products, 4)
+        instance = Product.objects.create(
+            vendor=vendor,
+            title=validated_data["title"],
+            description=validated_data["description"],
+            price=validated_data["price"],
+            condition=validated_data["condition"],
+            category=validated_data["category"],
+        )
 
-    #     product_serializer = ProductSimilarSerializer(similar_products, many=True)
-    #     return product_serializer.data
+        instance.save()
 
-    # def get_order_count(self, obj):
-    #     return order_models.Order.objects.filter(buyer=obj).count()
+        if product_image_data:
+            for img_name in product_image_data:
+                modified_data = Image.objects.create(product=instance, image=img_name)
+                file_serializer = ImagePostSerializer(data=modified_data)
+                if file_serializer.is_valid():
+                    file_serializer.save()
 
-    # def get_product_count(self, obj):
-    #     return Product.objects.filter(vendor=obj).count()
+        return instance
+
+    def update(self, instance, validated_data):
+        request = self.context["request"]
+        vendor = request.user.vendor
+
+        # Check if there is an images field
+        images_request = request.data.get("images", None)
+        print("new", images_request)
+
+        # Find current images attached to the product
+        current_images = Image.objects.filter(product=instance)
+        print("existing", current_images)
+
+        # If there is data, they would be new
+        to_remove = []
+        if images_request:
+            for img in dict((request.data).lists())["images"]:
+                new_image = Image.objects.create(product=instance, image=img)
+                image_serializer = ImagePostSerializer(data=new_image)
+                if image_serializer.is_valid():
+                    print("herreee?")
+                    image_serializer.save()
+                to_remove.append(new_image.id)
+                print("appended", new_image)
+
+        # Update any fields to the validated args, else keep the previous value
+        instance.title = validated_data.get("title", instance.title)
+        instance.description = validated_data.get("description", instance.description)
+        instance.price = validated_data.get("price", instance.price)
+        instance.condition = validated_data.get("condition", instance.condition)
+        instance.category = validated_data.get("category", instance.category)
+
+        # Finally save the updates to the produuct
+        instance.save()
+        print("saved additions", instance.product_images.all())
+
+        # To know if other images were removed,
+        # deleted_images = Image.objects.filter(id=instance.id)
+
+        # And then deal with destroying the images no longer attached to the product
+        print("LIST", to_remove)
+        if len(to_remove) > 0:
+            for img in list(instance.product_images.exclude(id__in=to_remove)):
+                print("here?", list(instance.product_images.exclude(id__in=to_remove)))
+                old_image = Image.objects.get(id=img.id)
+                print("herrrr", old_image)
+                old_image.delete()
+
+        return instance

@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from vendor.models import Vendor
 
 from . import models
-from .models import Category, Product
+from .models import Category, Product, Image
 from .serializers import (
     CategoryFullSerializer,
     CategorySerializer,
@@ -41,8 +41,75 @@ class ProductViewSet(FlexFieldsModelViewSet):
     search_fields = ["title", "description"]
     permission_classes = (AllowAny,)
 
-    def perform_create(self, serializer):
-        serializer.save(vendor=self.request.user.vendor)
+    # def list(self, request):
+    #     pass
+
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response({"Success": "msb blablabla"}, status=status.HTTP_201_CREATED, headers=headers)
+    # def create(self, request, *args, **kwargs):
+    #     serializer = self.get_serializer(data=request.data)
+    #     if not serializer.is_valid(raise_exception=False):
+    #         return Response({"Fail": "blablal", status=status.HTTP_400_BAD_REQUEST)
+
+    #     self.perform_create(serializer)
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response({"Success": "msb blablabla"}, status=status.HTTP_201_CREATED, headers=headers)
+
+    # def retrieve(self, request, pk=None):
+    #     pass
+
+    # def update(self, request, pk=None):
+    #     product_images = request.data("images", None)
+    #     vendor = request.user.vendor
+    #     current_images = Image.objects.get_or_create(product=vendor)[0]
+    #     friend = Vendor.objects.get(id=request.data["other_vendor_id"])
+    #     if friends_obj:
+    #         friends_obj.vendors.add(friend)
+
+    #     product_image_data = dict((self.context["request"].data).lists())["image"]
+
+    #     instance = Product.objects.create(
+    #         vendor=vendor,
+    #         title=validated_data["title"],
+    #         description=validated_data["description"],
+    #         price=validated_data["price"],
+    #         condition=validated_data["condition"],
+    #         category=validated_data["category"],
+    #     )
+
+    #     instance.save()
+
+    #     if product_image_data:
+    #         for img_name in product_image_data:
+    #             modified_data = Image.objects.create(product=instance, image=img_name)
+    #             file_serializer = ImagePostSerializer(data=modified_data)
+    #             if file_serializer.is_valid():
+    #                 file_serializer.save()
+    #     return Response(
+    #         data={"message": "Added to Friends"},
+    #         status=status.HTTP_200_OK,
+    #     )
+
+    # def post(self, request, id):
+    #     vendor = Vendor.objects.get(id=id)
+    #     favorites_obj = get_object_or_404(self.queryset, vendor=vendor)
+    #     product = Product.objects.get(id=request.data["product_id"])
+    #     if favorites_obj:
+    #         favorites_obj.favorites.add(product)
+    #     return Response(
+    #         data={"message": "Added to Favorites"},
+    #         status=status.HTTP_200_OK,
+    #     )
+
+    # def partial_update(self, request, pk=None):
+    #     pass
+
+    # def destroy(self, request, pk=None):
+    #     pass
 
 
 class ProductsByVendorView(generics.ListAPIView):

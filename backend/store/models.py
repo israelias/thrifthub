@@ -226,9 +226,9 @@ def delete_category_if_null(sender, instance, **kwargs):
     Delete category objects if it has no other related products.
 
     """
-
-    products = instance.category.filter(
-        category__in=Category.objects.get(slug=instance.slug).get_descendants(include_self=True)
+    # category = Category.objects.filter(products__in=instance)
+    products = instance.category.products.filter(
+        category__in=Category.objects.get(slug=instance.category.slug).get_descendants(include_self=True)
     )
     if not products.exists():
-        instance.category.delete()
+        products.delete()
