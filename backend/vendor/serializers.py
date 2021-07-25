@@ -220,13 +220,3 @@ class VendorProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = "__all__"
         # fields = ["id", "category", "vendor", "title", "description", "slug", "regular_price", "product_image"]
-
-    # def create(self, validated_data):
-    #     images_data = validated_data.pop("product_image")
-    #     category_data = validated_data.pop("category")
-    #     product, created = Product.objects.get_or_create(**validated_data)
-    #     if images_data:
-    #         for image_data in images_data:
-    #             Image.objects.create(product=product, **image_data)
-    #     category, created = Category.objects.get_or_create(**category_data)
-    #     return product
