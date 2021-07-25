@@ -37,7 +37,8 @@ DEBUG = "DEVELOPMENT" in os.environ
 if "DEVELOPMENT" in os.environ:
     ALLOWED_HOSTS = []
 else:
-    ALLOWED_HOSTS = ["thrifthub-backend.herokuapp.com", "localhost"]
+    # ALLOWED_HOSTS = ["thrifthub-backend.herokuapp.com", "localhost"]
+    ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -68,9 +69,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -153,6 +154,8 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+USE_THOUSAND_SEPARATOR = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -319,8 +322,28 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:19006",
 ]
 
-# CORS_EXPOSE_HEADERS = ["Content-Type", 'X-CSRFToken', "Authorization"]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://\w+\.thrifthub\.app$",
+    r"^https://\w+\.thrift-hub\.app$",
+]
+
+# CSRF_TRUSTED_ORIGINS = [
+#     "change.allowed.com",
+# ]
+
+# CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken", "Authorization"]
 CORS_ALLOW_CREDENTIALS = True
+# CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGIN_REGEXES
+# CORS_ALLOW_METHODS = [
+#     "DELETE",
+#     "GET",
+#     "OPTIONS",
+#     "PATCH",
+#     "POST",
+#     "PUT",
+# ]
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=15),
