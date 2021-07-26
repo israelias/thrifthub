@@ -4,9 +4,12 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from versatileimagefield.fields import PPOIField, VersatileImageField
+from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 from versatileimagefield.placeholder import (
     OnDiscPlaceholderImage,
     OnStoragePlaceholderImage,
@@ -53,6 +56,18 @@ class Vendor(models.Model):
     def get_paid_amount(self):
         items = self.items.filter(vendor_paid=True, order__vendors__in=[self.id])
         return sum((item.product.price * item.quantity) for item in items)
+
+
+@receiver(post_save, sender=Vendor)
+def warm_vendor_image(sender, instance, **kwargs):
+    """Ensures Vendor-specific images objects are created post-save"""
+    vendor_img_warmer = VersatileImageFieldWarmer(
+        instance_or_queryset=instance,
+        rendition_key_set="default_avatar",
+        image_attr="profile",
+        verbose=True
+    )
+    num_created, failed_to_create = vendor_img_warmer.warm()
 
 
 class Friend(models.Model):

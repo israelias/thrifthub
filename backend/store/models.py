@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Q
 from django.db.models.constraints import UniqueConstraint
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, post_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.text import slugify
@@ -15,6 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel, TreeForeignKey
 from vendor.models import Vendor
 from versatileimagefield.fields import PPOIField, VersatileImageField
+from versatileimagefield.image_warmer import VersatileImageFieldWarmer
 from versatileimagefield.placeholder import (
     OnDiscPlaceholderImage,
     OnStoragePlaceholderImage,
@@ -210,6 +211,15 @@ class Image(models.Model):
             self.alt_text = self.product.title + " photo"
 
         super(Image, self).save(*args, **kwargs)
+
+
+@receiver(post_save, sender=Image)
+def warm_image_instances_post_save(sender, instance, **kwargs):
+    """Ensures Image objects are created post-save"""
+    all_img_warmer = VersatileImageFieldWarmer(
+        instance_or_queryset=instance, rendition_key_set="default_product", image_attr="product", verbose=True
+    )
+    num_created, failed_to_create = all_img_warmer.warm()
 
 
 class Favorite(models.Model):
