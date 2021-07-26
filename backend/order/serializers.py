@@ -1,6 +1,5 @@
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import serializers
-
 from rest_framework.exceptions import MethodNotAllowed, NotFound
 from rest_framework.response import Response
 from rest_framework.validators import UniqueTogetherValidator
@@ -13,6 +12,7 @@ from store.serializers import (
     VendorFullSerializer,
     VendorPreviewSerializer,
 )
+from vendor.models import Vendor
 
 from .models import Order, OrderDetail
 
@@ -29,11 +29,11 @@ class OrderDetailSerializer(FlexFieldsModelSerializer):
 class OrderSerializer(FlexFieldsModelSerializer):
     # status = serializers.CharField(source="get_status_display", required=False)
     # products = serializers.StringRelatedField(many=True)
-    order_detail = serializers.SerializerMethodField("get_order_detail")
+    # order_detail = serializers.SerializerMethodField("get_order_detail")
 
     class Meta:
         model = Order
-        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at", "order_detail"]
+        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at"]
         expandable_fields = {
             "vendor": VendorPreviewSerializer,
             "buyer": VendorPreviewSerializer,
@@ -44,12 +44,12 @@ class OrderSerializer(FlexFieldsModelSerializer):
             "amount": {"required": False},
         }
 
-    def get_order_detail(self, obj):
+    # def get_order_detail(self, obj):
 
-        order_detail = OrderDetail.objects.get(order=obj)
+    #     order_detail = OrderDetail.objects.get(order=obj)
 
-        detail_serializer = OrderDetailSerializer(order_detail)
-        return detail_serializer.data
+    #     detail_serializer = OrderDetailSerializer(order_detail)
+    #     return detail_serializer.data
 
     def validate(self, data):
         """
@@ -60,30 +60,33 @@ class OrderSerializer(FlexFieldsModelSerializer):
         instance = getattr(self, "instance", None)
         print("instance", instance)
         if self.context["request"]._request.method == "POST":
-            # # Reject offer if product is no longer available
-            # if not data["product"].is_available:
-            #     raise NotFound({"message": "This product is no longer available."})
 
             # Reject offer if buyer has already have a standing offer for the product
             if Order.objects.filter(buyer=data["buyer"], product=data["product"]).exists():
                 raise MethodNotAllowed({"message": "This product is already in your orders."})
 
+            # Ensure the first offer is never more than the price of the product
+            if float(data["amount"]) > float(data["product"].price):
+                raise MethodNotAllowed({"message": f"Your offer must not be greater than {data['product'].price}"})
+
+        if self.context["request"]._request.method == "PUT":
+            # Ensure updates to offer amounts are validated only on put requests
+            if self.context["request"].user.vendor == instance.buyer:
+                if float(data["amount"]) > float(data["product"].price):
+                    raise MethodNotAllowed({"message": f"Your offer must not be greater than {data['product'].price}"})
+
         # Reject offer if product is no longer available
         if not data["product"].is_available:
             raise NotFound({"message": "This product is no longer available."})
 
-        # Ensure an offer is never more than the price of the product
-        if self.context["request"].user.vendor == instance.buyer:
-            print("BUYER,", self)
-            if float(data["amount"]) > float(data["product"].price):
-                raise MethodNotAllowed({"message": f"Your offer must not be greater than {data['product'].price}"})
-
         return data
 
     def create(self, validated_data):
+        request = self.context["request"]
+        buyer = request.user.vendor
+        # buyer = Vendor.objects.get(created_by=request.user.vendor)
 
-        buyer = self.context["request"].user.vendor
-        product = Product.objects.get(id=self.context["request"].data["product"])
+        product = Product.objects.get(id=request.data.get("product"))
         amount = validated_data.get("amount", product.price)
         instance = Order.objects.create(buyer=buyer, product=product, amount=amount)
 

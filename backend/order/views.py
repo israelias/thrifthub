@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_flex_fields import FlexFieldsModelViewSet, is_expanded
 from rest_framework import generics, status
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from store.models import Product
 
@@ -75,7 +75,7 @@ class VendorOrderDetailViewSet(FlexFieldsModelViewSet):
     lookup_field = "id"
     queryset = OrderDetail.objects.all()
     serializer_class = OrderDetailSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
 
 
 class Order(generics.RetrieveAPIView):
