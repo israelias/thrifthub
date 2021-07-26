@@ -270,7 +270,7 @@ VERSATILEIMAGEFIELD_SETTINGS = {
     # Whether or not to create new images on-the-fly. Set this to `False` for
     # speedy performance but don't forget to 'pre-warm' to ensure they're
     # created and available at the appropriate URL.
-    "create_images_on_demand": True,
+    "create_images_on_demand": "DEVELOPMENT" in os.environ,
     # A dot-notated python path string to a function that processes sized
     # image keys. Typically used to md5-ify the 'image key' portion of the
     # filename, giving each a uniform length.
@@ -289,14 +289,18 @@ VERSATILEIMAGEFIELD_SETTINGS = {
     "progressive_jpeg": False,
 }
 
-# VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
-#     'product_headshot': [
-#         ('full_size', 'url'),
-#         ('thumbnail', 'thumbnail__100x100'),
-#         ('medium_square_crop', 'crop__400x400'),
-#         ('small_square_crop', 'crop__50x50')
-#     ]
-# }
+VERSATILEIMAGEFIELD_RENDITION_KEY_SETS = {
+    "default_avatar": [
+        ("full_size", "url"),
+        ("thumbnail", "thumbnail__100x100"),
+        ("medium_square_crop", "crop__400x400"),
+        ("small_square_crop", "crop__50x50"),
+    ],
+    "default_product": [
+        ("full_size", "url"),
+        ("thumbnail", "thumbnail__240x180"),
+    ],
+}
 
 GRAPHENE = {
     # Where our Graphene schema lives
