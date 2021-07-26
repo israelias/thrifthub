@@ -270,7 +270,7 @@ VERSATILEIMAGEFIELD_SETTINGS = {
     # Whether or not to create new images on-the-fly. Set this to `False` for
     # speedy performance but don't forget to 'pre-warm' to ensure they're
     # created and available at the appropriate URL.
-    "create_images_on_demand": "DEVELOPMENT" in os.environ,
+    "create_images_on_demand": True,
     # A dot-notated python path string to a function that processes sized
     # image keys. Typically used to md5-ify the 'image key' portion of the
     # filename, giving each a uniform length.
