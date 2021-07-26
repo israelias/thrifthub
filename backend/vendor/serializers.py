@@ -17,6 +17,11 @@ from versatileimagefield.serializers import VersatileImageFieldSerializer
 from .models import Friend, Vendor
 
 
+class RawProductSlugSerializer(serializers.BaseSerializer):
+    def to_representation(self, obj):
+        return obj.slug
+
+
 class CurrentVendorSerializer(serializers.ModelSerializer):
     """
     Default Complete Vendor profile.
@@ -94,7 +99,7 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
     def get_favorites(self, obj):
         favorites, created = Favorite.objects.get_or_create(vendor=obj)
         favorite_products = obj.favorites.favorites.all()
-        product_serializer = ProductSerializer(favorite_products, many=True)
+        product_serializer = RawProductSlugSerializer(favorite_products, many=True)
         return product_serializer.data
 
     def get_order_count(self, obj):
@@ -151,11 +156,6 @@ class VendorFriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friend
         fields = "__all__"
-
-
-class RawProductSlugSerializer(serializers.BaseSerializer):
-    def to_representation(self, obj):
-        return obj.slug
 
 
 class VendorProductFavoriteSlugPreview(serializers.ModelSerializer):
