@@ -5,3 +5,4 @@ __pycache__
 frontend-web/node_modules
 .env
 env.py
+yarn-error.log

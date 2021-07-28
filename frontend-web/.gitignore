@@ -9,6 +9,7 @@ npm-debug.*
 *.orig.*
 web-build/
 .vercel
+.yarn-error.log
 
 # macOS
 .DS_Store
