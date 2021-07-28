@@ -43,7 +43,7 @@ jobs:
       runs-on: ubuntu-latest
       defaults:
         run:
-          working-directory: ./frontend-web
+          working-directory: ./frontend
       # needs: Backend_Deploy
       steps:
         - uses: actions/checkout@v1
@@ -75,9 +75,9 @@ jobs:
   Frontend_Deploy:
       name: Deploy to Frontend To Vercel
       runs-on: ubuntu-latest
-      defaults:
-        run:
-          working-directory: ./frontend-web/web-build
+      # defaults:
+      #   run:
+      #     working-directory: ./frontend-web/web-build
       needs: Expo_Web_Build
       steps:
         - uses: actions/checkout@v2
@@ -90,6 +90,6 @@ jobs:
             vercel-org-id: ${{ secrets.ORG_ID}}  #Required
             vercel-project-id: ${{ secrets.PROJECT_ID}} #Required 
             vercel-project-name: thrifthub
-            # working-directory: web-build
+            working-directory: frontend/web-build
          
     
