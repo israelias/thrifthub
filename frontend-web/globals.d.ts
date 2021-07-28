@@ -15,13 +15,15 @@ type Vendor = {
   slug: string;
   created_at: string;
   created_by: User;
-  image?: Image;
+  image: ImagePreview;
   products: Product[];
   favorites: Product[];
   friends: Vendor[];
   friends_products: Product[];
   order_requests: Order[];
   orders_made: Order[];
+  product_count: boolean;
+  order_count: boolean;
   online: boolean;
 };
 
@@ -29,9 +31,10 @@ type VendorPreview = {
   id: number;
   name: string;
   online: boolean;
-  image: Image;
+  image: ImagePreview;
   product_count: number;
   order_count: number;
+  favorites: Product["slug"][];
 };
 
 type Category = {
@@ -45,38 +48,48 @@ type Category = {
   parent_id: number;
 };
 
+type CategoryPreview = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
 type Product = {
   id: number;
-  category: Category;
-  vendor: Vendor;
+  category: CategoryPreview;
+  vendor: VendorPreview;
   title: string;
   description: string;
   slug: string;
   price: number;
+  condition: string;
   is_available: boolean;
   created_at?: string;
   updated_at?: string;
+  image: ImagePreview;
   product_images: Image[];
-  similiar_products?: Product[];
+  similar_products: Product[];
 };
 
 type ProductPreview = {
   id: number;
   category: Category["name"];
-  vendor: Vendor["name"];
+  vendor: VendorPreview;
   title: string;
+  description: string;
   slug: string;
   price: number;
   condition: string;
   is_available: boolean;
-  image: Image;
-  created_at?: string;
-  updated_at?: string;
+  image: ImagePreview;
+  created_at: string;
+  updated_at: string;
+  similar_products: ProductPreview[];
 };
 
 type ProductDetail = {
   id: number;
-  category: Category["id"];
+  category: Category["name"];
   vendor: VendorPreview;
   title: string;
   description: string;
@@ -88,21 +101,23 @@ type ProductDetail = {
   updated_at?: string;
   image: Image;
   product_images?: Image[];
-  similiar_products?: ProductPreview[];
+  similar_products: ProductPreview[];
 };
 
 type Image = {
   id?: number;
   name?: string;
-  image: {
-    full_size: string;
-    thumbnail: string;
-  };
+  image: ImagePreview;
   alt_text: string;
   is_feature: boolean;
   created_at?: string;
   updated_at?: string;
   product?: Product["id"];
+};
+
+type ImagePreview = {
+  full_size: string;
+  thumbnail: string;
 };
 
 type Order = {
@@ -113,6 +128,7 @@ type Order = {
   status: string;
   amount?: string;
   created_at?: string;
+  updated_at?: string;
   order_detail?: OrderDetail;
 };
 
@@ -137,4 +153,8 @@ type AuthResponse = {
   access: string;
   refresh: string;
   user: Vendor;
+};
+
+type AccessToken = {
+  accessToken: null | string;
 };
