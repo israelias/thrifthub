@@ -2,39 +2,30 @@ import React from "react";
 import "react-native-gesture-handler";
 
 import { StatusBar } from "expo-status-bar";
+
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
-import NativeBaseProvider from "./context/nativebase.context";
-import { Provider as PaperProvider } from "react-native-paper";
-
-import useCachedResources from "./hooks/useCachedResources";
-import useColorScheme from "./hooks/useColorScheme";
-import Navigation from "./navigation";
-import UserProvider from "./context/user.context";
+import { AppearanceProvider } from "react-native-appearance";
+// import AuthorizationProviderfrom from './src/context/authorization.context'
+import useCachedResources from "./src/hooks/useCachedResources";
+import AppLoader from "./native/AppLoader";
+import { Core } from "./src/core";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
-  const colorScheme = useColorScheme();
 
   if (!isLoadingComplete) {
-    return null;
+    return <AppLoader />;
   } else {
     return (
-      <PaperProvider>
-        <NativeBaseProvider>
-          <UserProvider>
-            {/* <IconRegistry icons={EvaIconsPack} /> */}
-            {/* <ApplicationProvider {...eva} theme={eva.light}> */}
-            <SafeAreaProvider>
-              {/* <HomeScreen /> */}
-              {/* <AppNavigator /> */}
-              <Navigation colorScheme={colorScheme} />
-              <StatusBar />
-            </SafeAreaProvider>
-            {/* </ApplicationProvider> */}
-          </UserProvider>
-        </NativeBaseProvider>
-      </PaperProvider>
+      <>
+        <AppearanceProvider>
+          <SafeAreaProvider>
+            <Core />
+            {/* <Main /> */}
+            {/* <StatusBar /> */}
+          </SafeAreaProvider>
+        </AppearanceProvider>
+      </>
     );
   }
 }
