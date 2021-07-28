@@ -1,12 +1,15 @@
 /* eslint-disable no-console */
 import * as React from "react";
 
+import * as Navigator from "../navigation/rootNavigator";
 import { Toast } from "../components/common/toast";
 import { useToast, IToastProps } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { useLinkTo } from "@react-navigation/native";
+import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
 import { AuthResponseType } from "../types";
-import { storage } from "../utils/storage";
+import { localStorage } from "../utils/storage";
+import { nativeStorage } from "../utils/nativeStorage";
 import {
   signInRequest,
   signUpRequest,
@@ -15,6 +18,7 @@ import {
 
 import { deleteRequest } from "../services/crud.service";
 import { useVendorData, VendorActionTypes } from "./vendor.context";
+import { useAuth, AccountActionTypes } from "./auth.context";
 
 /**
  * Top-most Context provider for all user authentication: form values, auth errors etc.
@@ -28,12 +32,7 @@ export type UserContent = {
   setUsername: React.Dispatch<React.SetStateAction<string>>;
   email: string;
   setEmail: React.Dispatch<React.SetStateAction<string>>;
-  accessToken: string;
-  setAccessToken: React.Dispatch<React.SetStateAction<string>>;
-  refreshToken: string;
-  setRefreshToken: React.Dispatch<React.SetStateAction<string>>;
-  loggedIn: boolean;
-  setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+
   loading: boolean;
   setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
   password: string;
@@ -44,9 +43,15 @@ export type UserContent = {
   setAlert: React.Dispatch<React.SetStateAction<boolean>>;
   returning: boolean;
   setReturning: React.Dispatch<React.SetStateAction<boolean>>;
-  handleSignIn: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
-  handleSignOut: (e: React.MouseEvent<HTMLButtonElement>) => Promise<void>;
-  handleDelete: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  handleSignIn: (
+    e: React.BaseSyntheticEvent<React.FunctionComponent>
+  ) => Promise<void>;
+  handleSignOut: (
+    e: React.BaseSyntheticEvent<React.FunctionComponent>
+  ) => Promise<void>;
+  handleDelete: (
+    e: React.BaseSyntheticEvent<React.FunctionComponent>
+  ) => Promise<void>;
 };
 
 export const UserContext = React.createContext<UserContent>(undefined!);
@@ -56,14 +61,13 @@ export default function UserProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { dispatch, setVendorId } = useVendorData();
+  const { dispatch: vendorDispatch, setVendorId } = useVendorData();
+  // const { dispatch: authDispatch, state, actions } = useAuth();
 
   const [userId, setUserId] = React.useState<number | string>(0);
   const [username, setUsername] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const [accessToken, setAccessToken] = React.useState("");
-  const [refreshToken, setRefreshToken] = React.useState("");
-  const [loggedIn, setLoggedIn] = React.useState(false);
+
   const [loading, setLoading] = React.useState(false);
 
   const [password, setPassword] = React.useState("");
@@ -101,13 +105,13 @@ export default function UserProvider({
     }, 1750);
   };
 
-  // const navigation = useNavigation();
-
-  const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-
-    dispatch({ type: VendorActionTypes.fetchVendor });
+  const handleSignIn = async (
+    e: React.BaseSyntheticEvent<React.FunctionComponent>
+  ) => {
+    // authDispatch({
+    //   type: AccountActionTypes.fetchAccount,
+    // });
+    vendorDispatch({ type: VendorActionTypes.fetchVendor });
 
     if (!returning) {
       try {
@@ -123,14 +127,20 @@ export default function UserProvider({
               if (data.access) {
                 setEmail("");
                 setPassword("");
-                setAccessToken(data.access);
-                setRefreshToken(data.refresh);
+
                 setUsername(data.user.name);
                 setUserId(data.user.id);
-                setLoggedIn(true);
-                storage.setToken(data.access);
+
                 setVendorId(data.user.id.toString());
-                dispatch({
+
+                // authDispatch({
+                //   type: AccountActionTypes.fetchAccountSignUp,
+                //   accessToken: data.access,
+                // });
+
+                // actions.register(data.access);
+
+                vendorDispatch({
                   type: VendorActionTypes.fetchVendorSuccess,
                   vendor: data.user,
                 });
@@ -140,7 +150,6 @@ export default function UserProvider({
                 }, 750);
                 setTimeout(() => {
                   setLoading(false);
-                  // navigation.navigate("Home");
                 }, 1500);
               }
             });
@@ -149,7 +158,13 @@ export default function UserProvider({
               if (data.message) {
                 setLoading(false);
 
-                dispatch({ type: VendorActionTypes.fetchVendorFailure });
+                // authDispatch({
+                //   type: AccountActionTypes.fetchAccountTokenFailure,
+                //   accessToken: null,
+                // });
+                // actions.blacklist();
+
+                vendorDispatch({ type: VendorActionTypes.fetchVendorFailure });
 
                 onWarning(data.message);
               }
@@ -159,9 +174,15 @@ export default function UserProvider({
       } catch (err: any) {
         setLoading(false);
 
-        dispatch({ type: VendorActionTypes.fetchVendorFailure });
+        // authDispatch({
+        //   type: AccountActionTypes.fetchAccountTokenFailure,
+        //   accessToken: null,
+        // });
+        // actions.blacklist();
 
-        onError(err?.message || "Something went wrong.");
+        vendorDispatch({ type: VendorActionTypes.fetchVendorFailure });
+
+        console.log(err?.message || "Something went wrong.");
       }
     } else {
       try {
@@ -177,14 +198,18 @@ export default function UserProvider({
                 setUsername("");
 
                 setPassword("");
-                setAccessToken(data.access);
-                setRefreshToken(data.refresh);
+
                 setUsername(data.user.name);
                 setUserId(data.user.id);
-                setLoggedIn(true);
-                storage.setToken(data.access);
 
-                dispatch({
+                // actions.register(data.access);
+
+                // authDispatch({
+                //   type: AccountActionTypes.fetchAccountSignIn,
+                //   accessToken: data.access,
+                // });
+
+                vendorDispatch({
                   type: VendorActionTypes.fetchVendorSuccess,
                   vendor: data.user,
                 });
@@ -199,9 +224,16 @@ export default function UserProvider({
               } else {
                 setLoading(false);
 
-                dispatch({ type: VendorActionTypes.fetchVendorFailure });
+                // authDispatch({
+                //   type: AccountActionTypes.fetchAccountTokenFailure,
+                //   accessToken: null,
+                // });
 
-                onWarning("Access Failed");
+                // actions.blacklist();
+
+                vendorDispatch({ type: VendorActionTypes.fetchVendorFailure });
+
+                console.log("Access Failed");
               }
             });
           } else {
@@ -209,12 +241,17 @@ export default function UserProvider({
               if (data.message) {
                 setLoading(false);
 
-                dispatch({
+                // authDispatch({
+                //   type: AccountActionTypes.fetchAccountTokenFailure,
+                // });
+                // actions.blacklist();
+
+                vendorDispatch({
                   type: VendorActionTypes.fetchVendorFailure,
                   error: data.message,
                 });
 
-                onWarning("Request failed");
+                console.log("Request failed");
               }
             });
           }
@@ -222,27 +259,39 @@ export default function UserProvider({
       } catch (err: any) {
         setLoading(false);
 
-        dispatch({ type: VendorActionTypes.fetchVendorFailure, error: err });
+        // authDispatch({
+        //   type: AccountActionTypes.fetchAccountTokenFailure,
+        // });
+        // actions.blacklist();
 
-        onError(err.message);
+        vendorDispatch({
+          type: VendorActionTypes.fetchVendorFailure,
+          error: err,
+        });
+
+        console.log(err.message);
       }
     }
   };
 
-  const handleSignOut = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
+  const handleSignOut = async (
+    e: React.BaseSyntheticEvent<React.FunctionComponent>
+  ) => {
     setLoading(true);
-    onSuccess("Signing Out");
+
+    const localToken = await localStorage.getToken();
 
     try {
-      await signOutRequest({ accessToken }).then((response) => {
+      await signOutRequest({
+        accessToken: localToken,
+      }).then((response) => {
         if (response.ok) {
-          setAccessToken("");
           setUsername("");
           setUserId("");
-          setLoggedIn(false);
+
           setReturning(true);
-          storage.clearToken();
+
+          // actions.blacklist();
 
           setTimeout(() => {
             onSuccess("Signed Out");
@@ -253,37 +302,33 @@ export default function UserProvider({
           }, 750);
         } else {
           setLoading(false);
-          onWarning("Sign Out Failed");
+          console.log("Sign Out Failed");
         }
       });
     } catch (err: any) {
       setLoading(false);
-      onError(err.message);
+      console.log(err.message);
     }
   };
 
-  const handleDelete = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleDelete = async (
+    e: React.BaseSyntheticEvent<React.FunctionComponent>
+  ) => {
     setLoading(true);
     try {
       await deleteRequest({
         url: `account/${userId}`,
-        accessToken,
+        accessToken: "",
       }).then((res) => {
         if (res.ok) {
-          setAccessToken("");
           setUsername("");
           setUserId("");
-          setLoggedIn(false);
-          storage.clearToken();
 
           setTimeout(() => {
             onSuccess("Account Deleted");
           }, 750);
           setTimeout(() => {
             setLoading(false);
-
-            // navigation.navigate("/");
           }, 1500);
         } else {
           setLoading(false);
@@ -311,12 +356,7 @@ export default function UserProvider({
         setUsername,
         email,
         setEmail,
-        accessToken,
-        setAccessToken,
-        refreshToken,
-        setRefreshToken,
-        loggedIn,
-        setLoggedIn,
+
         loading,
         setLoading,
         handleSignIn,

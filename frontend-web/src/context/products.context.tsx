@@ -82,18 +82,30 @@ export default function ProductsDataProvider({
   async function loadProducts() {
     dispatch({ type: ProductsActionTypes.fetchProducts });
 
-    try {
-      const response = await getRequest({
-        url: `store?expand=product_images,vendor,product,category&include=vendor.name`,
-      });
-      const productsData = await response.json();
+    const data = await getRequest({
+      url: `store/?expand=product_images,vendor,product,category&include=vendor.name`,
+    });
+    if (data) {
       dispatch({
         type: ProductsActionTypes.fetchProductsSuccess,
-        products: productsData,
+        products: data,
       });
-    } catch (e) {
+    } else {
       dispatch({ type: ProductsActionTypes.fetchProductsFailure });
     }
+
+    // try {
+    //   const response = await getRequest({
+    //     url: `store?expand=product_images,vendor,product,category&include=vendor.name`,
+    //   });
+    //   // const productsData = await response.json();
+    //   dispatch({
+    //     type: ProductsActionTypes.fetchProductsSuccess,
+    //     products: response,
+    //   });
+    // } catch (e) {
+    //   dispatch({ type: ProductsActionTypes.fetchProductsFailure });
+    // }
   }
 
   React.useEffect(() => {

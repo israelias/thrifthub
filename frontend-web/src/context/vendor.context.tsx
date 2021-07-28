@@ -9,10 +9,28 @@ import {
   postRequest,
 } from "../services/crud.service";
 
+import {
+  getVendorData,
+  getVendorFavorites,
+  addFavorite,
+  removeFavorite,
+  makePurchase,
+  makeOffer,
+  acceptOffer,
+  declineOffer,
+  completePayment,
+  createOrder,
+  updateOrder,
+} from "../services/get.service";
+
 const VENDOR_FAVORITES_ENDPOINT = "vendor/<id>/favorites/</id>";
 const VENDOR_PROFILE_ENDPOINT = "vendor/";
 
-import { OrderTransactionStackParamList, VendorTypeParamList } from "../types";
+import {
+  OrderTypeParamList,
+  VendorTypeParamList,
+  ProductTypeParamList,
+} from "../types";
 
 export type VendorParams = VendorTypeParamList;
 
@@ -27,11 +45,17 @@ export enum VendorActionTypes {
   fetchVendor,
   fetchVendorSuccess,
   fetchVendorFailure,
+  fetchVendorFaves,
+  fetchVendorOrderRequests,
+  fetchVendorOrdersMade,
 }
 
 export interface FetchVendorAction {
   type: VendorActionTypes;
   vendor?: VendorParams;
+  favorites?: ProductTypeParamList;
+  order_requests?: OrderTypeParamList;
+  orders_made?: OrderTypeParamList;
   error?: object;
 }
 
@@ -48,24 +72,29 @@ const initialState: StateInterface = {
 };
 
 type VendorDataType = {
-  // favorites: Product[] | [];
-  // setFavorites: React.Dispatch<React.SetStateAction<Product[] | []>>;
-  // orderRequests: Order[] | [];
-  // setOrderRequests: React.Dispatch<React.SetStateAction<Order[] | []>>;
-  // ordersMade: Order[] | [];
-  // setOrdersMade: React.Dispatch<React.SetStateAction<Order[] | []>>;
-  // products: Product[] | [];
-  // setProducts: React.Dispatch<React.SetStateAction<Product[] | []>>;
-  // image: ImagePreview | {};
-  // setImage: React.Dispatch<React.SetStateAction<ImagePreview | {}>>;
-  // setLoadingFaves: React.Dispatch<React.SetStateAction<boolean>>;
-  // loadingVendor: boolean;
-  // setLoadingVendor: React.Dispatch<React.SetStateAction<boolean>>;
+  vendorFaves: ProductTypeParamList[] | [];
+  vendorFavoritesFeed: ProductTypeParamList[] | [];
+  // setVendorFaves: React.Dispatch<
+  //   React.SetStateAction<VendorParams["favorites"] | []>
+  // >;
+  orderRequests: OrderTypeParamList[] | [];
+  // setOrderRequests: React.Dispatch<
+  //   React.SetStateAction<OrderTypeParamList[] | []>
+  // >;
+  ordersMade: OrderTypeParamList[] | [];
+  // setOrdersMade: React.Dispatch<
+  //   React.SetStateAction<OrderTypeParamList[] | []>
+  // >;
+  vendorProducts: ProductTypeParamList[] | [];
+  // setVendorProducts: React.Dispatch<
+  //   React.SetStateAction<ProductTypeParamList[] | []>
+  // >;
+
   vendor: VendorParams | undefined;
   loading: boolean;
   error: {} | undefined;
-  vendorId: string;
-  setVendorId: React.Dispatch<React.SetStateAction<string>>;
+  vendorId: string | undefined;
+  setVendorId: React.Dispatch<React.SetStateAction<string | undefined>>;
 
   dispatch: React.Dispatch<FetchVendorAction>;
   // loadFavorites: () => Promise<void>;
@@ -73,6 +102,8 @@ type VendorDataType = {
   // loadOrdersMade: () => Promise<void>;
   // loadProducts: () => Promise<void>;
   loadVendor: () => Promise<void>;
+  loadVendorFaves(id: string): Promise<void>;
+  loadVendorFavorites(id: string): Promise<void>;
 };
 
 const VendorData = React.createContext<VendorDataType>(undefined!);
@@ -82,22 +113,37 @@ export default function VendorDataProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [vendorId, setVendorId] = React.useState<string>("");
-
-  // const [favorites, setFavorites] = React.useState<Product[] | []>([]);
-
-  // const [orderRequests, setOrderRequests] = React.useState<Order[] | []>([]);
-
-  // const [ordersMade, setOrdersMade] = React.useState<Order[] | []>([]);
-
-  // const [products, setProducts] = React.useState<Product[] | []>([]);
-
-  // const [image, setImage] = React.useState<ImagePreview | {}>({});
-
-  // const [loadingVendor, setLoadingVendor] = React.useState<boolean>(false);
+  const [vendorId, setVendorId] = React.useState<string | undefined>(
+    undefined!
+  );
+  const [vendorProducts, setVendorProducts] = React.useState<
+    ProductTypeParamList[] | []
+  >([]);
+  const [vendorFavoritesFeed, setVendorFavoritesFeed] = React.useState<
+    ProductTypeParamList[] | []
+  >([]);
+  const [vendorFaves, setVendorFaves] = React.useState<
+    VendorParams["favorites"] | []
+  >([]);
+  const [orderRequests, setOrderRequests] = React.useState<
+    OrderTypeParamList[] | []
+  >([]);
+  const [ordersMade, setOrdersMade] = React.useState<OrderTypeParamList[] | []>(
+    []
+  );
 
   const [state, dispatch] = React.useReducer(
-    (state: StateInterface, { type, vendor, error }: FetchVendorAction) => {
+    (
+      state: StateInterface,
+      {
+        type,
+        vendor,
+        favorites,
+        order_requests,
+        orders_made,
+        error,
+      }: FetchVendorAction
+    ) => {
       switch (type) {
         case VendorActionTypes.fetchVendor:
           return { ...state, loading: true };
@@ -107,6 +153,23 @@ export default function VendorDataProvider({
 
         case VendorActionTypes.fetchVendorFailure:
           return { ...state, error: error, loading: false };
+
+        case VendorActionTypes.fetchVendorFaves:
+          return {
+            ...state,
+            loading: false,
+            favorites: favorites,
+          };
+        case VendorActionTypes.fetchVendorOrdersMade:
+          return {
+            ...state,
+            orders_made: orders_made,
+          };
+        case VendorActionTypes.fetchVendorOrderRequests:
+          return {
+            ...state,
+            order_requests: order_requests,
+          };
 
         default:
           return state;
@@ -130,20 +193,51 @@ export default function VendorDataProvider({
     }
   }
 
-  // React.useEffect(() => {
-  //   fetchVendor();
-  // }, []);
-
   const { vendor, loading, error } = state;
 
-  // const loadVendor = async () => {
-  //   setLoadingVendor(true);
-  //   const response = await getRequest({ url: `vendor/${userId}` });
-  //   if (response) {
-  //     setCollectionsProfile(response);
-  //     setLoadingCollections(false);
-  //   }
-  // };
+  async function loadVendorFavorites(id: string) {
+    dispatch({ type: VendorActionTypes.fetchVendor });
+    const response: ProductTypeParamList = await getVendorFavorites(id);
+    if (response) {
+      dispatch({
+        type: VendorActionTypes.fetchVendorFaves,
+        favorites: response,
+      });
+    }
+  }
+
+  async function loadVendorFaves(id: string) {
+    const response = await getVendorFavorites(id);
+    if (response) {
+      setVendorFavoritesFeed(response);
+    }
+  }
+
+  React.useEffect(() => {
+    if (vendor && vendor.products.length > 0) {
+      setVendorProducts(vendor.products);
+    }
+  }, [vendor]);
+
+  React.useEffect(() => {
+    if (vendor) {
+      if (vendor.id) {
+        setVendorId(vendor.id.toString());
+      }
+      if (vendor.order_requests.length > 0) {
+        setOrderRequests(vendor.order_requests);
+      }
+      if (vendor.orders_made.length > 0) {
+        setOrdersMade(vendor.orders_made);
+      }
+      if (vendor.products.length > 0) {
+        setVendorProducts(vendor.products);
+      }
+      if (vendor.favorites.length > 0) {
+        setVendorFaves(vendor.favorites);
+      }
+    }
+  }, [vendor]);
 
   return (
     <VendorData.Provider
@@ -155,23 +249,14 @@ export default function VendorDataProvider({
         vendorId,
         setVendorId,
         loadVendor,
+        orderRequests,
+        ordersMade,
+        vendorProducts,
+        vendorFaves,
+        loadVendorFaves,
+        vendorFavoritesFeed,
+        loadVendorFavorites,
       }}
-      // value={{
-      //   favorites,
-      //   setFavorites,
-      //   orderRequests,
-      //   setOrderRequests,
-      //   ordersMade,
-      //   setOrdersMade,
-      //   products,
-      //   setProducts,
-      //   image,
-      //   setImage,
-      //   loadFavorites,
-      //   loadOrderRequests,
-      //   loadOrdersMade,
-      //   loadProducts,
-      // }}
     >
       {children}
     </VendorData.Provider>
