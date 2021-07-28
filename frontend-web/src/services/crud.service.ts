@@ -17,14 +17,17 @@ import { RequestTicket } from "./request.service";
 export function deleteRequest({
   url,
   accessToken,
+  body,
 }: {
-  accessToken: string;
+  accessToken: AccessToken["accessToken"];
   url: string;
+  body?: object;
 }) {
   const request = RequestTicket({
     method: "delete",
     url,
     access: accessToken,
+    body,
   });
   return fetch(request);
 }
@@ -44,7 +47,7 @@ export function putRequest({
   accessToken,
   body,
 }: {
-  accessToken: string;
+  accessToken: AccessToken["accessToken"];
   url: string;
   body: object;
 }) {
@@ -72,7 +75,7 @@ export function postRequest({
   refreshToken,
   body,
 }: {
-  accessToken: string;
+  accessToken: AccessToken["accessToken"];
   refreshToken?: string;
   url: string;
   body: object;

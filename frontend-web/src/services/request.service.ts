@@ -13,8 +13,8 @@
 /**
  * Api backend base URL.
  */
-const API = "http://localhost:8000/api";
-// const API = "https://thrifthub-backend.herokuapp.com/api";
+// const API = "http://localhost:8000/api";
+const API = "https://thrifthub-backend.herokuapp.com/api";
 
 export const RequestTicket = ({
   method,
@@ -24,7 +24,7 @@ export const RequestTicket = ({
   body,
 }: {
   method: string;
-  access?: string;
+  access?: AccessToken["accessToken"];
   refresh?: string;
   url: string;
   body?: object;
@@ -74,7 +74,7 @@ export const RequestTicket = ({
   return new Request(`${API}/${url}/`, {
     method: "GET",
     credentials: "include",
-    mode: "cors",
+    // mode: "cors",
     headers: {
       "Content-Type": "application/json",
     },
