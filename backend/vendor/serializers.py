@@ -99,7 +99,7 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
     def get_favorites(self, obj):
         favorites, created = Favorite.objects.get_or_create(vendor=obj)
         favorite_products = obj.favorites.favorites.all()
-        product_serializer = RawProductSlugSerializer(favorite_products, many=True)
+        product_serializer = ProductSerializer(favorite_products, many=True)
         return product_serializer.data
 
     def get_order_count(self, obj):

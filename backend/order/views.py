@@ -75,7 +75,7 @@ class VendorOrderDetailViewSet(FlexFieldsModelViewSet):
     lookup_field = "id"
     queryset = OrderDetail.objects.all()
     serializer_class = OrderDetailSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (AllowAny,)
 
 
 class Order(generics.RetrieveAPIView):

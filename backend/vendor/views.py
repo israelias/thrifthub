@@ -98,7 +98,7 @@ class VendorFavoriteListView(generics.ListCreateAPIView):
 
     serializer_class = ProductVersatileSerializer
     queryset = Favorite.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
 
     def get_queryset(self):
         vendor = Vendor.objects.get(id=self.kwargs["id"])

@@ -143,12 +143,6 @@ class ProductSerializer(serializers.ModelSerializer):
             "product_images",
         ]
 
-    # def get_image(self, obj):
-    #     images = obj.product_images.all()[0]
-    #     image_serializer = ImageNewSerializer(images)
-    #     # first_image = image_serializer.data["image"]
-    #     print(image_serializer.data)
-    #     return image_serializer.data
     def get_image(self, obj):
         images = Image.objects.filter(product=obj).first()
         if not images:
