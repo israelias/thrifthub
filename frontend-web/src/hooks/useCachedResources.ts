@@ -1,7 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Asset } from "expo-asset";
 import * as Font from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import * as React from "react";
+
+import {
+  DEFAULT_ADAPTIVE_ICON,
+  MOBILE_SPLASHSCREEN,
+} from "../constants/backend.constants";
 
 export default function useCachedResources() {
   const [isLoadingComplete, setLoadingComplete] = React.useState(false);
@@ -31,3 +37,9 @@ export default function useCachedResources() {
 
   return isLoadingComplete;
 }
+
+// const startAsync = React.useMemo(
+//   // If you use a local image with require(...), use `Asset.fromModule`
+//   () => () => Asset.fromURI(image).downloadAsync(),
+//   [image]
+// );

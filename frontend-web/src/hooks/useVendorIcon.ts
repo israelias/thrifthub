@@ -1,4 +1,8 @@
 import React from "react";
+import {
+  DEFAULT_AVATAR,
+  DEFAULT_PLACEHOLDER,
+} from "../constants/backend.constants";
 import { initialize } from "../utils/initialize";
 import { useVendorData } from "../context/vendor.context";
 
@@ -15,7 +19,13 @@ export function useVendorIcon() {
   React.useMemo(() => {
     if (vendor) {
       if (vendor.image) {
-        setVendorIcon(vendor.image.thumbnail);
+        if (vendor.image.thumbnail) {
+          setVendorIcon(vendor.image.thumbnail);
+        } else {
+          setVendorIcon(vendor.image.full_size);
+        }
+      } else {
+        setVendorIcon(DEFAULT_AVATAR);
       }
       setVendorInitials(initialize(vendor.name));
     }
