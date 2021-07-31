@@ -19,6 +19,13 @@ from .models import Order, OrderDetail
 available = ("OFFERED", "DENIED", "PENDING")
 sold = ("PROCESSING", "ACCEPTED", "COMPLETED")
 
+class OrderFullSerializer(serializers.ModelSerializer):
+    vendor = VendorPreviewSerializer(read_only=True)
+    buyer = VendorPreviewSerializer(read_only=True)
+    product = ProductPreviewSerializer(read_only=True)
+    class Meta:
+        model = Order
+        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at"]
 
 class OrderDetailSerializer(FlexFieldsModelSerializer):
     class Meta:
