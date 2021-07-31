@@ -39,8 +39,8 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
     products = serializers.SerializerMethodField()
     friends_products = serializers.SerializerMethodField()
     favorites = serializers.SerializerMethodField()
-    order_requests = order_serializers.OrderSerializer(many=True)
-    orders_made = order_serializers.OrderSerializer(many=True)
+    order_requests = order_serializers.OrderFullSerializer(many=True, read_only=True)
+    orders_made = order_serializers.OrderFullSerializer(many=True, read_only=True)
     order_count = serializers.SerializerMethodField()
     product_count = serializers.SerializerMethodField()
 
@@ -120,8 +120,11 @@ class OtherVendorSerializer(serializers.ModelSerializer):
     """
 
     products = serializers.SerializerMethodField()
+    favorites = serializers.SerializerMethodField()
     order_count = serializers.SerializerMethodField()
     product_count = serializers.SerializerMethodField()
+    order_requests = order_serializers.OrderFullSerializer(many=True, read_only=True)
+    orders_made = order_serializers.OrderFullSerializer(many=True, read_only=True)
 
     image = VersatileImageFieldSerializer(
         sizes=[
@@ -132,7 +135,19 @@ class OtherVendorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vendor
-        fields = ["id", "name", "products", "product_count", "order_count", "online", "image"]
+        fields = [
+            "id",
+            "name",
+            "created_at",
+            "products",
+            "favorites",
+            "image",
+            "order_requests",
+            "orders_made",
+            "online",
+            "order_count",
+            "product_count",
+        ]
 
     def get_products(self, obj):
         their_products = Product.objects.filter(vendor=obj.id).order_by(Lower("title"))
@@ -144,6 +159,12 @@ class OtherVendorSerializer(serializers.ModelSerializer):
 
     def get_product_count(self, obj):
         return Product.objects.filter(vendor=obj).count()
+
+    def get_favorites(self, obj):
+        favorites, created = Favorite.objects.get_or_create(vendor=obj)
+        favorite_products = obj.favorites.favorites.all()
+        product_serializer = ProductSerializer(favorite_products, many=True)
+        return product_serializer.data
 
 
 class VendorFavoritesSerializer(serializers.ModelSerializer):

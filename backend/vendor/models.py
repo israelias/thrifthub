@@ -64,7 +64,7 @@ def warm_vendor_image(sender, instance, **kwargs):
     vendor_img_warmer = VersatileImageFieldWarmer(
         instance_or_queryset=instance,
         rendition_key_set="default_avatar",
-        image_attr="profile",
+        image_attr="image",
         verbose=True
     )
     num_created, failed_to_create = vendor_img_warmer.warm()
