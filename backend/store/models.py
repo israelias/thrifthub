@@ -217,7 +217,7 @@ class Image(models.Model):
 def warm_image_instances_post_save(sender, instance, **kwargs):
     """Ensures Image objects are created post-save"""
     all_img_warmer = VersatileImageFieldWarmer(
-        instance_or_queryset=instance, rendition_key_set="default_product", image_attr="product", verbose=True
+        instance_or_queryset=instance, rendition_key_set="default_product", image_attr="image", verbose=True
     )
     num_created, failed_to_create = all_img_warmer.warm()
 
