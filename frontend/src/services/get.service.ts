@@ -3,31 +3,41 @@ import {
   postRequest,
   putRequest,
   deleteRequest,
-} from "./crud.service";
+} from './crud.service';
+
+import * as BACKEND from '../constants/backend.constants';
 
 // STORE
 export function getCategories() {
-  return getRequest({ url: `category` });
+  return getRequest({ url: BACKEND.CATEGORY_ENDPOINT });
 }
 
 export function getProducts() {
-  return getRequest({ url: `store` });
+  return getRequest({
+    url: BACKEND.HOME_PRODUCTS_QUERY,
+  });
 }
 
 export function getProductsByCategory(slug: string) {
-  return getRequest({ url: `store/category/${slug}` });
+  return getRequest({
+    url: `${BACKEND.PRODUCT_ENDPONT}/${BACKEND.CATEGORY_ENDPOINT}/${slug}`,
+  });
 }
 
 export function getProductsByVendor(slug: string) {
-  return getRequest({ url: `store/vendor/${slug}` });
+  return getRequest({
+    url: `${BACKEND.PRODUCT_ENDPONT}/${BACKEND.VENDOR_ENDPOINT}/${slug}`,
+  });
 }
 
 export function searchProducts(query: string) {
-  return getRequest({ url: `store/?search=${query}` });
+  return getRequest({
+    url: `${BACKEND.PRODUCT_ENDPONT}/?search=${query}`,
+  });
 }
 
 export function getProduct(slug: string) {
-  return getRequest({ url: `store/${slug}` });
+  return getRequest({ url: `${BACKEND.PRODUCT_ENDPONT}/${slug}` });
 }
 
 export function createProduct(
@@ -37,7 +47,7 @@ export function createProduct(
   description: string,
   price: string,
   condition: number,
-  accessToken: AccessToken["accessToken"],
+  accessToken: AccessToken['accessToken'],
   image?: string,
   slug?: string
 ) {
@@ -58,7 +68,7 @@ export function createProduct(
 }
 
 export function updateProduct(
-  accessToken: AccessToken["accessToken"],
+  accessToken: AccessToken['accessToken'],
   slug: string,
   vendor: string,
   title?: string,
@@ -69,7 +79,7 @@ export function updateProduct(
   images?: string
 ) {
   return putRequest({
-    url: `store/${slug}`,
+    url: `${BACKEND.PRODUCT_ENDPONT}/${slug}`,
     body: {
       title,
       vendor,
@@ -85,29 +95,34 @@ export function updateProduct(
 }
 
 export function deleteProduct(slug: string, accessToken: string) {
-  return deleteRequest({ url: `store/${slug}`, accessToken });
+  return deleteRequest({
+    url: `${BACKEND.PRODUCT_ENDPONT}/${slug}`,
+    accessToken,
+  });
 }
 
 // VENDOR
 export function getVendors() {
-  return getRequest({ url: `vendor` });
+  return getRequest({ url: BACKEND.VENDOR_ENDPOINT });
 }
 
 export function getVendorData(id: string) {
-  return getRequest({ url: `vendor/${id}` });
+  return getRequest({ url: `${BACKEND.VENDOR_ENDPOINT}/${id}` });
 }
 
 export function getVendorFavorites(id: string) {
-  return getRequest({ url: `vendor/${id}/favorites` });
+  return getRequest({
+    url: `${BACKEND.VENDOR_ENDPOINT}/${id}/favorites`,
+  });
 }
 
 export function addFavorite(
   id: string,
   product_id: string,
-  accessToken: AccessToken["accessToken"]
+  accessToken: AccessToken['accessToken']
 ) {
   return postRequest({
-    url: `vendor/${id}/favorites`,
+    url: `${BACKEND.VENDOR_ENDPOINT}/${id}/favorites`,
     body: { product_id },
     accessToken,
   });
@@ -116,31 +131,33 @@ export function addFavorite(
 export function removeFavorite(
   id: string,
   product_id: string,
-  accessToken: AccessToken["accessToken"]
+  accessToken: AccessToken['accessToken']
 ) {
   return deleteRequest({
-    url: `vendor/${id}/favorites`,
+    url: `${BACKEND.VENDOR_ENDPOINT}/${id}/favorites`,
     body: { product_id },
     accessToken,
   });
 }
 
 export function getVendorFriends(id: string) {
-  return getRequest({ url: `vendor/${id}/friends` });
+  return getRequest({
+    url: `${BACKEND.VENDOR_ENDPOINT}/${id}/friends`,
+  });
 }
 
 // ORDERS
 export function getOrders() {
-  return getRequest({ url: `orders` });
+  return getRequest({ url: `${BACKEND.ORDER_ENDPOINT}` });
 }
 
 export function makePurchase(
   product: string,
   buyer: string,
-  accessToken: AccessToken["accessToken"]
+  accessToken: AccessToken['accessToken']
 ) {
   return postRequest({
-    url: `orders`,
+    url: BACKEND.ORDER_ENDPOINT,
     body: { product, buyer },
     accessToken,
   });
@@ -150,10 +167,10 @@ export function makeOffer(
   product: string,
   buyer: string,
   amount: string,
-  accessToken: AccessToken["accessToken"]
+  accessToken: AccessToken['accessToken']
 ) {
   return postRequest({
-    url: `orders`,
+    url: BACKEND.ORDER_ENDPOINT,
     body: { product, buyer, amount },
     accessToken,
   });
@@ -163,11 +180,11 @@ export function acceptOffer(
   id: string,
   product: string,
   buyer: string,
-  accessToken: AccessToken["accessToken"]
+  accessToken: AccessToken['accessToken']
 ) {
   return putRequest({
-    url: `orders/${id}`,
-    body: { product, buyer, status: "ACCEPTED" },
+    url: `${BACKEND.ORDER_ENDPOINT}/${id}`,
+    body: { product, buyer, status: 'ACCEPTED' },
     accessToken,
   });
 }
@@ -176,11 +193,11 @@ export function declineOffer(
   id: string,
   product: string,
   buyer: string,
-  accessToken: AccessToken["accessToken"]
+  accessToken: AccessToken['accessToken']
 ) {
   return putRequest({
-    url: `orders/${id}`,
-    body: { product, buyer, status: "DENIED" },
+    url: `${BACKEND.ORDER_ENDPOINT}/${id}`,
+    body: { product, buyer, status: 'DENIED' },
     accessToken,
   });
 }
@@ -189,11 +206,11 @@ export function completePayment(
   id: string,
   product: string,
   buyer: string,
-  accessToken: AccessToken["accessToken"]
+  accessToken: AccessToken['accessToken']
 ) {
   return putRequest({
-    url: `orders/${id}`,
-    body: { product, buyer, status: "COMPLETED" },
+    url: `${BACKEND.ORDER_ENDPOINT}/${id}`,
+    body: { product, buyer, status: 'COMPLETED' },
     accessToken,
   });
 }
@@ -202,12 +219,12 @@ export function updateOrder(
   id: string,
   product: string,
   buyer: string,
-  accessToken: AccessToken["accessToken"],
+  accessToken: AccessToken['accessToken'],
   amount?: string,
   status?: string
 ) {
   return putRequest({
-    url: `orders/${id}`,
+    url: `${BACKEND.ORDER_ENDPOINT}/${id}`,
     body: { product, buyer, status, amount },
     accessToken,
   });
@@ -216,29 +233,32 @@ export function updateOrder(
 export function createOrder(
   product: string,
   buyer: string,
-  accessToken: AccessToken["accessToken"],
+  accessToken: AccessToken['accessToken'],
   amount?: string
 ) {
   return postRequest({
-    url: `orders`,
+    url: BACKEND.ORDER_ENDPOINT,
     body: { product, buyer, amount },
     accessToken,
   });
 }
 
-export function deleteOrder(id: string, accessToken: string) {
+export function deleteOrder(
+  id: string,
+  accessToken: AccessToken['accessToken']
+) {
   return deleteRequest({
-    url: `orders/${id}`,
+    url: `${BACKEND.ORDER_ENDPOINT}/${id}`,
     accessToken,
   });
 }
 
 export function getOrderDetail(id: string) {
-  return getRequest({ url: `orderdetail/${id}` });
+  return getRequest({ url: `${BACKEND.ORDERDETAILS_ENDPONT}/${id}` });
 }
 
 export function createOrderDetail(
-  accessToken: AccessToken["accessToken"],
+  accessToken: AccessToken['accessToken'],
   order: string,
   full_name: string,
   email: string,
@@ -252,7 +272,7 @@ export function createOrderDetail(
   zipcode?: string
 ) {
   return postRequest({
-    url: `orderdetail`,
+    url: BACKEND.ORDERDETAILS_ENDPONT,
     body: {
       order,
       full_name,
@@ -272,7 +292,7 @@ export function createOrderDetail(
 
 export function updateOrderDetail(
   id: string,
-  accessToken: AccessToken["accessToken"],
+  accessToken: AccessToken['accessToken'],
   order: string,
   full_name?: string,
   email?: string,
@@ -286,7 +306,7 @@ export function updateOrderDetail(
   zipcode?: string
 ) {
   return putRequest({
-    url: `orderdetail/${id}`,
+    url: `${BACKEND.ORDERDETAILS_ENDPONT}/${id}`,
     body: {
       order,
       full_name,
