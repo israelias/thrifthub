@@ -1,7 +1,8 @@
-import React from "react";
-import { View, StyleSheet, Text, TextInputProps } from "react-native";
-import { TextInput as Input, useTheme } from "react-native-paper";
-
+import React from 'react';
+import { View, StyleSheet, Text, TextInputProps } from 'react-native';
+import { TextInput as Input, useTheme } from 'react-native-paper';
+import { LogicProps } from 'react-native-paper-form-builder/dist/Types/Types';
+import { useController } from 'react-hook-form';
 interface Props extends TextInputProps {
   errorText: string;
   description: string;
@@ -18,13 +19,23 @@ export default function TextInput({ errorText, description }: Props) {
         mode="outlined"
       />
       {description && !errorText ? (
-        <Text style={{ color: theme.colors.text, paddingTop: 8, fontSize: 13 }}>
+        <Text
+          style={{
+            color: theme.colors.text,
+            paddingTop: 8,
+            fontSize: 13,
+          }}
+        >
           {description}
         </Text>
       ) : null}
       {errorText ? (
         <Text
-          style={{ fontSize: 13, color: theme.colors.error, paddingTop: 8 }}
+          style={{
+            fontSize: 13,
+            color: theme.colors.error,
+            paddingTop: 8,
+          }}
         >
           {errorText}
         </Text>
@@ -35,7 +46,7 @@ export default function TextInput({ errorText, description }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
+    width: '100%',
     marginVertical: 12,
   },
 });

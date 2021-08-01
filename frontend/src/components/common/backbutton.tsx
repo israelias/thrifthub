@@ -1,30 +1,26 @@
-import React from "react";
-import { TouchableOpacity, Image, StyleSheet } from "react-native";
-import { TouchableRipple } from "react-native-paper";
-import { getStatusBarHeight } from "react-native-status-bar-height";
-
-import {
-  StackNavigationProp,
-  StackHeaderLeftButtonProps,
-} from "@react-navigation/stack";
-import { AccountStackNavigatorParamList } from "../../types";
+import React from 'react';
+import { TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { TouchableRipple } from 'react-native-paper';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
+import { DEFAULT_ICON } from '../../constants/backend.constants';
 
 export default function BackButton({
   goBack,
 }: {
-  goBack: StackHeaderLeftButtonProps;
+  goBack: () => void;
 }) {
-  const image = { uri: "https://reactjs.org/logo-og.png" };
+  const image = { uri: DEFAULT_ICON };
+  const backIcon = require('../../assets/arrow_back.png');
   return (
-    <TouchableRipple onPress={() => goBack} style={styles.container}>
-      <Image style={styles.image} source={image} />
+    <TouchableRipple onPress={goBack} style={styles.container}>
+      <Image style={styles.image} source={backIcon} />
     </TouchableRipple>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
+    position: 'absolute',
     top: 10 + getStatusBarHeight(),
     left: 4,
   },
