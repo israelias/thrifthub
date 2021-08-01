@@ -13,8 +13,8 @@
 /**
  * Api backend base URL.
  */
-// const API = "http://localhost:8000/api";
-const API = "https://thrifthub-backend.herokuapp.com/api";
+
+import { API } from '../constants/backend.constants';
 
 export const RequestTicket = ({
   method,
@@ -24,59 +24,60 @@ export const RequestTicket = ({
   body,
 }: {
   method: string;
-  access?: AccessToken["accessToken"];
+  access?: AccessToken['accessToken'];
   refresh?: string;
   url: string;
   body?: object;
 }) => {
-  if (method === "post") {
+  if (method === 'post') {
     if (access) {
       return new Request(`${API}/${url}/`, {
-        method: "POST",
+        method: 'POST',
+        mode: 'cors',
         headers: {
-          "Content-Type": "application/json",
-          Authorization: access ? `Bearer ${access}` : "",
+          'Content-Type': 'application/json',
+          Authorization: access ? `Bearer ${access}` : '',
         },
-        credentials: "include",
+        credentials: 'include',
         body: body ? JSON.stringify(body) : null,
       });
     }
     return new Request(`${API}/${url}/`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
   }
 
-  if (method === "put") {
+  if (method === 'put') {
     return new Request(`${API}/${url}/`, {
-      method: "PUT",
-      credentials: "include",
+      method: 'PUT',
+      credentials: 'include',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${access}`,
       },
       body: JSON.stringify(body),
     });
   }
 
-  if (method === "delete") {
+  if (method === 'delete') {
     return new Request(`${API}/${url}/`, {
-      method: "DELETE",
-      credentials: "include",
+      method: 'DELETE',
+      credentials: 'include',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${access}`,
       },
     });
   }
   return new Request(`${API}/${url}/`, {
-    method: "GET",
-    credentials: "include",
-    // mode: "cors",
+    method: 'GET',
+    credentials: 'include',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
+      // Authorization: access ? `Bearer ${access}` : '',
     },
   });
 };
