@@ -5,6 +5,7 @@ import { ActivityIndicator, useTheme } from 'react-native-paper';
 
 import { Product } from '../../components/products/product';
 import { useProductsData } from '../../context/products.context';
+import { useVendorData } from '../../context/vendor.context';
 
 import { ProductStackNavigatorParamList } from '../../types';
 
@@ -44,8 +45,12 @@ export const ProductScreen = ({
             navigation &&
             navigation.push('MakeOffer', {
               product: productProps,
-              productId: productProps.id.toString(),
-              vendorId: productProps.vendor.id.toString(),
+              ...productProps,
+            }),
+          updateProduct: () =>
+            navigation &&
+            navigation.push('UpdateProduct', {
+              product: productProps,
               ...productProps,
             }),
         }))
