@@ -20,7 +20,7 @@ type OrderProps = React.ComponentProps<typeof OrderTransaction>;
 
 export const OrderRequestsScreen = (props: Props) => {
   const theme = useTheme();
-  const { vendor, dispatch, loading, error } = useVendorData();
+  const { vendor, loading } = useVendorData();
 
   return loading || !vendor ? (
     <ActivityIndicator />
