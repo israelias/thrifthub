@@ -23,6 +23,7 @@ import color from 'color';
 
 import { TimeAgo } from '../common/time';
 import { useVendorData } from '../../context/vendor.context';
+import { useAuth } from '../../context/authorization.context';
 import { useVendorIcon } from '../../hooks/useVendorIcon';
 import { useImagePlaceholder } from '../../hooks/useImagePlaceholder';
 import { useAvatarPlaceholder } from '../../hooks/useAvatarPlaceholder';
@@ -36,13 +37,6 @@ import {
   OrderTypeParamList,
 } from '../../types';
 
-type Props = {
-  onPress?: (slug: string) => void;
-  makeOffer?: (id: string) => void;
-  makePurchase?: (id: string) => void;
-  addToFaves?: (id: string) => void;
-} & ProductStackNavigatorParamList['ProductDetails'];
-
 export type AvailableType = 'OFFERED' | 'DENIED' | 'PENDING';
 export type SoldType = 'PROCESSING' | 'ACCEPTED' | 'COMPLETED';
 
@@ -55,6 +49,7 @@ export const Product = ({
   makePurchase,
   addToFaves,
   removeFromFaves,
+  updateProduct,
 }: {
   product: ProductStackNavigatorParamList['ProductDetails'];
   onPress?: (slug: string) => void;
@@ -64,6 +59,7 @@ export const Product = ({
   makePurchase?: (id: string) => void;
   addToFaves?: (id: string) => void;
   removeFromFaves?: (id: string) => void;
+  updateProduct?: (slug: string) => void;
 }) => {
   const theme = useTheme();
   const iconColor = color(theme.colors.text)
@@ -81,7 +77,9 @@ export const Product = ({
     .rgb()
     .string();
 
-  const { vendorFaves, vendor } = useVendorData();
+  const { accessToken } = useAuth();
+  const { vendor, addVendorFavorite, removeVendorFavorite } =
+    useVendorData();
 
   const { vendorIcon, vendorInitials } = useVendorIcon();
 
@@ -125,18 +123,18 @@ export const Product = ({
       ordersMade.status === ('PROCESSING' || 'COMPLETED')
   );
 
-  console.log('Product: ', product.title);
-  console.log('Product: productImage', productImage);
-  console.log('Product: productAvatar', avatarImage);
-  console.log('Product: otherVendorInitials', otherVendorInitials);
+  // console.log('Product: ', product.title);
+  // console.log('Product: productImage', productImage);
+  // console.log('Product: productAvatar', avatarImage);
+  // console.log('Product: otherVendorInitials', otherVendorInitials);
 
-  console.log('Product: inFaves', inFavorites);
-  console.log('Product: isMyProduct', isMyProduct);
-  console.log('Product: hasPendingOffer', hasPendingOffer);
+  // console.log('Product: inFaves', inFavorites);
+  // console.log('Product: isMyProduct', isMyProduct);
+  // console.log('Product: hasPendingOffer', hasPendingOffer);
 
-  console.log('Product: Mine and isPurchased', isPurchased);
-  console.log('Product: Not Mine and inMyOffers', inMyOffers);
-  console.log('Product: Not Mine and isMyPurchase', isMyPurchase);
+  // console.log('Product: Mine and isPurchased', isPurchased);
+  // console.log('Product: Not Mine and inMyOffers', inMyOffers);
+  // console.log('Product: Not Mine and isMyPurchase', isMyPurchase);
 
   return (
     <TouchableRipple
@@ -316,12 +314,37 @@ export const Product = ({
               </Caption>
             </View>
 
+            {isMyProduct && (
+              <TouchableOpacity
+                onPress={() =>
+                  updateProduct ? updateProduct(product.slug) : {}
+                }
+                hitSlop={{ top: 10, bottom: 10 }}
+              >
+                <View style={styles.iconContainer}>
+                  <MaterialCommunityIcons
+                    name="cash-100"
+                    size={12}
+                    color={theme.colors.primary}
+                  />
+                  <Caption style={styles.iconDescription}>
+                    Update Product
+                  </Caption>
+                </View>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity
               onPress={() =>
                 inFavorites
-                  ? removeFromFaves &&
-                    removeFromFaves(product.id.toString())
-                  : addToFaves && addToFaves(product.id.toString())
+                  ? removeVendorFavorite(
+                      product.id.toString(),
+                      accessToken ? accessToken : ''
+                    )
+                  : addVendorFavorite(
+                      product.id.toString(),
+                      accessToken ? accessToken : ''
+                    )
               }
               hitSlop={{ top: 10, bottom: 10 }}
             >
