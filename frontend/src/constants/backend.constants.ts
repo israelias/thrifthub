@@ -18,3 +18,5 @@ export const VENDOR_ENDPOINT = "vendor";
 export const ORDER_ENDPOINT = "orders";
 export const ORDERDETAILS_ENDPONT = "orderdetail";
 export const API = "https://thrifthub-backend.herokuapp.com/api";
+export const HOME_PRODUCTS_QUERY =
+  'store/?expand=product_images,vendor,product,category&include=vendor.name';
