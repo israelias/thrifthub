@@ -41,21 +41,12 @@ import Header from '../../components/common/header';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { ProductStackNavigatorParamList } from '../../types';
 
-import {
-  API,
-  PRODUCT_ENDPONT,
-} from '../../constants/backend.constants';
-
 import * as ICONS from '../../constants/icons.constants';
 import { CONDITION_OPTIONS } from '../../constants/options.constants';
 
 import { useVendorData } from '../../context/vendor.context';
 import { useProductsData } from '../../context/products.context';
 import { useAuth } from '../../context/authorization.context';
-
-type Props = {
-  navigation: MaterialBottomTabNavigationProp<{}>;
-};
 
 export type ImageInfo = {
   uri: string;
@@ -87,11 +78,10 @@ export const AddProductScreen = ({
 
   const { accessToken } = useAuth();
 
-  const { vendorId } = useVendorData();
+  const { createProduct } = useVendorData();
 
   const { categoryOptions } = useProductsData();
 
-  const [submitting, setSubmitting] = React.useState<boolean>(false);
   const [getTitle, setTitle] = React.useState('');
   const [getCategory, setCategory] = React.useState('');
   const [getDescription, setDescription] = React.useState('');
@@ -112,7 +102,7 @@ export const AddProductScreen = ({
     register,
     setFocus,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting, isValidating },
   } = useForm<ProductFormValues>({
     defaultValues: {
       title: '',
@@ -171,10 +161,6 @@ export const AddProductScreen = ({
       }
     }
   };
-  console.log('files', files);
-  console.log('filelist', fileList);
-  console.log('filelist length', fileList?.length);
-  console.log('filelist item', fileList?.item);
 
   const pickImage = async () => {
     let results = await ImagePicker.launchImageLibraryAsync({
@@ -215,62 +201,17 @@ export const AddProductScreen = ({
     validatedData,
     e
   ) => {
-    setSubmitting(true);
     console.log('submit handler', e);
-    const data = new FormData();
-
-    console.log('validatedData', validatedData);
-
-    if (vendorId) {
-      data.append('vendor', vendorId);
-    }
-
-    data.append('title', validatedData.title);
-    data.append('description', validatedData.description);
-    data.append('price', validatedData.price);
-    data.append('condition', validatedData.condition);
-    data.append('category', validatedData.category);
-
-    if (fileList) {
-      Array.from(fileList).forEach(function (file) {
-        data.append('images', file, file.name);
-      });
-    }
-
-    if (images) {
-      Array.from(images).forEach(function (image) {
-        data.append(
-          'images',
-          { uri: image.uri, type: 'image/jpeg', name: image.uri },
-          image.uri
-        );
-      });
-    }
-
-    console.log('about to upload product');
-    console.log('current accessToken', accessToken);
-    console.log('current form data', data.toString);
-    console.log('current data stringified', JSON.stringify(data));
-    // console.log('imagesData', data.values());
-
-    await fetch(`${API}/${PRODUCT_ENDPONT}/`, {
-      method: 'POST',
-      body: data,
-      mode: 'cors',
-      credentials: 'include',
-      headers: {
-        Accept: '*/*',
-        Authorization: 'Bearer ' + accessToken,
-      },
-    }).then((response) => {
-      if (response.ok) {
-        setSubmitting(false);
-        console.log(response);
-      } else {
-        setSubmitting(false);
-        console.log(response);
-      }
-    });
+    console.log('submit handler validatedData', validatedData);
+    createProduct(
+      validatedData.title,
+      validatedData.category,
+      validatedData.description,
+      validatedData.price,
+      validatedData.condition,
+      accessToken ? accessToken : '',
+      fileList
+    );
   };
 
   return (
@@ -281,7 +222,7 @@ export const AddProductScreen = ({
         { backgroundColor },
       ]}
     >
-      <Logo loading={submitting} />
+      <Logo loading={isSubmitting || isValidating} />
       <Headline style={styles.centerText}>Sell a Product</Headline>
       <Caption style={styles.centerText}>Pick a Product</Caption>
 
@@ -370,8 +311,7 @@ export const AddProductScreen = ({
                     message: 'Price is required',
                   },
                   pattern: {
-                    value:
-                      /^(\d*([.,](?=\d{3}))?\d+)+((?!\2)[.,]\d\d)?$/gm,
+                    value: /^\-?[0-9]+(?:\.[0-9]{1,2})?/,
                     message: 'Price is invalid',
                   },
                   minLength: {
@@ -398,12 +338,11 @@ export const AddProductScreen = ({
                   ),
                   underlineColor: 'transparent',
                   mode: 'outlined',
-
                   returnKeyType: 'next',
                   keyboardType: 'default',
                   value: getCondition,
                   onChange: (condition) =>
-                    setDescription(condition.toString()),
+                    setCondition(condition.toString()),
                   onSubmitEditing: () => setFocus('category'),
                 },
                 rules: {
@@ -426,7 +365,6 @@ export const AddProductScreen = ({
                   ),
                   underlineColor: 'transparent',
                   mode: 'outlined',
-
                   returnKeyType: 'next',
                   keyboardType: 'default',
                   value: getCategory,

@@ -21,7 +21,7 @@ type Props = {
 
 export const MyProductsScreen = (props: Props) => {
   const theme = useTheme();
-  const { vendor, error, loading } = useVendorData();
+  const { vendor, loading } = useVendorData();
 
   return loading ? (
     <ActivityIndicator />

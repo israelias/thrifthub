@@ -28,8 +28,7 @@ type Props = {
 
 export const FavoriteProductsScreen = (props: Props) => {
   const theme = useTheme();
-  const { vendor, dispatch, vendorId, error, loading } =
-    useVendorData();
+  const { vendor, loading } = useVendorData();
 
   return loading ? (
     <ActivityIndicator />
