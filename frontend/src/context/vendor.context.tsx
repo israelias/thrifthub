@@ -1,13 +1,10 @@
-import React from "react";
-
-import { useUserContext } from "./user.context";
+import React from 'react';
+import { View } from 'react-native';
 
 import {
-  deleteRequest,
-  putRequest,
-  getRequest,
-  postRequest,
-} from "../services/crud.service";
+  updateProduct,
+  createProduct,
+} from '../services/products.service';
 
 import {
   getVendorData,
@@ -19,18 +16,19 @@ import {
   acceptOffer,
   declineOffer,
   completePayment,
-  createOrder,
-  updateOrder,
-} from "../services/get.service";
+  createOrderDetail,
+  updateOrderDetail,
+} from '../services/get.service';
 
-const VENDOR_FAVORITES_ENDPOINT = "vendor/<id>/favorites/</id>";
-const VENDOR_PROFILE_ENDPOINT = "vendor/";
+import { Toast } from '../components/common/toast';
+
+import { useProductsData } from './products.context';
 
 import {
   OrderTypeParamList,
   VendorTypeParamList,
   ProductTypeParamList,
-} from "../types";
+} from '../types';
 
 export type VendorParams = VendorTypeParamList;
 
@@ -72,38 +70,68 @@ const initialState: StateInterface = {
 };
 
 type VendorDataType = {
-  vendorFaves: ProductTypeParamList[] | [];
-  vendorFavoritesFeed: ProductTypeParamList[] | [];
-  // setVendorFaves: React.Dispatch<
-  //   React.SetStateAction<VendorParams["favorites"] | []>
-  // >;
-  orderRequests: OrderTypeParamList[] | [];
-  // setOrderRequests: React.Dispatch<
-  //   React.SetStateAction<OrderTypeParamList[] | []>
-  // >;
-  ordersMade: OrderTypeParamList[] | [];
-  // setOrdersMade: React.Dispatch<
-  //   React.SetStateAction<OrderTypeParamList[] | []>
-  // >;
-  vendorProducts: ProductTypeParamList[] | [];
-  // setVendorProducts: React.Dispatch<
-  //   React.SetStateAction<ProductTypeParamList[] | []>
-  // >;
-
   vendor: VendorParams | undefined;
   loading: boolean;
   error: {} | undefined;
   vendorId: string | undefined;
-  setVendorId: React.Dispatch<React.SetStateAction<string | undefined>>;
 
+  addVendorFavorite: (
+    product_id: string,
+    accessToken: string
+  ) => Promise<void>;
+  removeVendorFavorite: (
+    product_id: string,
+    accessToken: string
+  ) => Promise<void>;
+  makeOffer: (
+    product: string,
+    amount: string,
+    accessToken: string
+  ) => Promise<void>;
+  makePurchase: (
+    product: string,
+    accessToken: string
+  ) => Promise<void>;
+  acceptOffer: (
+    orderId: string,
+    product: string,
+    buyer: string,
+    accessToken: string
+  ) => Promise<void>;
+  declineOffer: (
+    orderId: string,
+    product: string,
+    buyer: string,
+    accessToken: string
+  ) => Promise<void>;
+  completePayment: (
+    orderId: string,
+    product: string,
+    buyer: string,
+    accessToken: string
+  ) => Promise<void>;
+  createProduct: (
+    title: string,
+    category: string,
+    description: string,
+    price: string,
+    condition: string,
+    accessToken: string,
+    images?: FileList | undefined
+  ) => Promise<void>;
+  updateProduct: (
+    slug: string,
+    title: string,
+    category: string,
+    description: string,
+    price: string,
+    condition: string,
+    accessToken: string,
+    images?: FileList | undefined
+  ) => Promise<void>;
+  state: StateInterface;
   dispatch: React.Dispatch<FetchVendorAction>;
-  // loadFavorites: () => Promise<void>;
-  // loadOrderRequests: () => Promise<void>;
-  // loadOrdersMade: () => Promise<void>;
-  // loadProducts: () => Promise<void>;
-  loadVendor: () => Promise<void>;
-  loadVendorFaves(id: string): Promise<void>;
-  loadVendorFavorites(id: string): Promise<void>;
+  loadVendorData(id: string): Promise<void>;
 };
 
 const VendorData = React.createContext<VendorDataType>(undefined!);
@@ -113,25 +141,10 @@ export default function VendorDataProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { loadProducts } = useProductsData();
   const [vendorId, setVendorId] = React.useState<string | undefined>(
     undefined!
   );
-  const [vendorProducts, setVendorProducts] = React.useState<
-    ProductTypeParamList[] | []
-  >([]);
-  const [vendorFavoritesFeed, setVendorFavoritesFeed] = React.useState<
-    ProductTypeParamList[] | []
-  >([]);
-  const [vendorFaves, setVendorFaves] = React.useState<
-    VendorParams["favorites"] | []
-  >([]);
-  const [orderRequests, setOrderRequests] = React.useState<
-    OrderTypeParamList[] | []
-  >([]);
-  const [ordersMade, setOrdersMade] = React.useState<OrderTypeParamList[] | []>(
-    []
-  );
-
   const [state, dispatch] = React.useReducer(
     (
       state: StateInterface,
@@ -178,27 +191,12 @@ export default function VendorDataProvider({
     initialState
   );
 
-  async function loadVendor() {
-    dispatch({ type: VendorActionTypes.fetchVendor });
-
-    try {
-      const response = await getRequest({ url: `vendor/${vendorId}` });
-      const vendorData = await response.json();
-      dispatch({
-        type: VendorActionTypes.fetchVendorSuccess,
-        vendor: vendorData,
-      });
-    } catch (e) {
-      dispatch({ type: VendorActionTypes.fetchVendorFailure });
-    }
-  }
-
-  const { vendor, loading, error } = state;
-
   async function loadVendorFavorites(id: string) {
-    dispatch({ type: VendorActionTypes.fetchVendor });
-    const response: ProductTypeParamList = await getVendorFavorites(id);
+    const response: ProductTypeParamList = await getVendorFavorites(
+      id
+    );
     if (response) {
+      console.log('VendorDispatch: Favorites reloaded', response);
       dispatch({
         type: VendorActionTypes.fetchVendorFaves,
         favorites: response,
@@ -206,59 +204,1013 @@ export default function VendorDataProvider({
     }
   }
 
-  async function loadVendorFaves(id: string) {
-    const response = await getVendorFavorites(id);
+  async function loadVendorData(id: string) {
+    dispatch({ type: VendorActionTypes.fetchVendor });
+    const response: VendorParams = await getVendorData(id);
     if (response) {
-      setVendorFavoritesFeed(response);
+      console.log('VendorDispatch: Vendor data reloaded', response);
+      dispatch({
+        type: VendorActionTypes.fetchVendorSuccess,
+        vendor: response,
+      });
     }
   }
 
-  React.useEffect(() => {
-    if (vendor && vendor.products.length > 0) {
-      setVendorProducts(vendor.products);
-    }
-  }, [vendor]);
+  const { vendor, loading, error } = state;
 
   React.useEffect(() => {
-    if (vendor) {
-      if (vendor.id) {
-        setVendorId(vendor.id.toString());
-      }
-      if (vendor.order_requests.length > 0) {
-        setOrderRequests(vendor.order_requests);
-      }
-      if (vendor.orders_made.length > 0) {
-        setOrdersMade(vendor.orders_made);
-      }
-      if (vendor.products.length > 0) {
-        setVendorProducts(vendor.products);
-      }
-      if (vendor.favorites.length > 0) {
-        setVendorFaves(vendor.favorites);
-      }
+    if (state.vendor) {
+      setVendorId(state.vendor.id.toString());
     }
-  }, [vendor]);
+  }, [state]);
+
+  console.log('currentVendorId', vendorId);
+
+  const [openSuccess, setOpenSuccess] = React.useState(false);
+  const [openWarning, setOpenWarning] = React.useState(false);
+  const [openError, setOpenError] = React.useState(false);
+  const [message, setMessage] = React.useState<string | any>('');
+
+  const onSuccess = (text: string | any) => {
+    setMessage(text);
+    setOpenSuccess(true);
+    setTimeout(() => {
+      setOpenSuccess(false);
+      setMessage('');
+    }, 2500);
+  };
+  const onWarning = (text: string | any) => {
+    setMessage(text);
+    setOpenWarning(true);
+    setTimeout(() => {
+      setOpenWarning(false);
+      setMessage('');
+    }, 2500);
+  };
+  const onError = (text: string | any) => {
+    setMessage(text);
+    setOpenError(true);
+    setTimeout(() => {
+      setOpenError(false);
+      setMessage('');
+    }, 2500);
+  };
+
+  const vendorContextValue = React.useMemo(
+    () => ({
+      addVendorFavorite: async (
+        product_id: string,
+        accessToken: string
+      ) => {
+        const ID = vendorId || vendor?.id.toString() || '';
+        console.group('Vendor Provider: adding favorite');
+        /**
+         * If credentials are validated...
+         */
+        if (product_id !== undefined && accessToken !== undefined) {
+          /**
+           * Dispatch auth to launch loading.
+           */
+          console.log('Fetching with', ID, product_id, accessToken);
+          /**
+           * Fetch add favorite to backend with credentials.
+           */
+          await addFavorite(ID, product_id, accessToken).then(
+            (response) => {
+              /**
+               * If status is ~200/successful...
+               */
+              if (response.ok) {
+                /**
+                 * Serialize the payload from backend.
+                 */
+                response.json().then((data) => {
+                  /**
+                   * Ensure there's data in the payload.
+                   */
+                  if (data) {
+                    /**
+                     * Dispatch that sign in was a success
+                     */
+                    console.log(
+                      'Vendor Provider: Add favorite success message',
+                      data.message
+                    );
+                    /**
+                     * Display a snackbar message
+                     */
+                    onSuccess(data.message);
+                    /**
+                     * Reload vendor data
+                     */
+                    console.log('vendorId in request add', vendorId);
+                    loadVendorData(ID);
+                  }
+                });
+              } else {
+                /**
+                 * Dispatch that sign in was a success
+                 */
+                console.warn(
+                  'Vendor Provider: Add favorite failed message',
+                  response
+                    .json()
+                    .then((data) =>
+                      data ? JSON.parse(data) : 'Request Failed'
+                    )
+                );
+                /**
+                 * Display warning message
+                 */
+                onWarning(
+                  response
+                    .json()
+                    .then((data) =>
+                      data ? JSON.parse(data) : 'Request Failed'
+                    )
+                );
+              }
+            }
+          );
+        } else {
+          console.warn('Vendor Provider: Credetials error');
+          /**
+           * Display error message
+           */
+          onError('Request Failed');
+        }
+        console.groupEnd();
+      },
+
+      removeVendorFavorite: async (
+        product_id: string,
+        accessToken: string
+      ) => {
+        const ID = vendorId || vendor?.id.toString() || '';
+        console.group('Vendor Provider: removing favorite');
+        /**
+         * If credentials are validated...
+         */
+        if (product_id !== undefined && accessToken !== undefined) {
+          /**
+           * Dispatch auth to launch loading.
+           */
+          console.log('Fetching with', ID, product_id, accessToken);
+          /**
+           * Fetch add favorite to backend with credentials.
+           */
+          await removeFavorite(ID, product_id, accessToken).then(
+            (response) => {
+              /**
+               * If status is ~200/successful...
+               */
+              if (response.ok) {
+                /**
+                 * Serialize the payload from backend.
+                 */
+                response.json().then((data) => {
+                  /**
+                   * Ensure there's data in the payload.
+                   */
+                  if (data) {
+                    /**
+                     * Dispatch that sign in was a success
+                     */
+                    console.log(
+                      'Vendor Provider: Remove favorite success message',
+                      data.message
+                    );
+
+                    /**
+                     * Display a snackbar message
+                     */
+                    onSuccess(data.message);
+                    /**
+                     * Reload vendor data
+                     */
+                    loadVendorData(ID);
+                  }
+                });
+              } else {
+                /**
+                 * Dispatch that sign in failed
+                 */
+                // response.json().then((data) => {
+                //   if (data) {
+                //     console.warn(
+                //       'Vendor Provider: Remove favorite failed message',
+                //       JSON.parse(data)
+                //     );
+                //     onWarning(JSON.parse(data));
+                //   } else {
+                //     onWarning('Request Failed');
+                //   }
+                // });
+                console.warn(
+                  'Vendor Provider: Remove favorite failed message',
+                  response
+                    .json()
+                    .then((data) =>
+                      data ? JSON.parse(data) : 'Request Failed'
+                    )
+                );
+                /**
+                 * Display warning message
+                 */
+                onWarning(
+                  response
+                    .json()
+                    .then((data) =>
+                      data ? JSON.parse(data) : 'Request Failed'
+                    )
+                );
+              }
+            }
+          );
+        } else {
+          console.warn('Vendor Provider: Credetials error');
+          /**
+           * Display error message
+           */
+          onError('Request Failed');
+        }
+        console.groupEnd();
+      },
+
+      makeOffer: async (
+        product: string,
+        amount: string,
+        accessToken: string
+      ) => {
+        const ID = vendorId || vendor?.id.toString() || '';
+        console.group('Vendor Provider: Making Offer');
+        /**
+         * If credentials are validated...
+         */
+        if (
+          product !== undefined &&
+          amount !== undefined &&
+          accessToken !== undefined
+        ) {
+          /**
+           * Dispatch auth to launch loading.
+           */
+          console.log('Fetching with', product, amount, accessToken);
+          /**
+           * Fetch make purchase to backend with credentials.
+           */
+          await makeOffer(product, ID, amount, accessToken).then(
+            (response) => {
+              /**
+               * If status is ~200/successful...
+               */
+              if (response.ok) {
+                /**
+                 * Serialize the payload from backend.
+                 */
+                response.json().then((data) => {
+                  /**
+                   * Dispatch that purchas was initiated
+                   */
+                  console.log(
+                    'Offer Success Order Status',
+                    data.status
+                  );
+                  console.log('Offer Success Order data', data);
+                  console.log('Offer Success Order Id', data.id);
+                  /**
+                   * Display a snackbar message
+                   */
+                  onSuccess(
+                    `Offer Made. Status: ${data.status}. Order ID: ${data.id} `
+                  );
+                  /**
+                   * Reload Vendor Data
+                   */
+                  loadVendorData(ID);
+                });
+              } else {
+                /**
+                 * Dispatch that purchase failed
+                 */
+                console.warn(
+                  'Offer Failed',
+                  response
+                    .json()
+                    .then((data) =>
+                      data ? JSON.parse(data) : 'Offer Request Failed'
+                    )
+                );
+                /**
+                 * Display warning message
+                 */
+                onWarning(
+                  response
+                    .json()
+                    .then((data) =>
+                      data ? JSON.parse(data) : 'Offer Request Failed'
+                    )
+                );
+              }
+            }
+          );
+        } else {
+          console.warn('Offer: Credentials error');
+
+          /**
+           * Display error message
+           */
+          onError('Request Failed with Credentials Error');
+        }
+        console.groupEnd();
+      },
+
+      makePurchase: async (product: string, accessToken: string) => {
+        const ID = vendorId || vendor?.id.toString() || '';
+        console.group('Vendor Provider: Making Purchase');
+        /**
+         * If credentials are validated...
+         */
+        if (product !== undefined && accessToken !== undefined) {
+          /**
+           * Dispatch auth to launch loading.
+           */
+          console.log('fetching with', ID, product, accessToken);
+          /**
+           * Fetch make purchase to backend with credentials.
+           */
+          await makePurchase(product, ID, accessToken).then(
+            (response) => {
+              /**
+               * If status is ~200/successful...
+               */
+              if (response.ok) {
+                /**
+                 * Serialize the payload from backend.
+                 */
+                response.json().then((data) => {
+                  /**
+                   * Dispatch that purchas was initiated
+                   */
+                  console.log(
+                    'Purchase Success Order Status',
+                    data.status
+                  );
+                  console.log('Purchase Success Order data', data);
+                  console.log('Purchase Success Order Id', data.id);
+                  /**
+                   * Display a snackbar message
+                   */
+                  onSuccess(
+                    `Purchase Initiated. Status: ${data.status}. Order ID: ${data.id} `
+                  );
+                  /**
+                   * Reload Vendor Data
+                   */
+                  loadVendorData(ID);
+                });
+              } else {
+                /**
+                 * Dispatch that purchase failed
+                 */
+                console.warn(
+                  'Purchase Failed',
+                  response
+                    .json()
+                    .then((data) =>
+                      data
+                        ? JSON.parse(data)
+                        : 'Purchase Request Failed'
+                    )
+                );
+                /**
+                 * Display warning message
+                 */
+                onWarning(
+                  response
+                    .json()
+                    .then((data) =>
+                      data
+                        ? JSON.parse(data)
+                        : 'Purchase Request Failed'
+                    )
+                );
+              }
+            }
+          );
+        } else {
+          console.warn('Purchase: Credentials error');
+          /**
+           * Display error message
+           */
+          onError('Request Failed');
+        }
+        console.groupEnd();
+      },
+
+      acceptOffer: async (
+        orderId: string,
+        product: string,
+        buyer: string,
+        accessToken: string
+      ) => {
+        console.group('Vendor Provider: Accepting Offer');
+        /**
+         * If credentials are validated...
+         */
+        if (
+          orderId !== undefined &&
+          product !== undefined &&
+          buyer !== undefined &&
+          accessToken !== undefined
+        ) {
+          /**
+           * Dispatch auth to launch loading.
+           */
+          console.log(
+            'Fetching with',
+            orderId,
+            product,
+            buyer,
+            accessToken
+          );
+          /**
+           * Fetch make purchase to backend with credentials.
+           */
+          await acceptOffer(
+            orderId,
+            product,
+            buyer,
+            accessToken
+          ).then((response) => {
+            /**
+             * If status is ~200/successful...
+             */
+            if (response.ok) {
+              /**
+               * Serialize the payload from backend.
+               */
+              response.json().then((data) => {
+                /**
+                 * Dispatch that purchas was initiated
+                 */
+                console.log(
+                  'Accept Offer Success Order Status',
+                  data.status
+                );
+                console.log('Accept Success Order data', data);
+                console.log('Accept Success Order Id', data.id);
+                /**
+                 * Display a snackbar message
+                 */
+                onSuccess(
+                  `Offer Accepted. Status: ${data.status}. Order ID: ${data.id} `
+                );
+                /**
+                 * Reload Vendor Data
+                 */
+                vendorId && loadVendorData(vendorId);
+              });
+            } else {
+              /**
+               * Dispatch that purchase failed
+               */
+              console.warn(
+                'Accept Failed',
+                response
+                  .json()
+                  .then((data) =>
+                    data
+                      ? JSON.parse(data)
+                      : 'Request to Accept Offer Failed'
+                  )
+              );
+              /**
+               * Display warning message
+               */
+              onWarning(
+                response
+                  .json()
+                  .then((data) =>
+                    data
+                      ? JSON.parse(data)
+                      : 'Request to Accept Offer Failed'
+                  )
+              );
+            }
+          });
+        } else {
+          console.warn('Offer: Credentials error');
+
+          /**
+           * Display error message
+           */
+          onError('Request Failed with Credentials Error');
+        }
+        console.groupEnd();
+      },
+
+      declineOffer: async (
+        orderId: string,
+        product: string,
+        buyer: string,
+        accessToken: string
+      ) => {
+        console.group('Vendor Provider: Declining Offer');
+        /**
+         * If credentials are validated...
+         */
+        if (
+          orderId !== undefined &&
+          product !== undefined &&
+          buyer !== undefined &&
+          accessToken !== undefined
+        ) {
+          /**
+           * Dispatch auth to launch loading.
+           */
+          console.log(
+            'Fetching with',
+            orderId,
+            product,
+            buyer,
+            accessToken
+          );
+          /**
+           * Fetch make declineoffer to backend with credentials.
+           */
+          await declineOffer(
+            orderId,
+            product,
+            buyer,
+            accessToken
+          ).then((response) => {
+            /**
+             * If status is ~200/successful...
+             */
+            if (response.ok) {
+              /**
+               * Serialize the payload from backend.
+               */
+              response.json().then((data) => {
+                /**
+                 * Dispatch that purchas was initiated
+                 */
+                console.log(
+                  'Decline Offer Success Order Status',
+                  data.status
+                );
+                console.log('Decline Success Order data', data);
+                console.log('Decline Success Order Id', data.id);
+                /**
+                 * Display a snackbar message
+                 */
+                onSuccess(
+                  `Offer Declined. Status: ${data.status}. Order ID: ${data.id} `
+                );
+                /**
+                 * Reload Vendor Data
+                 */
+                vendorId && loadVendorData(vendorId);
+              });
+            } else {
+              /**
+               * Dispatch that purchase failed
+               */
+              console.warn(
+                'Decline Failed',
+                response
+                  .json()
+                  .then((data) =>
+                    data
+                      ? JSON.parse(data)
+                      : 'Request to Decline Offer Failed'
+                  )
+              );
+              /**
+               * Display warning message
+               */
+              onWarning(
+                response
+                  .json()
+                  .then((data) =>
+                    data
+                      ? JSON.parse(data)
+                      : 'Request to Decline Offer Failed'
+                  )
+              );
+            }
+          });
+        } else {
+          console.warn('Offer: Credentials error');
+          /**
+           * Display error message
+           */
+          onError('Request Failed with Credentials Error');
+        }
+        console.groupEnd();
+      },
+
+      completePayment: async (
+        orderId: string,
+        product: string,
+        buyer: string,
+        accessToken: string
+      ) => {
+        console.group('Vendor Provider: Completing Payment');
+        /**
+         * If credentials are validated...
+         */
+        if (
+          orderId !== undefined &&
+          product !== undefined &&
+          buyer !== undefined &&
+          accessToken !== undefined
+        ) {
+          /**
+           * Dispatch auth to launch loading.
+           */
+          console.log(
+            'Fetching with',
+            orderId,
+            product,
+            buyer,
+            accessToken
+          );
+          /**
+           * Fetch make purchase to backend with credentials.
+           */
+          await completePayment(
+            orderId,
+            product,
+            buyer,
+            accessToken
+          ).then((response) => {
+            /**
+             * If status is ~200/successful...
+             */
+            if (response.ok) {
+              /**
+               * Serialize the payload from backend.
+               */
+              response.json().then((data) => {
+                /**
+                 * Dispatch that purchas was initiated
+                 */
+                console.log(
+                  'Complete Payment Success Order Status',
+                  data.status
+                );
+                console.log(
+                  'Complete Payment Success Order data',
+                  data
+                );
+                console.log(
+                  'Complete Payment Success Order Id',
+                  data.id
+                );
+                /**
+                 * Display a snackbar message
+                 */
+                onSuccess(
+                  `Payment Completed. Status: ${data.status}. Order ID: ${data.id} `
+                );
+                /**
+                 * Reload Vendor Data
+                 */
+                vendorId && loadVendorData(vendorId);
+              });
+            } else {
+              /**
+               * Dispatch that purchase failed
+               */
+              console.warn(
+                'Complete Payment Failed',
+                response
+                  .json()
+                  .then((data) =>
+                    data
+                      ? JSON.parse(data)
+                      : 'Request to Complete Payment Failed'
+                  )
+              );
+              /**
+               * Display warning message
+               */
+              onWarning(
+                response
+                  .json()
+                  .then((data) =>
+                    data
+                      ? JSON.parse(data)
+                      : 'Request to Complete Payment Failed'
+                  )
+              );
+            }
+          });
+        } else {
+          console.warn('Offer: Credentials error');
+
+          /**
+           * Display error message
+           */
+          onError('Request Failed with Credentials Error');
+        }
+        console.groupEnd();
+      },
+
+      createProduct: async (
+        title: string,
+        category: string,
+        description: string,
+        price: string,
+        condition: string,
+        accessToken: string,
+        images?: FileList
+      ) => {
+        const ID = vendorId || vendor?.id.toString() || '';
+        console.group('Vendor Provider: Creating Product');
+        /**
+         * If credentials are validated...
+         */
+        if (
+          title !== undefined &&
+          category !== undefined &&
+          description !== undefined &&
+          price !== undefined &&
+          condition !== undefined &&
+          accessToken !== undefined &&
+          images !== undefined
+        ) {
+          /**
+           * Dispatch auth to launch loading.
+           */
+          console.log(
+            'Fetching with',
+            title,
+            category,
+            description,
+            price,
+            condition,
+            accessToken,
+            images
+          );
+          /**
+           * Fetch add favorite to backend with credentials.
+           */
+          await createProduct(
+            ID,
+            title,
+            category,
+            description,
+            price,
+            condition,
+            accessToken,
+            images
+          ).then((response) => {
+            /**
+             * If status is ~200/successful...
+             */
+            if (response.ok) {
+              /**
+               * Serialize the payload from backend.
+               */
+              response.json().then((data) => {
+                /**
+                 * Ensure there's data in the payload.
+                 */
+                if (data) {
+                  /**
+                   * Dispatch that create product was a success
+                   */
+                  console.log(
+                    'Vendor Provider: Create Product success data',
+                    data
+                  );
+                  /**
+                   * Display a snackbar message
+                   */
+                  onSuccess(
+                    `Product Created. Product ID: ${data.id}`
+                  );
+                  /**
+                   * Reload vendor data
+                   */
+                  loadVendorData(ID);
+                  console.log('current vendor id in fetch', vendorId);
+                  /**
+                   * Reload products
+                   */
+                  loadProducts();
+                }
+              });
+            } else {
+              /**
+               * Dispatch that product creation failed
+               */
+              console.warn(
+                'Vendor Provider: Create Productfailed message',
+                response
+                  .json()
+                  .then((data) =>
+                    data
+                      ? JSON.parse(data)
+                      : 'Creating Product Failed'
+                  )
+              );
+              /**
+               * Display warning message
+               */
+              onWarning(
+                response
+                  .json()
+                  .then((data) =>
+                    data
+                      ? JSON.parse(data)
+                      : 'Creating Product Failed'
+                  )
+              );
+            }
+          });
+        } else {
+          console.warn('Vendor Provider: Credetials error');
+          console.log(
+            vendorId,
+            title,
+            description,
+            category,
+            price,
+            condition,
+            accessToken,
+            images
+          );
+          /**
+           * Display error message
+           */
+          onError('Request Failed');
+        }
+        console.groupEnd();
+      },
+
+      updateProduct: async (
+        slug: string,
+        title: string,
+        category: string,
+        description: string,
+        price: string,
+        condition: string,
+        accessToken: string,
+        images?: FileList
+      ) => {
+        const ID = vendorId || vendor?.id.toString() || '';
+        console.group('Vendor Provider: Updating Product');
+        /**
+         * If credentials are validated...
+         */
+        if (
+          slug !== undefined &&
+          title !== undefined &&
+          category !== undefined &&
+          description !== undefined &&
+          price !== undefined &&
+          condition !== undefined &&
+          accessToken !== undefined &&
+          images !== undefined
+        ) {
+          /**
+           * Dispatch auth to launch loading.
+           */
+          console.log(
+            'Fetching with',
+            slug,
+            title,
+            category,
+            description,
+            price,
+            condition,
+            accessToken,
+            images
+          );
+          /**
+           * Fetch add favorite to backend with credentials.
+           */
+          await updateProduct(
+            slug,
+            ID,
+            title,
+            category,
+            description,
+            price,
+            condition,
+            accessToken,
+            images
+          ).then((response) => {
+            /**
+             * If status is ~200/successful...
+             */
+            if (response.ok) {
+              /**
+               * Serialize the payload from backend.
+               */
+              response.json().then((data) => {
+                /**
+                 * Ensure there's data in the payload.
+                 */
+                if (data) {
+                  /**
+                   * Dispatch that create product was a success
+                   */
+                  console.log(
+                    'Vendor Provider: Update Product success data',
+                    data
+                  );
+                  /**
+                   * Display a snackbar message
+                   */
+                  onSuccess(
+                    `Product Updated. Product ID: ${data.id}`
+                  );
+                  /**
+                   * Reload vendor data
+                   */
+                  loadVendorData(ID);
+                  // return {
+                  //   status: data.status
+                  // }
+                  /**
+                   * Reload products
+                   */
+                  loadProducts();
+                }
+              });
+            } else {
+              /**
+               * Dispatch that product creation failed
+               */
+              console.warn(
+                'Vendor Provider: Create Productfailed message',
+                response
+                  .json()
+                  .then((data) =>
+                    data ? JSON.parse(data) : 'Update Product Failed'
+                  )
+              );
+              /**
+               * Display warning message
+               */
+              onWarning(
+                response
+                  .json()
+                  .then((data) =>
+                    data ? JSON.parse(data) : 'Update Product Failed'
+                  )
+              );
+            }
+          });
+        } else {
+          console.warn('Vendor Provider: Credetials error');
+          /**
+           * Display error message
+           */
+          onError('Request Failed');
+        }
+        console.groupEnd();
+      },
+
+      loading,
+      error,
+      vendor,
+      state,
+      dispatch,
+      vendorId,
+      loadVendorData,
+    }),
+    [state]
+  );
 
   return (
-    <VendorData.Provider
-      value={{
-        vendor,
-        loading,
-        error,
-        dispatch,
-        vendorId,
-        setVendorId,
-        loadVendor,
-        orderRequests,
-        ordersMade,
-        vendorProducts,
-        vendorFaves,
-        loadVendorFaves,
-        vendorFavoritesFeed,
-        loadVendorFavorites,
-      }}
-    >
+    <VendorData.Provider value={vendorContextValue}>
       {children}
+      <View>
+        <Toast
+          open={openSuccess}
+          setOpen={setOpenSuccess}
+          success
+          message={message}
+        />
+        <Toast
+          open={openWarning}
+          setOpen={setOpenWarning}
+          warning
+          message={message}
+        />
+        <Toast
+          open={openError}
+          setOpen={setOpenError}
+          error
+          message={message}
+        />
+      </View>
     </VendorData.Provider>
   );
 }
