@@ -1,22 +1,31 @@
-import React from "react";
-
-import { useUserContext } from "./user.context";
+import React from 'react';
 
 import {
   deleteRequest,
-  putRequest,
   getRequest,
   postRequest,
-} from "../services/crud.service";
+  putRequest,
+} from '../services/crud.service';
+import { getProducts, getCategories } from '../services/get.service';
+import {
+  ProductStackNavigatorParamList,
+  CategoryTypeParamList,
+} from '../types';
+import { useUserContext } from './user.context';
 
-import { ProductStackNavigatorParamList } from "../types";
+export type ProductParams =
+  ProductStackNavigatorParamList['ProductDetails'];
 
-export type ProductParams = ProductStackNavigatorParamList["ProductDetails"];
 /**
  * Third-level Context provider for all user-specific snipetts and collections data.
  * Relies on UserContext's username upon login to fetch user's data.
  *
  */
+
+export type Options = Array<{
+  label: string;
+  value: string | number;
+}>;
 
 export enum ProductsActionTypes {
   fetchProducts,
@@ -39,7 +48,7 @@ export interface ProductsStateInterface {
 const initialState: ProductsStateInterface = {
   products: [],
   loading: false,
-  error: "",
+  error: '',
 };
 
 type ProductsDataType = {
@@ -48,9 +57,13 @@ type ProductsDataType = {
   error: string | undefined;
   dispatch: React.Dispatch<FetchProductsAction>;
   loadProducts: () => Promise<void>;
+  loadCategories: () => Promise<void>;
+  categoryOptions: Options;
 };
 
-const ProductsData = React.createContext<ProductsDataType>(undefined!);
+const ProductsData = React.createContext<ProductsDataType>(
+  undefined!
+);
 
 export default function ProductsDataProvider({
   children,
@@ -79,12 +92,14 @@ export default function ProductsDataProvider({
     initialState
   );
 
+  const [categoryOptions, setCategoryOptions] =
+    React.useState<Options>([{ label: 'Category', value: 0 }]);
+
   async function loadProducts() {
     dispatch({ type: ProductsActionTypes.fetchProducts });
 
-    const data = await getRequest({
-      url: `store/?expand=product_images,vendor,product,category&include=vendor.name`,
-    });
+    const data = await getProducts();
+
     if (data) {
       dispatch({
         type: ProductsActionTypes.fetchProductsSuccess,
@@ -93,23 +108,26 @@ export default function ProductsDataProvider({
     } else {
       dispatch({ type: ProductsActionTypes.fetchProductsFailure });
     }
+  }
 
-    // try {
-    //   const response = await getRequest({
-    //     url: `store?expand=product_images,vendor,product,category&include=vendor.name`,
-    //   });
-    //   // const productsData = await response.json();
-    //   dispatch({
-    //     type: ProductsActionTypes.fetchProductsSuccess,
-    //     products: response,
-    //   });
-    // } catch (e) {
-    //   dispatch({ type: ProductsActionTypes.fetchProductsFailure });
-    // }
+  async function loadCategories() {
+    const data = await getCategories();
+    if (data) {
+      setCategoryOptions(
+        data.map((category: CategoryTypeParamList) => ({
+          label: category.name,
+          value: category.id,
+        }))
+      );
+    }
   }
 
   React.useEffect(() => {
     loadProducts();
+  }, []);
+
+  React.useEffect(() => {
+    loadCategories();
   }, []);
 
   const { products, loading, error } = state;
@@ -122,6 +140,8 @@ export default function ProductsDataProvider({
         error,
         dispatch,
         loadProducts,
+        loadCategories,
+        categoryOptions,
       }}
     >
       {children}
