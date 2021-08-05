@@ -1,20 +1,18 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Text,
   TextInput,
   Button,
   useTheme,
   TouchableRipple,
-} from "react-native-paper";
+} from 'react-native-paper';
 
-import BackButton from "../../components/common/BackButton";
-import Background from "../../components/common/Background";
-import Header from "../../components/common/Header";
+import BackButton from '../../components/common/backButton';
+import Background from '../../components/common/background';
+import Header from '../../components/common/header';
 
-import { emailValidator } from "../../utils/emailValidator";
-
-import { StackNavigationProp } from "@react-navigation/stack";
-import { AccountStackNavigatorParamList } from "../../types";
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AccountStackNavigatorParamList } from '../../types';
 
 export default function ResetPasswordScreen({
   navigation,
@@ -22,27 +20,29 @@ export default function ResetPasswordScreen({
   navigation: StackNavigationProp<AccountStackNavigatorParamList>;
 }) {
   const theme = useTheme();
-  const [email, setEmail] = useState({ value: "", error: "" });
+  const [email, setEmail] = useState({ value: '', error: '' });
 
   const sendResetPasswordEmail = () => {
-    const emailError = emailValidator(email.value);
-    if (emailError) {
-      setEmail({ ...email, error: emailError });
-      return;
-    }
-    navigation.navigate("LoginScreen");
+    // const emailError = emailValidator(email.value);
+    // if (emailError) {
+    //   setEmail({ ...email, error: emailError });
+    //   return;
+    // }
+    navigation.navigate('LoginScreen');
   };
 
   return (
     <Background>
-      <TouchableRipple onPress={navigation.goBack}>Go Back</TouchableRipple>
+      <TouchableRipple onPress={navigation.goBack}>
+        Go Back
+      </TouchableRipple>
 
       <Header>Restore Password</Header>
       <TextInput
         label="E-mail address"
         returnKeyType="done"
         value={email.value}
-        onChangeText={(text) => setEmail({ value: text, error: "" })}
+        onChangeText={(text) => setEmail({ value: text, error: '' })}
         error={!!email.error}
         autoCapitalize="none"
         autoCompleteType="email"

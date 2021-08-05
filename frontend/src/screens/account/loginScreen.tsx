@@ -1,110 +1,288 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { TouchableOpacity, StyleSheet, View } from "react-native";
+import {
+  TouchableOpacity,
+  StyleSheet,
+  View,
+  ScrollView,
+} from 'react-native';
+import {
+  useController,
+  useForm,
+  SubmitHandler,
+  SubmitErrorHandler,
+} from 'react-hook-form';
+import _ from 'lodash/fp';
+import { ErrorMessage } from '@hookform/error-message';
+import { FormBuilder } from 'react-native-paper-form-builder';
+import { LogicProps } from 'react-native-paper-form-builder/dist/Types/Types';
 import {
   Text,
   useTheme,
   TextInput,
   Button,
-  Surface,
-  Headline,
-} from "react-native-paper";
-import Background from "../../components/common/background";
+  List,
+  Checkbox,
+  ActivityIndicator,
+} from 'react-native-paper';
+import Background from '../../components/common/background';
+import Logo from '../../components/common/logo';
+import Header from '../../components/common/header';
+import BackButton from '../../components/common/backButton';
 
-import Header from "../../components/common/header";
-import BackButton from "../../components/common/backButton";
-import { emailValidator } from "../../utils/emailValidator";
-import { passwordValidator } from "../../utils/passwordValidator";
+import { useAuth } from '../../context/authorization.context';
 
-import { useUserContext } from "../../context/user.context";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { AccountStackNavigatorParamList } from "../../types";
-import { SignIn } from "../../components/account/accounSign";
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AccountStackNavigatorParamList } from '../../types';
+
+type FormValues = {
+  username: string;
+  password: string;
+};
+
 export default function LoginScreen({
   navigation,
 }: {
   navigation: StackNavigationProp<AccountStackNavigatorParamList>;
 }) {
   const theme = useTheme();
-  // const { username, setUsername, email, setEmail, password, setPassword } = useUserContext()
-  const [email, setEmail] = useState({ value: "", error: "" });
-  const [password, setPassword] = useState({ value: "", error: "" });
+  const { signIn, isLoading } = useAuth();
+  const [getUsername, setUsername] = useState('');
+  const [getPassword, setPassword] = useState('');
 
-  const onLoginPressed = () => {
-    const emailError = emailValidator(email.value);
-    const passwordError = passwordValidator(password.value);
+  const {
+    control,
+    setFocus,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormValues>({
+    defaultValues: {
+      username: '',
+      password: '',
+    },
+    mode: 'onChange',
+    criteriaMode: 'all',
+  });
 
-    if (emailError || passwordError) {
-      setEmail({ ...email, error: emailError });
-      setPassword({ ...password, error: passwordError });
-      return;
-    }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Dashboard" }],
-    });
+  const onSubmit: SubmitHandler<FormValues> = (data, e) => {
+    console.log(data, e);
+    signIn(data.username, data.password);
+  };
+  const onError: SubmitErrorHandler<FormValues> = (errors, e) => {
+    console.log(errors, e);
+    // navigation.reset({});
   };
 
   return (
     <Background>
-      <TouchableOpacity onPress={() => navigation.goBack} />
+      <Logo loading={isLoading} />
 
-      <Headline>Welcomggge back.</Headline>
-      <SignIn />
-      {/* <TextInput
-        label="Email"
-        returnKeyType="next"
-        value={email.value}
-        onChangeText={(text: string) => setEmail({ value: text, error: "" })}
-        error={!!email.error}
-        autoCapitalize="none"
-        autoCompleteType="email"
-        textContentType="emailAddress"
-        keyboardType="email-address"
+      <Header>Welcome Back</Header>
+
+      <View style={styles.container}>
+        <FormBuilder
+          inputSpacing={12}
+          inputSpacingHorizontal={4}
+          theme={theme}
+          control={control}
+          setFocus={setFocus}
+          formConfigArray={[
+            {
+              name: 'username',
+              type: 'text',
+              textInputProps: {
+                label: 'Username',
+                style: styles.textInput,
+                left: <TextInput.Icon name={'account'} />,
+                underlineColor: 'transparent',
+                mode: 'outlined',
+                textContentType: 'username',
+                returnKeyType: 'next',
+                keyboardType: 'default',
+                autoCapitalize: 'none',
+                value: getUsername,
+                onChangeText: (username) => setUsername(username),
+                onSubmitEditing: () => setFocus('password'),
+              },
+              rules: {
+                required: {
+                  value: true,
+                  message: 'Username is required',
+                },
+              },
+            },
+            {
+              name: 'password',
+              type: 'password',
+              textInputProps: {
+                label: 'Password',
+                style: styles.textInput,
+                left: <TextInput.Icon name={'lock'} />,
+                underlineColor: 'transparent',
+                mode: 'outlined',
+                textContentType: 'password',
+                returnKeyType: 'send',
+                keyboardType: 'default',
+                value: getPassword,
+                onChangeText: (password) => setPassword(password),
+                secureTextEntry: true,
+                onSubmitEditing: () =>
+                  handleSubmit(onSubmit, onError),
+              },
+              rules: {
+                required: {
+                  value: true,
+                  message: 'Password is required',
+                },
+                minLength: {
+                  value: 4,
+                  message: 'Password should be atleast 4 characters',
+                },
+                maxLength: {
+                  value: 30,
+                  message:
+                    'Password should be between 8 and 30 characters',
+                },
+              },
+            },
+          ]}
+        />
+      </View>
+
+      <Button
+        mode={'contained'}
+        labelStyle={styles.text}
+        style={[styles.button, { marginTop: 24 }]}
+        onPress={handleSubmit(onSubmit, onError)}
+      >
+        LogIn
+      </Button>
+
+      <ErrorMessage
+        errors={errors}
+        name="username"
+        render={({ messages }) => {
+          console.log('messages', messages);
+          return (
+            messages &&
+            _.entries(messages).map(([type, message]) => (
+              <Text key={type}>{message}</Text>
+            ))
+          );
+        }}
       />
-      <TextInput
-        label="Password"
-        returnKeyType="done"
-        value={password.value}
-        onChangeText={(text) => setPassword({ value: text, error: "" })}
-        error={!!password.error}
-        secureTextEntry
+
+      <ErrorMessage
+        errors={errors}
+        name="password"
+        render={({ messages }) => {
+          console.log('messages', messages);
+          return (
+            messages &&
+            _.entries(messages).map(([type, message]) => (
+              <Text key={type}>{message}</Text>
+            ))
+          );
+        }}
       />
-      <View style={styles.forgotPassword}>
-        <TouchableOpacity onPress={() => navigation.navigate("ResetPassword")}>
-          <Text style={{ fontSize: 13, color: theme.colors.text }}>
-            Forgot your password?
+
+      <View style={styles.row}>
+        <Text>Don’t have an account? </Text>
+        <TouchableOpacity
+          onPress={() => navigation.replace('RegisterScreen')}
+        >
+          <Text
+            style={{
+              fontWeight: 'bold',
+              color: theme.colors.primary,
+            }}
+          >
+            Sign up
           </Text>
         </TouchableOpacity>
       </View>
-      <Button mode="contained" onPress={onLoginPressed}>
-        Login
-      </Button>
-      <View style={styles.row}>
-        <Text>Don’t have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.replace("RegisterScreen")}>
-          <Text style={{ fontWeight: "bold", color: theme.colors.primary }}>
-            Sign up
-          </Text>
-        </TouchableOpacity> */}
-      {/* </View> */}
     </Background>
   );
 }
 
+function ForgotPassword({
+  navigation,
+}: {
+  navigation: StackNavigationProp<AccountStackNavigatorParamList>;
+}) {
+  return (
+    <View style={styles.forgotPassword}>
+      <TouchableOpacity
+      // onPress={() => navigation.navigate('ResetPassword')}
+      >
+        <Text style={styles.forgotPassword}>
+          Forgot your password?
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function RememberMe(props: LogicProps) {
+  const { name, rules, shouldUnregister, defaultValue, control } =
+    props;
+  const { field } = useController({
+    name,
+    rules,
+    shouldUnregister,
+    defaultValue,
+    control,
+  });
+
+  return (
+    <List.Item
+      title={'Remember me'}
+      left={() => (
+        <Checkbox.Android
+          status={field.value}
+          onPress={() => {
+            field.onChange(
+              field.value === 'checked' ? 'unchecked' : 'checked'
+            );
+          }}
+        />
+      )}
+    />
+  );
+}
+
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    flex: 1,
-    padding: 20,
-  },
   forgotPassword: {
-    width: "100%",
-    alignItems: "flex-end",
+    width: '100%',
+    alignItems: 'flex-end',
     marginBottom: 24,
   },
   row: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 4,
+  },
+  halfContainer: {
+    flex: 1,
+    padding: 8,
+  },
+  headline: {
+    textAlign: 'center',
+  },
+  textInput: {
+    paddingVertical: 5,
+  },
+  button: {
+    width: '100%',
+    marginVertical: 10,
+    paddingVertical: 2,
+  },
+  text: {
+    fontWeight: 'bold',
+    fontSize: 15,
+    lineHeight: 26,
+  },
+  container: {
+    width: '100%',
+    marginVertical: 12,
   },
 });
