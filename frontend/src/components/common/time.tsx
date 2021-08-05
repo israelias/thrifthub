@@ -1,6 +1,7 @@
-import React from "react";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import React from 'react';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import { Text } from 'react-native-paper';
 
 /**
  * A date parser.
@@ -29,6 +30,10 @@ import relativeTime from "dayjs/plugin/relativeTime";
 export const TimeAgo = ({ date }: { date: string }) => {
   dayjs.extend(relativeTime);
   return (
-    <time dateTime={dayjs(date).toISOString()}>{dayjs(date).fromNow()}</time>
+    <Text
+    // dateTime={dayjs(date).toISOString()}
+    >
+      {dayjs(date).fromNow()}
+    </Text>
   );
 };
