@@ -53,7 +53,7 @@ export const ProductDetail = ({
 }) => {
   const theme = useTheme();
 
-  const { vendorId, vendorFaves } = useVendorData();
+  const { vendorId, vendor } = useVendorData();
 
   const { vendorIcon, vendorInitials } = useVendorIcon();
 
@@ -65,7 +65,7 @@ export const ProductDetail = ({
 
   const otherVendorInitials = initialize(product.vendor.name);
 
-  const inFavorites = vendorFaves.some(
+  const inFavorites = vendor?.favorites.some(
     (favorite) => favorite.id === product.id
   );
 
@@ -118,7 +118,7 @@ export const ProductDetail = ({
       <Text style={{ marginBottom: 10 }}>{product.price}</Text>
       <Text style={{ marginBottom: 10 }}>{product.price}</Text>
       <Text style={{ marginBottom: 10 }}>
-        {product.is_available ? 'Posted' : 'Sold'}{' '}
+        {product.is_available ? 'Posted' : 'Sold'}
         <TimeAgo
           date={
             product.is_available
@@ -162,12 +162,7 @@ export const ProductDetail = ({
                   navigation &&
                     navigation.replace('MakeOffer', {
                       product: product,
-                      productId: product.id.toString(),
-                      vendorId: product.vendor.id.toString(),
-
                       ...product,
-                      // productId: product.id.toString(),
-                      // sellerId: product.vendor.id
                     });
                 }}
               >
@@ -180,7 +175,7 @@ export const ProductDetail = ({
 
       {product.product_images && product.product_images.length > 0 && (
         <>
-          <View style={{ height: StyleSheet.hairlineWidth }} />;
+          <View style={{ height: StyleSheet.hairlineWidth }} />
           <View style={styles.bottomRow}>
             <View>
               <Title>Product Images</Title>
