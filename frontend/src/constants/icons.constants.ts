@@ -1,9 +1,11 @@
 // tavs
 export const PRODUCTS_ICON = 'package-variant';
+export const PRODUCT_DETAILS_ICON = 'package-variant';
 export const TRANSACTIONS_ICON = 'cash-multiple';
 export const FAVORITES_ICON = 'heart';
 export const MY_PRODUCTS_ICON = 'folder-home-outline';
 export const ADD_PRODUCT_ICON = 'folder-home-outline';
+export const UPDATE_PRODUCT_ICON = 'folder-home-outline';
 
 // product
 
@@ -32,3 +34,9 @@ export const PRODUCT_CATEGORY_ICON = 'account';
 export const PRODUCT_DESCRIPTION_ICON = 'email';
 export const PRODUCT_PRICE_ICON = 'lock';
 export const PRODUCT_CONDITION_ICON = 'office-building';
+
+// account
+
+export const START_ICON = 'StartScreen';
+export const SIGNIN_ICON = 'LoginScreen';
+export const SIGNUP_ICON = 'RegisterScreen';
