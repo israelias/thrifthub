@@ -1,67 +1,184 @@
-import React from "react";
-import { I18nManager } from "react-native";
-import { Provider as PaperProvider } from "react-native-paper";
+import React from 'react';
 
-import * as Updates from "expo-updates";
-import { useColorScheme } from "react-native-appearance";
+import { Platform, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { NavigationContainer } from '@react-navigation/native';
+import * as Linking from 'expo-linking';
 
-import { CoreNavigator } from "./navigation/coreNavigator";
-import { PreferencesContext } from "./context/preferences.context";
-import VendorDataProvider from "./context/vendor.context";
-import ProductsDataProvider from "./context/products.context";
-import AuthorizationProvider from "./context/authorization.context";
-import AuthProvider, { useAuth } from "./context/auth.context";
-import UserProvider from "./context/user.context";
-import {
-  CombinedDefaultTheme,
-  CombinedDarkTheme,
-} from "./components/common/theme";
+import { StatusBar } from 'expo-status-bar';
+
+import { CoreNavigator } from './navigation/coreNavigator';
+
+import VendorDataProvider from './context/vendor.context';
+import ProductsDataProvider from './context/products.context';
+import AuthorizationProvider from './context/authorization.context';
+import { usePreference } from './context/preferences.context';
+import useCachedResources from './hooks/useCachedResources';
+import UserProvider from './context/user.context';
+
+import { Splash } from './components/common/splash';
+
+const PERSISTENCE_KEY = 'NAVIGATION_STATE';
 
 export const Core = () => {
-  const colorScheme = useColorScheme();
-  const [theme, setTheme] = React.useState<"light" | "dark">(
-    colorScheme === "dark" ? "dark" : "light"
-  );
-  const [rtl] = React.useState<boolean>(I18nManager.isRTL);
+  const { isThemeDark, theme } = usePreference();
 
-  function toggleTheme() {
-    setTheme((theme) => (theme === "light" ? "dark" : "light"));
+  const isLoadingComplete = useCachedResources();
+
+  const [isReady, setIsReady] = React.useState(
+    __DEV__ ? false : true
+  );
+  const [initialState, setInitialState] = React.useState();
+
+  const [showSplash, setShowSplash] = React.useState(true);
+
+  React.useEffect(() => {
+    const restoreState = async () => {
+      try {
+        const initialUrl = await Linking.getInitialURL();
+
+        if (Platform.OS !== 'web' && initialUrl == null) {
+          // Only restore state if there's no deep link and we're not on web
+          const savedStateString = await AsyncStorage.getItem(
+            PERSISTENCE_KEY
+          );
+          const state = savedStateString
+            ? JSON.parse(savedStateString)
+            : undefined;
+
+          if (state !== undefined) {
+            setInitialState(state);
+          }
+        }
+      } finally {
+        setIsReady(true);
+      }
+    };
+
+    if (!isReady) {
+      restoreState();
+    }
+  }, [isReady]);
+
+  React.useEffect(() => {
+    if (!isReady || !isLoadingComplete)
+      setTimeout(() => {
+        setShowSplash(false);
+      }, 7000);
+  }, []);
+
+  // if (!isReady || !isLoadingComplete) {
+  //   return <Splash />;
+  // }
+
+  if (showSplash) {
+    return <Splash isVisible={!isReady || !isLoadingComplete} />;
   }
 
-  const toggleRTL = React.useCallback(() => {
-    I18nManager.forceRTL(!rtl);
-    Updates.reloadAsync();
-  }, [rtl]);
+  // let theme = isThemeDark ? CombinedDarkTheme : CombinedDefaultTheme;
 
-  const preferences = React.useMemo(
-    () => ({
-      toggleTheme,
-      toggleRTL,
-      theme,
-      rtl: (rtl ? "right" : "left") as "right" | "left",
-    }),
-    [rtl, theme, toggleRTL]
-  );
+  // const onReady = ((
+  //   isReadyRef as React.MutableRefObject<boolean>
+  // ).current = true);
+
+  // console.log('onReady', onReady);
+
+  // React.useEffect(() => {
+  //   return () => {
+  //     (isReadyRef as React.MutableRefObject<boolean>).current = false;
+  //   };
+  // }, []);
+
+  // React.useEffect(() => {
+  //   console.log(
+  //     'NavigationContainerRef: getRootState',
+  //     navigationRef?.current?.getRootState()
+  //   );
+  //   console.log(
+  //     'NavigationContainerRef: getCurrentRoute',
+  //     navigationRef?.current?.getCurrentRoute()
+  //   );
+  //   console.log(
+  //     'NavigationContainerRef: getCurrentOptions',
+  //     navigationRef?.current?.getCurrentOptions()
+  //   );
+  // }, [navigationRef]);
+
+  console.log('Core: Linking.getInitialUrl', Linking.getInitialURL());
 
   return (
-    <>
-      <PreferencesContext.Provider value={preferences}>
-        <PaperProvider
-          theme={theme === "light" ? CombinedDefaultTheme : CombinedDarkTheme}
-        >
-          <VendorDataProvider>
-            <AuthorizationProvider>
-              <>
-                <ProductsDataProvider>
-                  <UserProvider>
-                    <CoreNavigator />
-                  </UserProvider>
-                </ProductsDataProvider>
-              </>
-            </AuthorizationProvider>
-          </VendorDataProvider>
+    <NavigationContainer
+      initialState={initialState}
+      onStateChange={(state) => {
+        console.log(
+          'NavigationContainer: onStateChange',
+          JSON.stringify(state)
+        );
+        AsyncStorage.setItem(PERSISTENCE_KEY, JSON.stringify(state));
+      }}
+      documentTitle={{
+        formatter: (options, route) =>
+          `${options?.title ?? route?.name} - ThriftHub`,
+      }}
+      theme={theme}
+      linking={{
+        prefixes: [Linking.makeUrl('/')],
+        enabled: true,
+        config: {
+          screens: {
+            Store: {
+              screens: {
+                Products: {
+                  screens: {
+                    ProductScreen: 'products',
+                    ProductDetailScreen: {
+                      path: 'products/:slug',
+                      parse: {
+                        slug: String,
+                      },
+                    },
+                  },
+                },
+                Transactions: {
+                  screens: {
+                    TransactionOrdersScreen: 'two',
+                  },
+                },
+                // Products: {
+                //   path: 'products/:slug',
+                //   parse: {
+                //     slug: String,
+                //   },
+                // },
+              },
+            },
+            NotFound: '*',
+          },
+        },
+      }}
+    >
+      <>
+        <PaperProvider theme={theme}>
+          <StatusBar
+            animated={true}
+            style={isThemeDark ? 'light' : 'dark'}
+          />
+          <ProductsDataProvider>
+            <VendorDataProvider>
+              <AuthorizationProvider>
+                <>
+                  <>
+                    <UserProvider>
+                      <CoreNavigator />
+                    </UserProvider>
+                  </>
+                </>
+              </AuthorizationProvider>
+            </VendorDataProvider>
+          </ProductsDataProvider>
         </PaperProvider>
-      </PreferencesContext.Provider>
-    </>
+      </>
+    </NavigationContainer>
   );
 };
