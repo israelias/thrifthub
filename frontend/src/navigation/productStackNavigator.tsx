@@ -1,19 +1,27 @@
-import React from "react";
-import { TouchableOpacity } from "react-native";
-import { createStackNavigator } from "@react-navigation/stack";
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
-import { DrawerNavigationProp } from "@react-navigation/drawer";
-import { Appbar, Avatar, useTheme } from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import React from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import {
+  getFocusedRouteNameFromRoute,
+  RouteProp,
+} from '@react-navigation/native';
+import {
+  createStackNavigator,
+  StackNavigationOptions,
+} from '@react-navigation/stack';
 
-import { BottomTabs } from "./bottomTabNavigator";
-import { ProductDetailScreen } from "../screens/products/productDetailScreen";
+import { TouchableOpacity, useWindowDimensions } from 'react-native';
+import { Appbar, Avatar, useTheme } from 'react-native-paper';
 
-import { ProductStackNavigatorParamList } from "../types";
+import * as ROUTES from '../constants/routes.constants';
 
-import { useAuth } from "../context/auth.context";
-import { useVendorData } from "../context/vendor.context";
-import { useVendorIcon } from "../hooks/useVendorIcon";
+import { useVendorIcon } from '../hooks/useVendorIcon';
+import { ProductDetailScreen } from '../screens/products/productDetailScreen';
+import { MakeOfferScreen } from '../screens/products/newMakeOfferScreen';
+import { MakePurchaseScreen } from '../screens/products/makePurchaseScreen';
+import { UpdateProductScreen } from '../screens/products/updateProductScreen';
+import { ProductStackNavigatorParamList } from '../types';
+import { BottomTabs } from './bottomTabNavigator';
 
 const Stack = createStackNavigator<ProductStackNavigatorParamList>();
 
@@ -22,25 +30,35 @@ export const StackNavigator = () => {
 
   const { vendorInitials, vendorIcon } = useVendorIcon();
 
+  const dimensions = useWindowDimensions();
+
+  const isLargeScreen = dimensions.width >= 768;
+
+  const handleSearch = () => console.log('Searching');
+
+  React.useEffect(() => {
+    console.log('ProductStackNavigator', Stack);
+  }, []);
+
   return (
     <Stack.Navigator
       initialRouteName="Products"
-      headerMode="screen"
       screenOptions={{
-        header: ({ scene, previous, navigation }) => {
-          const { options } = scene.descriptor;
+        // animationEnabled: true,
+
+        header: ({ navigation, route, options, back }) => {
           const title =
             options.headerTitle !== undefined
               ? options.headerTitle
               : options.title !== undefined
               ? options.title
-              : scene.route.name;
+              : route.name;
 
           return (
             <Appbar.Header
               theme={{ colors: { primary: theme.colors.surface } }}
             >
-              {previous ? (
+              {back ? (
                 <Appbar.BackAction
                   onPress={navigation.goBack}
                   color={theme.colors.primary}
@@ -70,7 +88,7 @@ export const StackNavigator = () => {
               )}
               <Appbar.Content
                 title={
-                  title === "Store" ? (
+                  title === 'Store' ? (
                     <MaterialCommunityIcons
                       style={{ marginRight: 10 }}
                       name="package-variant-closed"
@@ -83,9 +101,19 @@ export const StackNavigator = () => {
                 }
                 titleStyle={{
                   fontSize: 18,
-                  fontWeight: "bold",
+                  fontWeight: 'bold',
                   color: theme.colors.primary,
                 }}
+              />
+              <Appbar.Action
+                icon={() => (
+                  <MaterialCommunityIcons
+                    name="magnify"
+                    size={30}
+                    color={theme.colors.primary}
+                  />
+                )}
+                onPress={handleSearch}
               />
             </Appbar.Header>
           );
@@ -96,14 +124,30 @@ export const StackNavigator = () => {
         name="Products"
         component={BottomTabs}
         options={({ route }) => {
-          const routeName = getFocusedRouteNameFromRoute(route) ?? "Store";
+          const routeName =
+            getFocusedRouteNameFromRoute(route) ?? 'Store';
           return { headerTitle: routeName };
         }}
       />
       <Stack.Screen
-        name="ProductDetails"
+        name={ROUTES.PRODUCT_DETAILS_ROUTE}
         component={ProductDetailScreen}
-        options={{ headerTitle: "Product Details" }}
+        options={{ headerTitle: 'Product Details' }}
+      />
+      <Stack.Screen
+        name={ROUTES.MAKE_OFFER_ROUTE}
+        component={MakeOfferScreen}
+        options={{ headerTitle: 'Make Offer' }}
+      />
+      <Stack.Screen
+        name={ROUTES.MAKE_PURCHASE_ROUTE}
+        component={MakePurchaseScreen}
+        options={{ headerTitle: 'Make Purchase' }}
+      />
+      <Stack.Screen
+        name={ROUTES.UPDATE_PRODUCT_ROUTE}
+        component={UpdateProductScreen}
+        options={{ headerTitle: 'Update Product' }}
       />
     </Stack.Navigator>
   );

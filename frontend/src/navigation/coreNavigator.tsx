@@ -1,132 +1,134 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import { createStackNavigator } from "@react-navigation/stack";
-import { useTheme } from "react-native-paper";
-import { StackNavigator } from "./productStackNavigator";
-import { AccountStackNavigator } from "./accountStackNavigator";
-import { DrawerContent } from "../screens/vendor/drawerContent";
-
-import { DrawerNavigator } from "./drawerNavigator";
-import { SignIn } from "../components/account/accounSign";
-import { SignUpScreen } from "../screens/account/signUpScreen";
-import { SplashScreen } from "../screens/account/splashScreen";
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import * as Linking from 'expo-linking';
+import React from 'react';
+import { useTheme } from 'react-native-paper';
 
 import {
   CombinedDarkTheme,
   CombinedDefaultTheme,
-} from "../components/common/theme";
-
+} from '../components/common/theme';
 import {
-  navigationRef,
-  isReadyRef,
-  // setTopLevelNavigator,
-} from "./rootNavigator";
-
-import { AuthStackNavigationParamList } from "../types";
-
-import UserProvider from "../context/user.context";
-import AuthProvider, { useAuth } from "../context/auth.context";
-import AuthorizationProvider from "../context/authorization.context";
-
-import {
-  stateConditionString,
   AuthStateInterface,
-  AuthContext,
-} from "../context/authUtils";
+  useAuth,
+} from '../context/authorization.context';
+import { stateConditionString } from '../context/authUtils';
+import UserProvider from '../context/user.context';
+import {
+  Dashboard,
+  LoginScreen,
+  RegisterScreen,
+  ResetPasswordScreen,
+  StartScreen,
+} from '../screens/account';
 
-const Stack = createStackNavigator<AuthStackNavigationParamList>();
-const Drawer = createDrawerNavigator();
-const RootStack = createStackNavigator();
+import { ProductDetailScreen } from '../screens/products/productDetailScreen';
+import { DrawerContent } from '../screens/vendor/drawerContent';
+import { AuthStackNavigationParamList } from '../types';
+import { AccountStackNavigator } from './accountStackNavigator';
+import { DrawerNavigator } from './drawerNavigator';
+import { StackNavigator } from './productStackNavigator';
 
 export const CoreNavigator = () => {
-  const { state } = React.useContext(AuthContext);
-  // setTopLevelNavigator()
-  // const isReady = React.useRef(isReadyRef);
-  // const [readyState, setReadyState] = React.useState(false);
-  // const { state } = useAuth();
+  const { state } = useAuth();
+  const {
+    isLoading,
+    isSignedIn,
+    accessToken,
+    noAccount,
+    isSignedUp,
+  } = useAuth();
 
-  // const { accessToken, loading, isSignOut } = state;
+  console.log('Core: isSignedIn', isSignedIn);
+  console.log('Core: isLoading', isLoading);
+  console.log('Core: accessToken', accessToken);
+  console.log('Core: noAccount', noAccount);
+  console.log('Core: isSignedUp', isSignedUp);
 
   // React.useEffect(() => {
-  //   if (state) {
-  //     setReadyState(true);
+  //   if (isLoading) {
+  //     navigation.replace('Dashboard');
   //   }
-  // }, [state]);
+  //   if (isSignedIn && accessToken && isSignedUp) {
+  //     console.log('isSignedIn and accessToken and isSignedUp');
+  //     navigation.replace('LoginScreen');
+  //   }
+  //   if (!isSignedUp && noAccount) {
+  //     console.log('not isSignedUp and noAccount');
+  //     navigation.replace('RegisterScreen');
+  //   }
+  //   if (!isSignedIn && !noAccount) {
+  //     console.log('not isSignedIn and not noAccount');
+  //     navigation.replace('LoginScreen');
+  //   }
+  // }, [isSignedIn, accessToken, isSignedUp, noAccount, isLoading]);
 
   // const chooseScreen = (state: AuthStateInterface) => {
   //   let navigateTo = stateConditionString(state);
   //   let arr = [];
 
   //   switch (navigateTo) {
-  //     case "LOAD_APP":
-  //       arr.push(<Stack.Screen name="SplashScreen" component={SplashScreen} />);
+  //     case 'LOAD_APP':
+  //       arr.push(
+  //         <RootStack.Screen
+  //           name="SplashScreen"
+  //           component={StartScreen}
+  //         />
+  //       );
   //       break;
 
-  //     case "LOAD_SIGNUP":
+  //     case 'LOAD_SIGNUP':
   //       arr.push(
-  //         <Stack.Screen
+  //         <RootStack.Screen
   //           name="SignUpScreen"
-  //           component={SignUpScreen}
+  //           component={RegisterScreen}
   //           options={{
-  //             title: "Sign Up",
-  //             animationTypeForReplace: state.isSignedOut ? "pop" : "push",
+  //             title: 'Sign Up',
+  //             animationTypeForReplace: state.isSignedOut
+  //               ? 'pop'
+  //               : 'push',
   //           }}
   //         />
   //       );
   //       break;
-  //     case "LOAD_SIGNIN":
-  //       arr.push(<Stack.Screen name="SignInScreen" component={SignIn} />);
+  //     case 'LOAD_SIGNIN':
+  //       arr.push(
+  //         <RootStack.Screen name="SignInScreen" component={SignIn} />
+  //       );
   //       break;
 
-  //     case "LOAD_HOME":
+  //     case 'LOAD_HOME':
   //       arr.push(
-  //         <Drawer.Navigator
-  //           drawerContent={(props) => <DrawerContent {...props} />}
-  //         >
-  //           <Drawer.Screen name="Home" component={StackNavigator} />
-  //           {/* <Drawer.Screen name="Account" component={AccountStackNavigator} /> */}
-  //         </Drawer.Navigator>
+  //         <RootStack.Screen
+  //           name="HomeScreen"
+  //           component={DrawerNavigator}
+  //         />
   //       );
   //       break;
   //     default:
-  //       arr.push(<Stack.Screen name="SignInScreen" component={SignIn} />);
+  //       arr.push(
+  //         <RootStack.Screen name="SignInScreen" component={SignIn} />
+  //       );
   //       break;
   //   }
   //   return arr[0];
   // };
 
-  const onReady = isReadyRef.current as React.MutableRefObject<boolean>;
-
-  React.useEffect(() => {
-    return () => {
-      // onReady.current = false;
-      (isReadyRef as React.MutableRefObject<boolean>).current = false;
-    };
-  }, []);
-
-  console.log("root state", navigationRef?.current?.getRootState());
-
-  console.log(state.isSignedIn);
-  const theme = useTheme();
-  const navigationTheme = theme.dark ? CombinedDarkTheme : CombinedDefaultTheme;
-
   return (
     <>
-      <NavigationContainer
-        ref={navigationRef}
-        onReady={() => {
-          // onReady.current = true;
-          (isReadyRef as React.MutableRefObject<boolean>).current = true;
-        }}
-        theme={navigationTheme}
-      >
+      <>
         <>
-          <>
-            {state.isSignedIn ? <DrawerNavigator /> : <AccountStackNavigator />}
-          </>
+          {state.isSignedIn ? (
+            <DrawerNavigator />
+          ) : (
+            <AccountStackNavigator />
+          )}
         </>
-      </NavigationContainer>
+      </>
+      {/* <RootStack.Navigator>
+          {chooseScreen(state)}
+        </RootStack.Navigator> */}
     </>
   );
 };

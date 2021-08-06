@@ -1,54 +1,73 @@
-import React, { RefObject } from "react";
+import React from 'react';
+import color from 'color';
 
-import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
-import { useTheme, Portal, FAB } from "react-native-paper";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { useTheme, Portal, FAB } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   useIsFocused,
   RouteProp,
   getFocusedRouteNameFromRoute,
-} from "@react-navigation/native";
+} from '@react-navigation/native';
 
-import { ProductScreen } from "../screens/products/productScreen";
-import { FavoriteProductsScreen } from "../screens/vendor/favoritesScreen";
-import { TransactionOrdersScreen } from "../screens/orders/transactionOrdersScreen";
-import { MakeOfferScreen } from "../screens/vendor/makeOfferScreen";
-import { AddProductScreen } from "../screens/vendor/addProductScreen";
-import { Message } from "../components/account/messages";
+import * as ROUTES from '../constants/routes.constants';
+import * as ICONS from '../constants/icons.constants';
+
+import { ProductScreen } from '../screens/products/productScreen';
+import { FavoriteProductsScreen } from '../screens/vendor/favoritesScreen';
+import { TransactionOrdersScreen } from '../screens/orders/ordersScreen';
+
+import { AddProductScreen } from '../screens/vendor/newAddProductScreen';
+import { MyProductsScreen } from '../screens/vendor/myProductsScreen';
+
 import {
   OrderTransactionStackParamList,
   ProductStackNavigatorParamList,
-} from "../types";
+} from '../types';
 
-import overlay from "../utils/overlay";
+import overlay from '../utils/overlay';
 
-import { AccountStackNavigator } from "./accountStackNavigator";
-import { AuthContext } from "../context/authUtils";
+import { useAuth } from '../context/authorization.context';
 
 const Tab = createMaterialBottomTabNavigator();
 
 type OrderProps = {
-  route: RouteProp<OrderTransactionStackParamList, "Order">;
+  route: RouteProp<OrderTransactionStackParamList, 'Order'>;
 };
 type Props = {
-  route: RouteProp<ProductStackNavigatorParamList, "Products">;
+  route: RouteProp<ProductStackNavigatorParamList, 'Products'>;
 };
 
 export const BottomTabs = (props: Props) => {
-  const routeName = getFocusedRouteNameFromRoute(props.route) ?? "Store";
-  const { state } = React.useContext(AuthContext);
+  const routeName =
+    getFocusedRouteNameFromRoute(props.route) ?? 'Store';
+
+  const { state } = useAuth();
+
   const theme = useTheme();
   const safeArea = useSafeAreaInsets();
   const isFocused = useIsFocused();
 
-  let icon = "feather";
+  let icon = 'feather';
 
   switch (routeName) {
-    case "Transactions":
-      icon = "cash-multiple";
+    case ROUTES.PRODUCTS_ROUTE:
+      icon = ICONS.PRODUCTS_ICON;
+      break;
+    case ROUTES.TRANSACTIONS_ROUTE:
+      icon = ICONS.TRANSACTIONS_ICON;
+      break;
+    case ROUTES.FAVORITES_ROUTE:
+      icon = ICONS.FAVORITES_ICON;
+      break;
+    case ROUTES.MY_PRODUCTS_ROUTE:
+      icon = ICONS.MY_PRODUCTS_ICON;
+      break;
+    case ROUTES.ADD_PRODUCT_ROUTE:
+      icon = ICONS.ADD_PRODUCT_ICON;
       break;
     default:
-      icon = "feather";
+      icon = 'feather';
       break;
   }
 
@@ -56,16 +75,15 @@ export const BottomTabs = (props: Props) => {
     ? (overlay(6, theme.colors.surface) as string)
     : theme.colors.surface;
 
-  // const [view, setView] = React.useState()
-
-  const [renderStore, setRendorStore] = React.useState(false);
   React.useEffect(() => {
-    if (state.isSignedIn) {
-      setRendorStore(true);
-    } else {
-      setRendorStore(false);
-    }
-  }, [state]);
+    console.log('Bottom Tabs: route', props.route);
+  }, [props]);
+
+  React.useEffect(() => {
+    console.log('BottomTab Navigator', Tab);
+  }, []);
+
+  console.log('BottomTabs: tabBarColor', tabBarColor);
 
   return (
     <React.Fragment>
@@ -75,80 +93,64 @@ export const BottomTabs = (props: Props) => {
           backBehavior="initialRoute"
           shifting={true}
           activeColor={theme.colors.primary}
-          // inactiveColor={color(theme.colors.text).alpha(0.6).rgb().string()}
-          // sceneAnimationEnabled={false}
+          inactiveColor={color(theme.colors.text)
+            .alpha(0.6)
+            .rgb()
+            .string()}
+          sceneAnimationEnabled={false}
+          barStyle={{
+            backgroundColor: theme.dark
+              ? (overlay(6, theme.colors.surface) as string)
+              : theme.colors.surface,
+          }}
         >
           <Tab.Screen
-            name="Products"
+            name={ROUTES.PRODUCTS_ROUTE}
             component={ProductScreen}
             options={{
-              tabBarIcon: "package-variant",
+              tabBarIcon: ICONS.PRODUCTS_ICON,
               tabBarColor,
             }}
           />
           <Tab.Screen
-            name="Transactions"
+            name={ROUTES.TRANSACTIONS_ROUTE}
             component={TransactionOrdersScreen}
             options={{
-              tabBarIcon: "cash-multiple",
+              tabBarIcon: ICONS.TRANSACTIONS_ICON,
               tabBarColor,
             }}
           />
           <Tab.Screen
-            name="Favorites"
+            name={ROUTES.FAVORITES_ROUTE}
             component={FavoriteProductsScreen}
             options={{
-              tabBarIcon: "heart",
+              tabBarIcon: ICONS.FAVORITES_ICON,
               tabBarColor,
             }}
           />
           <Tab.Screen
-            name="My Products"
-            component={ProductScreen}
+            name={ROUTES.MY_PRODUCTS_ROUTE}
+            component={MyProductsScreen}
             options={{
-              tabBarIcon: "folder-home-outline",
+              tabBarIcon: ICONS.MY_PRODUCTS_ICON,
               tabBarColor,
             }}
           />
           <Tab.Screen
-            name="Add Product"
+            name={ROUTES.ADD_PRODUCT_ROUTE}
             component={AddProductScreen}
             options={{
-              tabBarIcon: "folder-home-outline",
+              tabBarIcon: ICONS.ADD_PRODUCT_ICON,
               tabBarColor,
             }}
           />
-          <Tab.Screen
-            name="Make Offer"
-            component={MakeOfferScreen}
-            options={{
-              tabBarIcon: "folder-home-outline",
-              tabBarColor,
-            }}
-          />
-          <Tab.Screen
-            name="Messages"
-            component={Message}
-            options={{
-              tabBarIcon: "message-text-outline",
-              tabBarColor,
-            }}
-          />
-          {/* <Tab.Screen
-          name="StartScreen"
-          component={AccountStackNavigator}
-          options={{
-            tabBarIcon: "message-text-outline",
-            tabBarColor,
-          }}
-        /> */}
         </Tab.Navigator>
         <Portal>
           <FAB
             visible={isFocused}
             icon={icon}
             style={{
-              position: "absolute",
+              position: 'absolute',
               bottom: safeArea.bottom + 65,
               right: 16,
             }}

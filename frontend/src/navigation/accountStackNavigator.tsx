@@ -1,74 +1,117 @@
-import React from "react";
+import React from 'react';
+import color from 'color';
 
-import { createStackNavigator } from "@react-navigation/stack";
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
-import { DrawerNavigationProp } from "@react-navigation/drawer";
-import { Appbar, Avatar, useTheme } from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { createStackNavigator } from '@react-navigation/stack';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { Appbar, Avatar, useTheme } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-import { TouchableOpacity } from "react-native";
-import { DEFAULT_AVATAR } from "../constants/backend.constants";
+import { TouchableOpacity } from 'react-native';
+import {
+  DEFAULT_AVATAR,
+  DEFAULT_ICON,
+} from '../constants/backend.constants';
+
+import * as ROUTES from '../constants/routes.constants';
+
+import overlay from '../utils/overlay';
 
 import {
   StartScreen,
   LoginScreen,
   RegisterScreen,
-  ResetPasswordScreen,
-  Dashboard,
-} from "../screens/account";
+} from '../screens/account';
 
-import { AccountStackNavigatorParamList } from "../types";
+import { useAuth } from '../context/authorization.context';
 
-const AccountStack = createStackNavigator<AccountStackNavigatorParamList>();
+import { AccountStackNavigatorParamList } from '../types';
+
+const AccountStack =
+  createStackNavigator<AccountStackNavigatorParamList>();
 
 export const AccountStackNavigator = () => {
   const theme = useTheme();
-  // console.log(AccountStack);
+  const { state } = useAuth();
+  // const {
+  //   isLoading,
+  //   isSignedIn,
+  //   accessToken,
+  //   noAccount,
+  //   isSignedUp,
+  // } = useAuth();
+
+  // console.log('isSignedIn', isSignedIn);
+  // console.log('isLoading', isLoading);
+  // console.log('accessToken', accessToken);
+  // console.log('noAccount', noAccount);
+  // console.log('isSignedUp', isSignedUp);
+
+  // React.useEffect(() => {
+  //   if (isLoading) {
+  //     navigation.replace('Dashboard');
+  //   }
+  //   if (isSignedIn && accessToken && isSignedUp) {
+  //     console.log('isSignedIn and accessToken and isSignedUp');
+  //     navigation.replace('LoginScreen');
+  //   }
+  //   if (!isSignedUp && noAccount) {
+  //     console.log('not isSignedUp and noAccount');
+  //     navigation.replace('RegisterScreen');
+  //   }
+  //   if (!isSignedIn && !noAccount) {
+  //     console.log('not isSignedIn and not noAccount');
+  //     navigation.replace('LoginScreen');
+  //   }
+  // }, [isSignedIn, accessToken, isSignedUp, noAccount, isLoading]);
+
+  console.log('AccountStackNavigator', AccountStack);
 
   return (
     <AccountStack.Navigator
-      initialRouteName="StartScreen"
-      headerMode="screen"
+      initialRouteName={ROUTES.START_ROUTE}
+      // headerMode="screen"
       screenOptions={{
-        header: ({ scene, previous, navigation }) => {
-          const { options } = scene.descriptor;
+        headerShown: true,
+        animationEnabled: true,
+        cardOverlayEnabled: true,
+        cardShadowEnabled: true,
+        animationTypeForReplace: 'push',
+        header: ({ navigation, route, back, options }) => {
+          // const { options } = scene.descriptor;
           const title =
             options.headerTitle !== undefined
               ? options.headerTitle
               : options.title !== undefined
               ? options.title
-              : scene.route.name;
+              : route.name;
 
           return (
             <Appbar.Header
-              theme={{ colors: { primary: theme.colors.surface } }}
+              theme={{
+                colors: {
+                  primary: theme.dark
+                    ? (overlay(6, theme.colors.surface) as string)
+                    : theme.colors.surface,
+                },
+              }}
             >
-              {previous ? (
+              {back ? (
                 <Appbar.BackAction
                   onPress={navigation.goBack}
                   color={theme.colors.primary}
                 />
               ) : (
-                <TouchableOpacity
-                  style={{ marginLeft: 10 }}
-                  onPress={() => {
-                    (
-                      navigation as any as DrawerNavigationProp<{}>
-                    ).openDrawer();
-                  }}
-                >
-                  <Avatar.Image
-                    size={40}
-                    source={{
-                      uri: DEFAULT_AVATAR,
-                    }}
-                  />
-                </TouchableOpacity>
+                <Avatar.Image
+                  size={40}
+                  style={{ backgroundColor: 'transparent' }}
+                  source={require('../assets/logo.png')}
+                />
               )}
 
               <Appbar.Content
                 title={
-                  title === "StartScreen" ? (
+                  title === ROUTES.START_ROUTE ? (
                     <MaterialCommunityIcons
                       style={{ marginRight: 10 }}
                       name="package-variant-closed"
@@ -81,7 +124,7 @@ export const AccountStackNavigator = () => {
                 }
                 titleStyle={{
                   fontSize: 18,
-                  fontWeight: "bold",
+                  fontWeight: 'bold',
                   color: theme.colors.primary,
                 }}
               />
@@ -91,33 +134,26 @@ export const AccountStackNavigator = () => {
       }}
     >
       <AccountStack.Screen
-        name="StartScreen"
+        name={ROUTES.START_ROUTE}
         component={StartScreen}
         options={({ route }) => {
           const routeName =
-            getFocusedRouteNameFromRoute(route) ?? "StartScreen";
+            getFocusedRouteNameFromRoute(route) ?? 'StartScreen';
           return { headerTitle: routeName };
         }}
       />
       <AccountStack.Screen
-        name="LoginScreen"
+        name={ROUTES.SIGNIN_ROUTE}
         component={LoginScreen}
-        options={{ headerTitle: "Sign In" }}
+        options={{ headerTitle: 'Sign In' }}
       />
       <AccountStack.Screen
-        name="RegisterScreen"
+        name={ROUTES.SIGNUP_ROUTE}
         component={RegisterScreen}
-        options={{ headerTitle: "Register" }}
-      />
-      <AccountStack.Screen
-        name="Dashboard"
-        component={Dashboard}
-        options={{ headerTitle: "Dashboard" }}
-      />
-      <AccountStack.Screen
-        name="ResetPassword"
-        component={ResetPasswordScreen}
-        options={{ headerTitle: "Reset Password" }}
+        options={{
+          headerTitle: 'Register',
+          animationTypeForReplace: state.isSignedOut ? 'pop' : 'push',
+        }}
       />
     </AccountStack.Navigator>
   );
