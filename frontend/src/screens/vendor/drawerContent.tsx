@@ -1,24 +1,29 @@
+import React from 'react';
+
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+import color from 'color';
+
 import {
   DrawerContentComponentProps,
-  DrawerContentOptions,
-  DrawerNavigationProp,
   DrawerContentScrollView,
   DrawerItem,
+  useDrawerProgress,
 } from '@react-navigation/drawer';
+
 import {
-  getFocusedRouteNameFromRoute,
   DrawerActions,
   StackActions,
-  ParamListBase,
 } from '@react-navigation/native';
-import React from 'react';
+
 import {
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
   ScrollViewProps,
   View,
 } from 'react-native';
+
 import {
   Avatar,
   Caption,
@@ -32,14 +37,16 @@ import {
   Button,
 } from 'react-native-paper';
 import Animated from 'react-native-reanimated';
-import * as ICONS from '../../constants/icons.constants';
-import { usePreference } from '../../context/preferences.context';
 
+import * as ICONS from '../../constants/icons.constants';
+import * as ROUTES from '../../constants/routes.constants';
+
+import { usePreference } from '../../context/preferences.context';
 import { useVendorData } from '../../context/vendor.context';
 import { useVendorIcon } from '../../hooks/useVendorIcon';
 import { useAuth } from '../../context/authorization.context';
 
-type Props = DrawerContentComponentProps<DrawerContentOptions>;
+type Props = DrawerContentComponentProps;
 
 export function DrawerContent(props: Props) {
   const { vendor } = useVendorData();
@@ -50,11 +57,33 @@ export function DrawerContent(props: Props) {
   const { rtl, theme, isThemeDark, toggleRTL, toggleTheme } =
     usePreference();
 
-  const translateX = Animated.interpolateNode(props.progress, {
-    inputRange: [0, 0.5, 0.7, 0.8, 1],
-    outputRange: [-100, -85, -70, -45, 0],
-  });
+  const dimensions = useWindowDimensions();
 
+  const isLargeScreen = dimensions.width >= 768;
+
+  const progress = useDrawerProgress();
+
+  const translateX = Animated.interpolateNode(
+    // @ts-ignore
+    progress,
+    {
+      inputRange: [0, 0.5, 0.7, 0.8, 1],
+      outputRange: [-100, -85, -70, -45, 0],
+    }
+  );
+
+  const { state } = props;
+  const { routes, index } = state;
+  const focusedRoute = routes[index].name;
+
+  const activeColor = theme.colors.primary;
+
+  const inactiveColor = color(theme.colors.text)
+    .alpha(0.6)
+    .rgb()
+    .string();
+
+  console.log('Drawer: state focused route', focusedRoute);
   console.log('Drawer: state', props.state);
   console.log('Drawer: state routes', props.state.routes);
   console.log('Drawer: state routenames', props.state.routeNames);
@@ -64,8 +93,7 @@ export function DrawerContent(props: Props) {
     let routes = props.state.routeNames;
 
     console.log('DrawerContent: routes', routes);
-    // let tempRoute =
-    //   getFocusedRouteNameFromRoute(props.navigation.isFocused) ?? 'Store';
+
     let route = routes[routes.length - 1];
     console.log('DrawerContent: route', route);
     if (route.length > 0) {
@@ -204,84 +232,115 @@ export function DrawerContent(props: Props) {
             icon={({ color, size }) => (
               <MaterialCommunityIcons
                 name={ICONS.MY_PRODUCTS_ICON}
-                color={color}
+                color={
+                  focusedRoute === ROUTES.MY_PRODUCTS_ROUTE
+                    ? activeColor
+                    : inactiveColor
+                }
                 size={size}
               />
             )}
             label="My Products"
             onPress={() => {
-              console.log('Drawer: pushed My Products');
-
-              navigationWithPush('Products', {
-                screen: 'My Products',
-                params: {
-                  screen: 'My Products',
-                },
-              });
+              isLargeScreen
+                ? props.navigation.navigate(ROUTES.MY_PRODUCTS_ROUTE)
+                : navigationWithPush('Products', {
+                    screen: ROUTES.MY_PRODUCTS_ROUTE,
+                  });
             }}
           />
           <DrawerItem
-            icon={({ color, size }) => (
+            activeTintColor={activeColor}
+            inactiveTintColor={inactiveColor}
+            icon={({ color, focused, size }) => (
               <MaterialCommunityIcons
                 name={ICONS.TRANSACTIONS_ICON}
-                color={color}
+                color={
+                  focusedRoute === ROUTES.TRANSACTIONS_ROUTE
+                    ? activeColor
+                    : inactiveColor
+                }
                 size={size}
               />
             )}
             label="Transactions"
             onPress={() => {
               console.log('Drawer: pushed Transactions');
-
-              navigationWithPush('Products', {
-                screen: 'Transactions',
-              });
+              isLargeScreen
+                ? props.navigation.navigate(ROUTES.TRANSACTIONS_ROUTE)
+                : navigationWithPush('Products', {
+                    screen: ROUTES.TRANSACTIONS_ROUTE,
+                  });
             }}
           />
           <DrawerItem
+            activeTintColor={activeColor}
+            inactiveTintColor={inactiveColor}
             icon={({ color, size }) => (
               <MaterialCommunityIcons
                 name={ICONS.FAVORITES_ICON}
-                color={color}
+                color={
+                  focusedRoute === ROUTES.FAVORITES_ROUTE
+                    ? activeColor
+                    : inactiveColor
+                }
                 size={size}
               />
             )}
             label="Favorites"
             onPress={() => {
               console.log('Drawer: pushed Favorites');
-              navigationWithPush('Products', {
-                screen: 'Favorites',
-              });
+              isLargeScreen
+                ? props.navigation.navigate(ROUTES.FAVORITES_ROUTE)
+                : navigationWithPush('Products', {
+                    screen: ROUTES.FAVORITES_ROUTE,
+                  });
             }}
           />
           <DrawerItem
+            activeTintColor={activeColor}
+            inactiveTintColor={inactiveColor}
             icon={({ color, size }) => (
               <MaterialCommunityIcons
                 name={ICONS.PRODUCTS_ICON}
-                color={color}
+                color={
+                  focusedRoute === ROUTES.PRODUCTS_ROUTE
+                    ? activeColor
+                    : inactiveColor
+                }
                 size={size}
               />
             )}
             label="All Products"
             onPress={() => {
               console.log('Drawer: pushed All Products');
-
-              navigationWithPush('Products');
+              isLargeScreen
+                ? props.navigation.navigate(ROUTES.PRODUCTS_ROUTE)
+                : navigationWithPush('Products');
             }}
           />
           <DrawerItem
+            activeTintColor={activeColor}
+            inactiveTintColor={inactiveColor}
             icon={({ color, size }) => (
               <MaterialCommunityIcons
                 name={ICONS.ADD_PRODUCT_ICON}
-                color={color}
+                color={
+                  focusedRoute === ROUTES.ADD_PRODUCT_ROUTE
+                    ? activeColor
+                    : inactiveColor
+                }
                 size={size}
               />
             )}
             label="Add Product"
             onPress={() => {
-              console.log('Drawer: pushed Favorites');
-              navigationWithPush('Products', {
-                screen: 'Add Product',
-              });
+              console.log('Drawer: pushed Add Product');
+              isLargeScreen
+                ? props.navigation.navigate(ROUTES.ADD_PRODUCT_ROUTE)
+                : navigationWithPush('Products', {
+                    screen: ROUTES.ADD_PRODUCT_ROUTE,
+                  });
             }}
           />
         </Drawer.Section>
