@@ -34,7 +34,7 @@ type VendorPreview = {
   image: ImagePreview;
   product_count: number;
   order_count: number;
-  favorites: Product["slug"][];
+  favorites: Product['slug'][];
 };
 
 type Category = {
@@ -73,7 +73,7 @@ type Product = {
 
 type ProductPreview = {
   id: number;
-  category: Category["name"];
+  category: Category['name'];
   vendor: VendorPreview;
   title: string;
   description: string;
@@ -89,7 +89,7 @@ type ProductPreview = {
 
 type ProductDetail = {
   id: number;
-  category: Category["name"];
+  category: Category['name'];
   vendor: VendorPreview;
   title: string;
   description: string;
@@ -112,7 +112,7 @@ type Image = {
   is_feature: boolean;
   created_at?: string;
   updated_at?: string;
-  product?: Product["id"];
+  product?: Product['id'];
 };
 
 type ImagePreview = {
@@ -146,7 +146,7 @@ type OrderDetail = {
   created_at?: string;
   updated_at?: string;
   stripe_pid?: string;
-  order?: Order["id"];
+  order?: Order['id'];
 };
 
 type AuthResponse = {
@@ -156,5 +156,5 @@ type AuthResponse = {
 };
 
 type AccessToken = {
-  accessToken: null | string;
+  accessToken?: null | string;
 };
