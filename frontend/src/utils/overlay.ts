@@ -1,15 +1,20 @@
-// import color from "color";
-import { Animated } from "react-native";
-import { DarkTheme } from "react-native-paper";
+import color from 'color';
+import { Animated } from 'react-native';
+import { DarkTheme } from 'react-native-paper';
+import {
+  CombinedDefaultTheme,
+  CombinedDarkTheme,
+} from '../components/common/theme';
 
 export default function overlay(
   elevation: number | Animated.Value = 1,
-  surfaceColor: string = DarkTheme.colors.surface
+  surfaceColor: string = CombinedDarkTheme.colors.surface
 ) {
   if (elevation instanceof Animated.Value) {
     const inputRange = [0, 1, 2, 3, 8, 24];
     return elevation.interpolate({
       inputRange,
+
       outputRange: inputRange.map((elevation) => {
         return calculateColor(surfaceColor, elevation);
       }),
@@ -27,10 +32,9 @@ function calculateColor(surfaceColor: string, elevation: number) {
   } else {
     overlayTransparency = elevationOverlayTransparency[1];
   }
-  return surfaceColor;
-  // return color(surfaceColor)
-  //   .mix(color("white"), overlayTransparency * 0.01)
-  //   .hex();
+  return color(surfaceColor)
+    .mix(color('white'), overlayTransparency * 0.01)
+    .hex();
 }
 const elevationOverlayTransparency: { [id: number]: number } = {
   1: 5,

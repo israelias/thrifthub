@@ -1,19 +1,23 @@
-import { Fragment } from "react";
+import { Fragment } from 'react';
 import {
   Appearance as AppearanceOriginal,
   ColorSchemeName as ColorSchemeNameOriginal,
-} from "react-native";
+} from 'react-native';
 
-export type ColorSchemeName = "light" | "dark" | undefined;
+export type ColorSchemeName = 'light' | 'dark';
 
 export interface AppearancePreferences {
   colorScheme: ColorSchemeName;
 }
 
-type AppearanceListener = (preferences: AppearancePreferences) => void;
+type AppearanceListener = (
+  preferences: AppearancePreferences
+) => void;
 
 export interface Appearence {
-  addChangeListener: (listener: AppearanceListener) => { remove: () => void };
+  addChangeListener: (listener: AppearanceListener) => {
+    remove: () => void;
+  };
   getColorScheme(): ColorSchemeName;
 }
 
@@ -40,8 +44,11 @@ export const Appearance: Appearence = {
 function normalizeColorScheme(
   colorSchemeOriginal: ColorSchemeNameOriginal
 ): ColorSchemeName {
-  if (colorSchemeOriginal === "light" || colorSchemeOriginal === "dark")
+  if (
+    colorSchemeOriginal === 'light' ||
+    colorSchemeOriginal === 'dark'
+  )
     return colorSchemeOriginal;
 
-  return undefined;
+  return 'light';
 }
