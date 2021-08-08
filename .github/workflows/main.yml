@@ -47,7 +47,7 @@ jobs:
       defaults:
         run:
           working-directory: ./frontend
-      needs: Backend_Deploy
+      # needs: Backend_Deploy
       steps:
         - uses: actions/checkout@v1
         - uses: actions/setup-node@v1
