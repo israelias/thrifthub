@@ -349,7 +349,7 @@ export function DrawerContent(props: Props) {
             <View style={styles.preference}>
               <Text>Dark Theme</Text>
               <View pointerEvents="none">
-                <Switch value={isThemeDark} />
+                <Switch value={theme.dark} />
               </View>
             </View>
           </TouchableRipple>

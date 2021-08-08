@@ -1,4 +1,4 @@
-import React, { ComponentProps } from 'react';
+import React from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 
@@ -8,6 +8,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  Alert,
 } from 'react-native';
 
 import { FormBuilder } from 'react-native-paper-form-builder';
@@ -23,6 +24,8 @@ import {
   SubmitHandler,
   SubmitErrorHandler,
 } from 'react-hook-form';
+
+import merge from 'deepmerge';
 
 import { MaterialBottomTabNavigationProp } from '@react-navigation/material-bottom-tabs';
 import {
@@ -65,7 +68,15 @@ type ProductFormValues = {
   description: string;
   price: string;
   condition: string;
-  fieldArray: { name: string; uri?: string }[];
+  images: {
+    type: 'success';
+    name: string;
+    size: number;
+    uri: string;
+    lastModified?: number | undefined;
+    file: File;
+    output?: FileList | null | undefined;
+  }[];
 };
 
 export const AddProductScreen = ({
@@ -89,6 +100,8 @@ export const AddProductScreen = ({
   const [getCondition, setCondition] = React.useState('');
 
   const [images, setImages] = React.useState<ImageInfo[] | null>([]);
+  const [selected, setSelected] =
+    React.useState<DocumentPicker.DocumentResult[]>();
   const [files, setFiles] =
     React.useState<DocumentPicker.DocumentResult>();
 
@@ -110,18 +123,18 @@ export const AddProductScreen = ({
       description: '',
       price: '',
       condition: '',
-      fieldArray: [{ name: 'test', uri: '' }],
+      images: [{}],
     },
     mode: 'onChange',
     criteriaMode: 'all',
   });
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
-    name: 'fieldArray',
+    name: 'images',
   });
 
-  const watchFieldArray = watch('fieldArray');
+  const watchFieldArray = watch('images');
   const controlledFields = fields.map((field, index) => {
     return {
       ...field,
@@ -154,7 +167,9 @@ export const AddProductScreen = ({
     if (results.type === 'success') {
       console.log(results);
       setFiles(results);
-      append({ name: results.uri, uri: results.uri });
+
+      append(results);
+
       if (results.output) {
         setFileList(results.output);
         console.log('results output', results.output);
@@ -203,6 +218,15 @@ export const AddProductScreen = ({
   ) => {
     console.log('submit handler', e);
     console.log('submit handler validatedData', validatedData);
+    // const mergedFileList = validatedData.images
+    //   .map((image) => image.output)
+    //   .reduce((acc, image, index, field) => {
+    //     image[field] = { ...image };
+    //     return acc;
+    //   });
+
+    // console.log('reduce', mergedFileList);
+
     createProduct(
       validatedData.title,
       validatedData.category,
@@ -213,6 +237,60 @@ export const AddProductScreen = ({
       fileList
     );
   };
+
+  const hasUnsavedChanges = Boolean(
+    getTitle ||
+      getDescription ||
+      getCategory ||
+      getPrice ||
+      getCondition
+  );
+
+  React.useEffect(
+    () =>
+      navigation &&
+      navigation.addListener('beforeRemove', (e) => {
+        if (!hasUnsavedChanges) {
+          return;
+        }
+
+        e.preventDefault();
+
+        if (Platform.OS === 'web') {
+          const discard = confirm(
+            'You have unsaved changes. Discard them and leave the screen?'
+          );
+
+          if (discard) {
+            navigation.dispatch(e.data.action);
+          }
+        } else {
+          Alert.alert(
+            'Discard changes?',
+            'You have unsaved changes. Discard them and leave the screen?',
+            [
+              {
+                text: "Don't leave",
+                style: 'cancel',
+                onPress: () => {},
+              },
+              {
+                text: 'Discard',
+                style: 'destructive',
+                onPress: () => navigation.dispatch(e.data.action),
+              },
+            ]
+          );
+        }
+      }),
+    [hasUnsavedChanges, navigation]
+  );
+
+  // React.useEffect(() => {
+  //   if (fields.length === 2) {
+  //     remove(0);
+  //   }
+  // }, [fields]);
 
   return (
     <ScrollView
@@ -382,25 +460,48 @@ export const AddProductScreen = ({
                 options: categoryOptions,
               },
               {
-                name: 'fieldArray',
+                name: 'images',
                 type: 'custom',
                 JSX: () =>
                   controlledFields.map((field, index) => {
                     return (
-                      <View>
+                      <View
+                        key={field.id}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                        }}
+                      >
                         <Image
                           source={{ uri: field.uri }}
                           style={{ width: 200, height: 200 }}
                         />
                         <TextInput
+                          key={field.id}
                           style={{ display: 'none' }}
                           underlineColor={'transparent'}
                           mode="outlined"
                           value={field.uri}
+                          defaultValue={field.name}
+                          // ref={...register()}
                           {...register(
-                            `fieldArray.${index}.name` as const
+                            `images.${index}.name` as const
                           )}
                         />
+                        <Button
+                          mode={'outlined'}
+                          labelStyle={styles.text}
+                          style={[
+                            styles.button,
+                            {
+                              marginTop: 24,
+                              backgroundColor: theme.colors.surface,
+                            },
+                          ]}
+                          onPress={() => remove(index)}
+                        >
+                          Remove
+                        </Button>
                       </View>
                     );
                   }),
@@ -408,21 +509,7 @@ export const AddProductScreen = ({
             ]}
           />
         </View>
-        <Button
-          mode={'outlined'}
-          labelStyle={styles.text}
-          style={[
-            styles.button,
-            { marginTop: 24, backgroundColor: theme.colors.surface },
-          ]}
-          onPress={() =>
-            append({
-              name: 'bill',
-            })
-          }
-        >
-          Append
-        </Button>
+
         <Button
           mode={'outlined'}
           labelStyle={styles.text}
@@ -434,7 +521,7 @@ export const AddProductScreen = ({
         >
           Upload Images
         </Button>
-        <View
+        {/* <View
           style={{
             flex: 1,
             alignItems: 'center',
@@ -456,7 +543,7 @@ export const AddProductScreen = ({
                   style={{ width: 200, height: 200 }}
                 />
               ))}
-        </View>
+        </View> */}
         <Button
           mode={'contained'}
           labelStyle={styles.text}
