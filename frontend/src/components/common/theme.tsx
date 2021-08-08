@@ -8,31 +8,31 @@ import {
 } from 'react-native-paper';
 import merge from 'deepmerge';
 
-// export const CombinedDarkTheme = {
-//   ...PaperDarkTheme,
-//   ...NavigationDarkTheme,
-//   colors: {
-//     ...PaperDarkTheme.colors,
-//     ...NavigationDarkTheme.colors,
-//     primary: '#1ba1f2',
-//   },
-// };
+export const CombinedDarkTheme = {
+  ...PaperDarkTheme,
+  ...NavigationDarkTheme,
+  colors: {
+    ...PaperDarkTheme.colors,
+    ...NavigationDarkTheme.colors,
+    primary: '#1ba1f2',
+  },
+};
 
-// export const CombinedDefaultTheme = {
-//   ...PaperDefaultTheme,
-//   ...NavigationDefaultTheme,
-//   colors: {
-//     ...PaperDefaultTheme.colors,
-//     ...NavigationDefaultTheme.colors,
-//     primary: '#1ba1f2',
-//   },
-// };
+export const CombinedDefaultTheme = {
+  ...PaperDefaultTheme,
+  ...NavigationDefaultTheme,
+  colors: {
+    ...PaperDefaultTheme.colors,
+    ...NavigationDefaultTheme.colors,
+    primary: '#1ba1f2',
+  },
+};
 
-export const CombinedDefaultTheme = merge(
-  PaperDefaultTheme,
-  NavigationDefaultTheme
-);
-export const CombinedDarkTheme = merge(
-  PaperDarkTheme,
-  NavigationDarkTheme
-);
+// export const CombinedDefaultTheme = merge(
+//   PaperDefaultTheme,
+//   NavigationDefaultTheme
+// );
+// export const CombinedDarkTheme = merge(
+//   PaperDarkTheme,
+//   NavigationDarkTheme
+// );
