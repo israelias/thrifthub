@@ -22,7 +22,9 @@ import { StackNavigator } from './productStackNavigator';
 
 import { DrawerContent } from '../screens/vendor/drawerContent';
 
-const Drawer = createDrawerNavigator();
+import { DrawerStackParamList } from '../types';
+
+const Drawer = createDrawerNavigator<DrawerStackParamList>();
 
 export const DrawerNavigator = () => {
   const theme = useTheme();

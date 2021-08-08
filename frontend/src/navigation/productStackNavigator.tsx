@@ -44,7 +44,7 @@ export const StackNavigator = () => {
     <Stack.Navigator
       initialRouteName="Products"
       screenOptions={{
-        // animationEnabled: true,
+        animationEnabled: true,
 
         header: ({ navigation, route, options, back }) => {
           const title =
