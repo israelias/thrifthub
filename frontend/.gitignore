@@ -7,7 +7,6 @@ npm-debug.*
 *.key
 *.mobileprovision
 *.orig.*
-web-build/
 .vercel
 .yarn-error.log
 
