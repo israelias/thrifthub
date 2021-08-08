@@ -22,7 +22,7 @@ export const ProductScreen = ({
 }) => {
   const theme = useTheme();
 
-  const { products, dispatch, loading, error } = useProductsData();
+  const { products, loading } = useProductsData();
 
   return loading ? (
     <ActivityIndicator />
@@ -38,18 +38,18 @@ export const ProductScreen = ({
           ...productProps,
           onPress: () =>
             navigation &&
-            navigation.push('ProductDetails', {
+            navigation.navigate('ProductDetails', {
               ...productProps,
             }),
           makeOffer: () =>
             navigation &&
-            navigation.push('MakeOffer', {
+            navigation.navigate('MakeOffer', {
               product: productProps,
               ...productProps,
             }),
           updateProduct: () =>
             navigation &&
-            navigation.push('UpdateProduct', {
+            navigation.navigate('UpdateProduct', {
               product: productProps,
               ...productProps,
             }),

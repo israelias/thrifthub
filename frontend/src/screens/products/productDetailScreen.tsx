@@ -17,8 +17,6 @@ export const ProductDetailScreen = ({
     navigation &&
     navigation.navigate('MakeOffer', {
       product,
-      productId: product.id.toString(),
-      vendorId: product.vendor.id.toString(),
       ...product,
     });
   console.log('is this whats making it work');
