@@ -1,7 +1,6 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { MaterialBottomTabNavigationProp } from '@react-navigation/material-bottom-tabs';
 
 import {
   useForm,
@@ -226,173 +225,175 @@ export const MakePurchase = ({
 
       {confirmation ? (
         <React.Fragment>
-          <FormBuilder
-            control={control}
-            setFocus={setFocus}
-            formConfigArray={[
-              {
-                name: 'full_name',
-                type: 'text',
-                textInputProps: {
-                  label: 'Full Name',
-                  left: <TextInput.Icon name={'account'} />,
-                  underlineColor: 'transparent',
-                  mode: 'outlined',
-                  textContentType: 'name',
-                  returnKeyType: 'next',
-                  keyboardType: 'default',
-                },
-                rules: {
-                  required: {
-                    value: true,
-                    message: 'Full name is required',
+          <View style={styles.container}>
+            <FormBuilder
+              control={control}
+              setFocus={setFocus}
+              formConfigArray={[
+                {
+                  name: 'full_name',
+                  type: 'text',
+                  textInputProps: {
+                    label: 'Full Name',
+                    left: <TextInput.Icon name={'account'} />,
+                    underlineColor: 'transparent',
+                    mode: 'outlined',
+                    textContentType: 'name',
+                    returnKeyType: 'next',
+                    keyboardType: 'default',
+                  },
+                  rules: {
+                    required: {
+                      value: true,
+                      message: 'Full name is required',
+                    },
                   },
                 },
-              },
-              {
-                name: 'email',
-                type: 'text',
-                textInputProps: {
-                  label: 'Email',
-                  left: <TextInput.Icon name={'lock'} />,
-                  underlineColor: 'transparent',
-                  mode: 'outlined',
-                  textContentType: 'emailAddress',
-                  returnKeyType: 'next',
-                  keyboardType: 'email-address',
-                },
+                {
+                  name: 'email',
+                  type: 'text',
+                  textInputProps: {
+                    label: 'Email',
+                    left: <TextInput.Icon name={'lock'} />,
+                    underlineColor: 'transparent',
+                    mode: 'outlined',
+                    textContentType: 'emailAddress',
+                    returnKeyType: 'next',
+                    keyboardType: 'email-address',
+                  },
 
-                rules: {
-                  required: {
-                    value: true,
-                    message: 'Email is required',
-                  },
-                  pattern: {
-                    value: /\S+@\S+\.\S+/,
-                    // value:
-                    //   /[A-Za-z0-9._%+-]{3,}@[a-zA-Z]{3,}([.]{1}[a-zA-Z]{2,}|[.]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,})/,
-                    message: 'Email is invalid',
-                  },
-                },
-              },
-              {
-                name: 'phone_number',
-                type: 'text',
-                textInputProps: {
-                  label: 'Phone Number',
-                  left: <TextInput.Icon name={'account'} />,
-                  underlineColor: 'transparent',
-                  mode: 'outlined',
-                  textContentType: 'telephoneNumber',
-                  returnKeyType: 'next',
-                  keyboardType: 'number-pad',
-                },
-                rules: {
-                  required: {
-                    value: true,
-                    message: 'Phone number is required',
+                  rules: {
+                    required: {
+                      value: true,
+                      message: 'Email is required',
+                    },
+                    pattern: {
+                      value: /\S+@\S+\.\S+/,
+                      // value:
+                      //   /[A-Za-z0-9._%+-]{3,}@[a-zA-Z]{3,}([.]{1}[a-zA-Z]{2,}|[.]{1}[a-zA-Z]{2,}[.]{1}[a-zA-Z]{2,})/,
+                      message: 'Email is invalid',
+                    },
                   },
                 },
-              },
-              {
-                name: 'street_address1',
-                type: 'text',
-                textInputProps: {
-                  label: 'Street Address 1',
-                  left: <TextInput.Icon name={'account'} />,
-                  underlineColor: 'transparent',
-                  mode: 'outlined',
-                  textContentType: 'streetAddressLine1',
-                  returnKeyType: 'next',
-                  keyboardType: 'default',
-                },
-                rules: {
-                  required: {
-                    value: true,
-                    message: 'Street address is required',
+                {
+                  name: 'phone_number',
+                  type: 'text',
+                  textInputProps: {
+                    label: 'Phone Number',
+                    left: <TextInput.Icon name={'account'} />,
+                    underlineColor: 'transparent',
+                    mode: 'outlined',
+                    textContentType: 'telephoneNumber',
+                    returnKeyType: 'next',
+                    keyboardType: 'number-pad',
+                  },
+                  rules: {
+                    required: {
+                      value: true,
+                      message: 'Phone number is required',
+                    },
                   },
                 },
-              },
-              {
-                name: 'street_address2',
-                type: 'text',
-                textInputProps: {
-                  label: 'Street Address 2',
-                  left: <TextInput.Icon name={'account'} />,
-                  underlineColor: 'transparent',
-                  mode: 'outlined',
-                  textContentType: 'streetAddressLine2',
-                  returnKeyType: 'next',
-                  keyboardType: 'default',
-                },
-              },
-              {
-                name: 'county',
-                type: 'text',
-                textInputProps: {
-                  label: 'County',
-                  left: <TextInput.Icon name={'account'} />,
-                  underlineColor: 'transparent',
-                  mode: 'outlined',
-                  textContentType: 'sublocality',
-                  returnKeyType: 'next',
-                  keyboardType: 'default',
-                },
-              },
-              {
-                name: 'town_or_city',
-                type: 'text',
-                textInputProps: {
-                  label: 'Town or City',
-                  left: <TextInput.Icon name={'account'} />,
-                  underlineColor: 'transparent',
-                  mode: 'outlined',
-                  textContentType: 'addressCity',
-                  returnKeyType: 'next',
-                  keyboardType: 'default',
-                },
-                rules: {
-                  required: {
-                    value: true,
-                    message: 'Town or City is required',
+                {
+                  name: 'street_address1',
+                  type: 'text',
+                  textInputProps: {
+                    label: 'Street Address 1',
+                    left: <TextInput.Icon name={'account'} />,
+                    underlineColor: 'transparent',
+                    mode: 'outlined',
+                    textContentType: 'streetAddressLine1',
+                    returnKeyType: 'next',
+                    keyboardType: 'default',
+                  },
+                  rules: {
+                    required: {
+                      value: true,
+                      message: 'Street address is required',
+                    },
                   },
                 },
-              },
-              {
-                name: 'country',
-                type: 'select',
-                textInputProps: {
-                  label: 'Town or City',
-                  left: <TextInput.Icon name={'account'} />,
-                  underlineColor: 'transparent',
-                  mode: 'outlined',
-                  textContentType: 'countryName',
-                  returnKeyType: 'next',
-                  keyboardType: 'default',
-                },
-                rules: {
-                  required: {
-                    value: true,
-                    message: 'Country is Required',
+                {
+                  name: 'street_address2',
+                  type: 'text',
+                  textInputProps: {
+                    label: 'Street Address 2',
+                    left: <TextInput.Icon name={'account'} />,
+                    underlineColor: 'transparent',
+                    mode: 'outlined',
+                    textContentType: 'streetAddressLine2',
+                    returnKeyType: 'next',
+                    keyboardType: 'default',
                   },
                 },
-                options: [
-                  {
-                    label: 'Afganistan',
-                    value: 'AF',
+                {
+                  name: 'county',
+                  type: 'text',
+                  textInputProps: {
+                    label: 'County',
+                    left: <TextInput.Icon name={'account'} />,
+                    underlineColor: 'transparent',
+                    mode: 'outlined',
+                    textContentType: 'sublocality',
+                    returnKeyType: 'next',
+                    keyboardType: 'default',
                   },
-                  {
-                    label: 'Denmark',
-                    value: 'DM',
+                },
+                {
+                  name: 'town_or_city',
+                  type: 'text',
+                  textInputProps: {
+                    label: 'Town or City',
+                    left: <TextInput.Icon name={'account'} />,
+                    underlineColor: 'transparent',
+                    mode: 'outlined',
+                    textContentType: 'addressCity',
+                    returnKeyType: 'next',
+                    keyboardType: 'default',
                   },
-                  {
-                    label: 'Philippines',
-                    value: 'PH',
+                  rules: {
+                    required: {
+                      value: true,
+                      message: 'Town or City is required',
+                    },
                   },
-                ],
-              },
-            ]}
-          />
+                },
+                {
+                  name: 'country',
+                  type: 'select',
+                  textInputProps: {
+                    label: 'Town or City',
+                    left: <TextInput.Icon name={'account'} />,
+                    underlineColor: 'transparent',
+                    mode: 'outlined',
+                    textContentType: 'countryName',
+                    returnKeyType: 'next',
+                    keyboardType: 'default',
+                  },
+                  rules: {
+                    required: {
+                      value: true,
+                      message: 'Country is Required',
+                    },
+                  },
+                  options: [
+                    {
+                      label: 'Afganistan',
+                      value: 'AF',
+                    },
+                    {
+                      label: 'Denmark',
+                      value: 'DM',
+                    },
+                    {
+                      label: 'Philippines',
+                      value: 'PH',
+                    },
+                  ],
+                },
+              ]}
+            />
+          </View>
           <Button
             mode="contained"
             labelStyle={styles.text}

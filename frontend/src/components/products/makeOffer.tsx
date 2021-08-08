@@ -1,11 +1,12 @@
 import React from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { MaterialBottomTabNavigationProp } from '@react-navigation/material-bottom-tabs';
 import {
-  NativeSyntheticEvent,
-  TextInputChangeEventData,
+  ScrollView,
+  StyleSheet,
+  View,
+  Platform,
+  Alert,
 } from 'react-native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 import {
   useController,
@@ -26,8 +27,6 @@ import {
   useTheme,
   Button,
   TextInput,
-  List,
-  Checkbox,
 } from 'react-native-paper';
 
 import Background from '../../components/common/background';
@@ -168,6 +167,48 @@ export const MakeOffer = ({
     navigation
   );
 
+  const hasUnsavedChanges = Boolean(getAmount);
+
+  React.useEffect(
+    () =>
+      navigation &&
+      navigation.addListener('beforeRemove', (e) => {
+        if (!hasUnsavedChanges) {
+          return;
+        }
+
+        e.preventDefault();
+
+        if (Platform.OS === 'web') {
+          const discard = confirm(
+            'You have unsaved changes. Discard them and leave the screen?'
+          );
+
+          if (discard) {
+            navigation.dispatch(e.data.action);
+          }
+        } else {
+          Alert.alert(
+            'Discard changes?',
+            'You have unsaved changes. Discard them and leave the screen?',
+            [
+              {
+                text: "Don't leave",
+                style: 'cancel',
+                onPress: () => {},
+              },
+              {
+                text: 'Discard',
+                style: 'destructive',
+                onPress: () => navigation.dispatch(e.data.action),
+              },
+            ]
+          );
+        }
+      }),
+    [hasUnsavedChanges, navigation]
+  );
+
   return (
     <ScrollView
       style={{ backgroundColor }}
@@ -209,116 +250,118 @@ export const MakeOffer = ({
         }}
       />
       <React.Fragment>
-        <FormBuilder
-          control={control}
-          setFocus={setFocus}
-          formConfigArray={[
-            {
-              name: 'product',
-              type: 'text',
-              textInputProps: {
-                label: 'Product',
-                left: <TextInput.Icon name={'account'} />,
-                disabled: true,
-                placeholder: product.product.title,
-              },
-              rules: {
-                required: {
-                  value: true,
-                  message: 'Product is required',
+        <View style={styles.container}>
+          <FormBuilder
+            control={control}
+            setFocus={setFocus}
+            formConfigArray={[
+              {
+                name: 'product',
+                type: 'text',
+                textInputProps: {
+                  label: 'Product',
+                  left: <TextInput.Icon name={'account'} />,
+                  disabled: true,
+                  style: {
+                    display: 'none',
+                  },
+                  placeholder: product.product.title,
+                },
+                rules: {
+                  required: {
+                    value: true,
+                    message: 'Product is required',
+                  },
                 },
               },
-            },
-            {
-              name: 'amount',
-              type: 'text',
-              textInputProps: {
-                label: 'Your Offer Amount',
-                left: <TextInput.Icon name={'lock'} />,
-                underlineColor: 'transparent',
-                mode: 'outlined',
-                textContentType: 'none',
-                returnKeyType: 'next',
-                keyboardType: 'numeric',
+              {
+                name: 'amount',
+                type: 'text',
+                textInputProps: {
+                  label: 'Your Offer Amount',
+                  left: <TextInput.Icon name={'lock'} />,
+                  underlineColor: 'transparent',
+                  mode: 'outlined',
+                  textContentType: 'none',
+                  returnKeyType: 'next',
+                  keyboardType: 'numeric',
 
-                // onChange: (e) => {
-                //   amount.onChange(e);
-                //   setError('amount', {
-                //     type: 'manual',
-                //     message:
-                //       'price should be less than product price',
-                //   });
-                // },
+                  value: getAmount,
+                  onChangeText: (amount) => setAmount(amount),
+                },
 
-                value: getAmount,
-                onChangeText: (amount) => setAmount(amount),
-              },
+                rules: {
+                  required: {
+                    value: true,
+                    message: 'Amount is required',
+                  },
+                  validate: {
+                    positive: (v) =>
+                      parseInt(v) > 0 || 'should be greater than 0',
 
-              rules: {
-                required: {
-                  value: true,
-                  message: 'Amount is required',
+                    lessThanPrice: (v) =>
+                      parseInt(v) <= price ||
+                      'should not be more than product price',
+                  },
+                  pattern: {
+                    value: /^\-?[0-9]+(?:\.[0-9]{1,2})?/,
+                    message: 'Amount is invalid',
+                  },
+                  minLength: {
+                    value: 3,
+                    message:
+                      'The Amount must be a valid decimal field.',
+                  },
+                  maxLength: {
+                    value: 8,
+                    message:
+                      'The Amount must be between 0 and 999,999.99',
+                  },
                 },
-                validate: {
-                  positive: (v) =>
-                    parseInt(v) > 0 || 'should be greater than 0',
+              },
+              {
+                name: 'buyer',
+                type: 'text',
+                textInputProps: {
+                  label: 'Buyer',
+                  left: <TextInput.Icon name={'account'} />,
+                  disabled: true,
+                  placeholder: vendor?.name,
+                  style: {
+                    display: 'none',
+                  },
+                },
 
-                  lessThanPrice: (v) =>
-                    parseInt(v) <= price ||
-                    'should not be more than product price',
-                },
-                pattern: {
-                  value: /^\-?[0-9]+(?:\.[0-9]{1,2})?/,
-                  message: 'Amount is invalid',
-                },
-                minLength: {
-                  value: 3,
-                  message:
-                    'The Amount must be a valid decimal field.',
-                },
-                maxLength: {
-                  value: 8,
-                  message:
-                    'The Amount must be between 0 and 999,999.99',
+                rules: {
+                  required: {
+                    value: true,
+                    message: 'Buyer is required',
+                  },
                 },
               },
-            },
-            {
-              name: 'buyer',
-              type: 'text',
-              textInputProps: {
-                label: 'Buyer',
-                left: <TextInput.Icon name={'account'} />,
-                disabled: true,
-                placeholder: vendor?.name,
-              },
-              rules: {
-                required: {
-                  value: true,
-                  message: 'Buyer is required',
-                },
-              },
-            },
-            {
-              name: 'vendor',
-              type: 'text',
-              textInputProps: {
-                label: 'Vendor',
-                left: <TextInput.Icon name={'account'} />,
+              {
+                name: 'vendor',
+                type: 'text',
+                textInputProps: {
+                  label: 'Vendor',
+                  left: <TextInput.Icon name={'account'} />,
+                  disabled: true,
+                  placeholder: product.product.vendor.name,
 
-                disabled: true,
-                placeholder: product.product.vendor.name,
-                value: product.product.vendor.id.toString(),
-              },
-              rules: {
-                required: {
-                  value: true,
-                  message: 'Vendor is required',
+                  style: {
+                    display: 'none',
+                  },
+                },
+                rules: {
+                  required: {
+                    value: true,
+                    message: 'Vendor is required',
+                  },
                 },
               },
-            },
-          ]}
-        />
+            ]}
+          />
+        </View>
         <Button
           mode="contained"
           labelStyle={styles.text}

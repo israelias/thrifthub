@@ -1,20 +1,23 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  View,
+  Platform,
+  Alert,
+} from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { MaterialBottomTabNavigationProp } from '@react-navigation/material-bottom-tabs';
 
 import {
-  useController,
   useForm,
   SubmitHandler,
   SubmitErrorHandler,
-  useFormState,
 } from 'react-hook-form';
 
 import _ from 'lodash/fp';
 
 import { FormBuilder } from 'react-native-paper-form-builder';
-import { ErrorMessage } from '@hookform/error-message';
+
 import {
   Headline,
   Subheading,
@@ -23,6 +26,7 @@ import {
   Button,
   TextInput,
 } from 'react-native-paper';
+
 import * as ICONS from '../../constants/icons.constants';
 import { CONDITION_OPTIONS } from '../../constants/options.constants';
 import Background from '../common/background';
@@ -34,14 +38,9 @@ import overlay from '../../utils/overlay';
 import { RouteProp } from '@react-navigation/native';
 import { ProductStackNavigatorParamList } from '../../types';
 
-import {
-  useVendorData,
-  VendorActionTypes,
-} from '../../context/vendor.context';
+import { useVendorData } from '../../context/vendor.context';
 import { useAuth } from '../../context/authorization.context';
 import { useProductsData } from '../../context/products.context';
-
-// import { updateProduct } from '../../services/products.service';
 
 type FormValues = {
   vendor: string;
@@ -62,10 +61,13 @@ export const UpdateProduct = ({
   navigation?: StackNavigationProp<ProductStackNavigatorParamList>;
   route?: RouteProp<ProductStackNavigatorParamList, 'UpdateProduct'>;
 }) => {
-  const { vendorId, vendor, loadVendorData, updateProduct } =
-    useVendorData();
-  const { loadProducts, categoryOptions } = useProductsData();
+  const { updateProduct } = useVendorData();
+
+  const { categoryOptions } = useProductsData();
   const { accessToken } = useAuth();
+
+  const theme = useTheme();
+  const backgroundColor = overlay(2, theme.colors.surface) as string;
 
   const [getTitle, setTitle] = React.useState(product.product.title);
   const [getCategory, setCategory] = React.useState(
@@ -87,8 +89,6 @@ export const UpdateProduct = ({
   const [fileList, setFileList] = React.useState<
     FileList | undefined
   >(undefined!);
-  const theme = useTheme();
-  const backgroundColor = overlay(2, theme.colors.surface) as string;
 
   const {
     control,
@@ -125,62 +125,63 @@ export const UpdateProduct = ({
       data.condition,
       accessToken ?? ''
     ).then((response) => console.log(response));
-    // await updateProduct(
-    //   product.product.slug,
-    //   vendorId || product.product.vendor.id.toString(),
-    //   data.title,
-    //   data.category,
-    //   data.description,
-    //   data.price,
-    //   data.condition,
-    //   accessToken,
-    //   data.images
-    // ).then((response) => {
-    //   if (response.ok) {
-    //     // response.json().then((data) => {
-    //     //   setStatus(data.status);
-    //     // });
-    //     console.log(
-    //       'EditProduct: dispatching response buyer id',
-    //       data.vendor
-    //     );
-    //     loadVendorData(data.vendor);
-    //     loadProducts();
-
-    //     // setTimeout(() => {
-    //     //   navigation && navigation.replace('Products');
-    //     // }, 1720);
-    //   }
-    // });
   };
 
   const onError: SubmitErrorHandler<FormValues> = (errors, e) => {
     console.log('EditProduct: ErrorSubmitData =>', errors, e);
-    // navigation &&
-    //   navigation.reset({
-    //     index: 0,
-    //     routes: [{ name: 'Products' }],
-    //   });
+    navigation &&
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Products' }],
+      });
   };
 
-  console.log('EditProduct: price from props', product.product.price);
-  console.log('EditProduct: buyer from context', vendorId);
-  console.log('EditProduct: buyer from context reducer', vendor?.id);
-
-  console.log(
-    'EditProduct: seller from props param extracted',
-    product.product.vendor.id
+  const hasUnsavedChanges = Boolean(
+    getTitle ||
+      getDescription ||
+      getCategory ||
+      getPrice ||
+      getCondition
   );
 
-  console.log(
-    'EditProduct: product id from props extracted',
-    product.product.id
-  );
-  console.log('EditProduct: the product object from props', product);
-  console.log('EditProduct: the route object from props', route);
-  console.log(
-    'EditProduct: the navigation object from props',
-    navigation
+  React.useEffect(
+    () =>
+      navigation &&
+      navigation.addListener('beforeRemove', (e) => {
+        if (!hasUnsavedChanges) {
+          return;
+        }
+
+        e.preventDefault();
+
+        if (Platform.OS === 'web') {
+          const discard = confirm(
+            'You have unsaved changes. Discard them and leave the screen?'
+          );
+
+          if (discard) {
+            navigation.dispatch(e.data.action);
+          }
+        } else {
+          Alert.alert(
+            'Discard changes?',
+            'You have unsaved changes. Discard them and leave the screen?',
+            [
+              {
+                text: "Don't leave",
+                style: 'cancel',
+                onPress: () => {},
+              },
+              {
+                text: 'Discard',
+                style: 'destructive',
+                onPress: () => navigation.dispatch(e.data.action),
+              },
+            ]
+          );
+        }
+      }),
+    [hasUnsavedChanges, navigation]
   );
 
   return (
@@ -203,28 +204,7 @@ export const UpdateProduct = ({
       <Subheading style={styles.centerText}>
         {product.product.is_available ? 'Available' : 'Sold'}
       </Subheading>
-      {/* <Caption style={styles.centerText}>{status}</Caption> */}
-      {/* <ErrorMessage
-        errors={errors}
-        name="amount"
-        render={({ messages }) => {
-          console.log('messages', messages);
-          return (
-            messages &&
-            _.entries(messages).map(([type, message]) => (
-              <Caption
-                style={[
-                  styles.centerText,
-                  { color: theme.colors.error },
-                ]}
-                key={type}
-              >
-                {message}
-              </Caption>
-            ))
-          );
-        }}
-      /> */}
+
       <React.Fragment>
         <View style={styles.container}>
           <FormBuilder
