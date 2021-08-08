@@ -10,8 +10,8 @@ export const UPDATE_PRODUCT_ROUTE = 'UpdateProduct';
 // Screen Stack
 export const TRANSACTIONS_ROUTE = 'Transactions';
 export const FAVORITES_ROUTE = 'Favorites';
-export const MY_PRODUCTS_ROUTE = 'My Products';
-export const ADD_PRODUCT_ROUTE = 'Add Product';
+export const MY_PRODUCTS_ROUTE = 'MyProducts';
+export const ADD_PRODUCT_ROUTE = 'AddProduct';
 
 // Account Stack
 export const START_ROUTE = 'StartScreen';
