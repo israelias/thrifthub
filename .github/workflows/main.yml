@@ -73,7 +73,7 @@ jobs:
          
               vercel-org-id: ${{ secrets.ORG_ID}}  
               vercel-project-id: ${{ secrets.PROJECT_ID}} 
-              working-directory: web-build
+              # working-directory: web-build
 
   # Frontend_Deploy:
   #     name: Deploy to Frontend To Vercel
