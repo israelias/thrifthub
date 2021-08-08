@@ -1,0 +1,68 @@
+{
+  "extends": [
+    "@callstack",
+    // "eslint-plugin-import"
+    // "eslint:recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript"
+  ],
+  "plugins": [
+    "prettier",
+    "@typescript-eslint",
+    "import",
+    // "eslint-plugin-import",
+    "react"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    // "project": "./tsconfig.json",
+    // "sourceType": "module",
+
+    "ecmaFeatures": {
+      "jsx": true,
+      "modules": true
+    }
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true
+      },
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"],
+        "moduleDirectory": ["node_modules", "src/"]
+      }
+    }
+  },
+  "rules": {
+    "react-native/no-color-literals": 0,
+    "react-native/no-inline-styles": 0,
+    "react-native/no-raw-text": 0,
+    "no-unused-vars": 1,
+    "no-undef": 0,
+    "@typescript-eslint/no-unused-vars": 1,
+    "import/no-unresolved": [1, { "ignore": "@expo/" }],
+    "import/order": [
+      "error",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          "- parent\n- sibling"
+        ],
+        "pathGroups": [
+          {
+            "patern": "react+(|-native)",
+            "group": "external",
+            "position": "before"
+          }
+        ],
+        "pathGroupsExcludedImportTypes": ["builtin"],
+        "newlines-between": "always",
+        "alphabetize": { "order": "asc", "caseInsensitive": true }
+      }
+    ]
+  }
+}
