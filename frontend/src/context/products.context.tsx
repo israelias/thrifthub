@@ -122,6 +122,8 @@ export default function ProductsDataProvider({
     }
   }
 
+  console.log('Products Context Render');
+
   React.useEffect(() => {
     loadProducts();
   }, []);

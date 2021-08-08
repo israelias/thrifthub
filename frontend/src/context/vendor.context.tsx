@@ -256,6 +256,8 @@ export default function VendorDataProvider({
     }, 2500);
   };
 
+  console.log('Vendor Context Render');
+
   const vendorContextValue = React.useMemo(
     () => ({
       addVendorFavorite: async (

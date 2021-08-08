@@ -1,23 +1,35 @@
-import React from "react";
+import React from 'react';
 
 export type AuthDataType = {
   signIn: (username: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  signUp: (username: string, email: string, password: string) => Promise<void>;
+  signUp: (
+    username: string,
+    email: string,
+    password: string
+  ) => Promise<void>;
   isSignedOut: boolean;
   isSignedIn: boolean;
   isLoading: boolean;
   noAccount: boolean;
-  userToken: string | null;
+  accessToken?: string | null;
+  error?: any;
   state: AuthStateInterface;
 };
 
-export const AuthContext = React.createContext<AuthDataType>(undefined!);
+export const AuthContext = React.createContext<AuthDataType>(
+  undefined!
+);
 
 export enum AuthActionTypes {
   TO_SIGNUP_PAGE,
   TO_SIGNIN_PAGE,
   RESTORE_TOKEN,
+  RESTORE_TOKEN_ERROR,
+  SIGNING_IN,
+  SIGNING_IN_ERROR,
+  SIGNING_OUT,
+  SIGNING_OUT_ERROR,
   SIGNED_UP,
   SIGN_IN,
   SIGN_OUT,
@@ -25,7 +37,8 @@ export enum AuthActionTypes {
 
 export interface AuthAction {
   type: AuthActionTypes;
-  token: null | string;
+  accessToken?: null | string;
+  error?: any;
 }
 
 export type AuthStateInterface = {
@@ -34,7 +47,8 @@ export type AuthStateInterface = {
   isSignedUp: boolean;
   isSignedIn: boolean;
   noAccount: boolean;
-  userToken: null | string;
+  accessToken?: null | string;
+  error?: any;
 };
 
 export const initialState = {
@@ -43,71 +57,74 @@ export const initialState = {
   isSignedUp: false,
   noAccount: false,
   isSignedIn: false,
-  userToken: null,
+  accessToken: null,
+  refreshToken: null,
+  error: undefined,
 };
 
-export const authReducer = (
-  prevState = initialState,
-  action: AuthAction
-): AuthStateInterface => {
-  switch (action.type) {
-    case AuthActionTypes.TO_SIGNUP_PAGE:
-      return {
-        ...prevState,
-        isLoading: false,
-        isSignedUp: false,
-        noAccount: true,
-      };
-    case AuthActionTypes.TO_SIGNIN_PAGE:
-      return {
-        ...prevState,
-        isLoading: false,
-        isSignedIn: false,
-        noAccount: false,
-      };
-    case AuthActionTypes.RESTORE_TOKEN:
-      return {
-        ...prevState,
-        userToken: action.token,
-        isLoading: false,
-      };
-    case AuthActionTypes.SIGNED_UP:
-      return {
-        ...prevState,
-        isSignedIn: true,
-        isSignedUp: true,
-        isLoading: false,
-        userToken: action.token,
-      };
-    case AuthActionTypes.SIGN_IN:
-      return {
-        ...prevState,
-        isSignedOut: false,
-        isSignedIn: true,
-        isSignedUp: true,
-        userToken: action.token,
-      };
-    case AuthActionTypes.SIGN_OUT:
-      return {
-        ...prevState,
-        isSignedOut: true,
-      };
-  }
-};
+// export const authReducer = (
+//   prevState = initialState,
+//   action: AuthAction
+// ): AuthStateInterface => {
+//   switch (action.type) {
+//     case AuthActionTypes.TO_SIGNUP_PAGE:
+//       return {
+//         ...prevState,
+//         isLoading: false,
+//         isSignedUp: false,
+//         noAccount: true,
+//       };
+//     case AuthActionTypes.TO_SIGNIN_PAGE:
+//       return {
+//         ...prevState,
+//         isLoading: false,
+//         isSignedIn: false,
+//         noAccount: false,
+//       };
+//     case AuthActionTypes.RESTORE_TOKEN:
+//       return {
+//         ...prevState,
+//         accessToken: action.accessToken,
+//         isLoading: false,
+//       };
+//     case AuthActionTypes.SIGNED_UP:
+//       return {
+//         ...prevState,
+//         isSignedIn: true,
+//         isSignedUp: true,
+//         isLoading: false,
+//         accessToken: action.accessToken,
+//       };
+//     case AuthActionTypes.SIGN_IN:
+//       return {
+//         ...prevState,
+//         isSignedOut: false,
+//         isSignedIn: true,
+//         isSignedUp: true,
+//         accessToken: action.accessToken,
+//       };
+//     case AuthActionTypes.SIGN_OUT:
+//       return {
+//         ...prevState,
+//         isSignedOut: true,
+//         accessToken: null,
+//       };
+//   }
+// };
 
 export const stateConditionString = (state: AuthStateInterface) => {
-  let navigateTo = "";
+  let navigateTo = '';
   if (state.isLoading) {
-    navigateTo = "LOAD_APP";
+    navigateTo = 'LOAD_APP';
   }
-  if (state.isSignedIn && state.userToken && state.isSignedUp) {
-    navigateTo = "LOAD_HOME";
+  if (state.isSignedIn && state.accessToken && state.isSignedUp) {
+    navigateTo = 'LOAD_HOME';
   }
   if (!state.isSignedUp && state.noAccount) {
-    navigateTo = "LOAD_SIGNUP";
+    navigateTo = 'LOAD_SIGNUP';
   }
   if (!state.isSignedIn && !state.noAccount) {
-    navigateTo = "LOAD_SIGNIN";
+    navigateTo = 'LOAD_SIGNIN';
   }
   return navigateTo;
 };

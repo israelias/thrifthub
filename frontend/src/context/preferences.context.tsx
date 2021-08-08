@@ -1,14 +1,23 @@
 import React from 'react';
 import { I18nManager } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import useColorScheme from '../hooks/useColorScheme';
 
+import { THEME_PERSISTENCE_KEY } from '../constants/keys.constants';
+
+import {
+  CombinedDefaultTheme,
+  CombinedDarkTheme,
+} from '../components/common/theme';
+
 type PreferencesContextType = {
-  theme: 'light' | 'dark';
+  theme: typeof CombinedDefaultTheme | typeof CombinedDarkTheme;
   rtl: 'left' | 'right';
   toggleTheme: () => void;
   toggleRTL: () => void;
   isThemeDark: boolean;
+  setIsThemeDark: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const PreferencesContext =
@@ -21,29 +30,50 @@ export default function PreferencesProvider({
 }) {
   const colorScheme = useColorScheme();
 
+  console.log('Preferences: colorscheme', colorScheme);
+
   const [rtl] = React.useState<boolean>(I18nManager.isRTL);
   const [isThemeDark, setIsThemeDark] =
     React.useState<boolean>(false);
 
-  React.useMemo(() => {
-    if (colorScheme === 'dark') {
-      console.log(
-        'PreferenceProvider: useMemo: if ColoScheme === dark',
-        colorScheme
-      );
-      setIsThemeDark(true);
-    }
-  }, [colorScheme]);
+  React.useEffect(() => {
+    const themeAsync = async () => {
+      try {
+        const themeName = await AsyncStorage?.getItem(
+          THEME_PERSISTENCE_KEY
+        );
+
+        console.log(
+          'Storage themePersistence: ',
+          THEME_PERSISTENCE_KEY
+        );
+
+        setIsThemeDark(themeName === 'dark' ? true : false);
+      } catch (e) {
+        // Ignore
+      }
+    };
+    themeAsync();
+  }, []);
 
   const preferences = React.useMemo(
     () => ({
-      toggleTheme: () => setIsThemeDark(!isThemeDark),
+      toggleTheme: () => {
+        setIsThemeDark(!isThemeDark);
+        AsyncStorage?.setItem(
+          THEME_PERSISTENCE_KEY,
+          isThemeDark ? 'light' : 'dark'
+        );
+      },
+
       toggleRTL: () => I18nManager.forceRTL(!rtl),
       isThemeDark,
-      theme: colorScheme,
+      setIsThemeDark,
+      theme: isThemeDark ? CombinedDarkTheme : CombinedDefaultTheme,
+
       rtl: (rtl ? 'right' : 'left') as 'right' | 'left',
     }),
-    [rtl, colorScheme, isThemeDark]
+    [rtl, isThemeDark]
   );
 
   return (
