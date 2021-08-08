@@ -1,5 +1,5 @@
-import React from "react";
-import { StyleSheet, View } from "react-native";
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
 import {
   Surface,
   Text,
@@ -10,17 +10,16 @@ import {
   Paragraph,
   Caption,
   useTheme,
-} from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { capitalize } from "../../utils/initialize";
-import { TimeAgo } from "../common/time";
+} from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import color from 'color';
 
-import { useVendorData } from "../../context/vendor.context";
+import { capitalize } from '../../utils/initialize';
+import { TimeAgo } from '../common/time';
 
-import {
-  OrderTransactionStackParamList,
-  OrderTypeParamList,
-} from "../../types";
+import { useVendorData } from '../../context/vendor.context';
+
+import { OrderTypeParamList } from '../../types';
 
 type Props = {
   onPress?: (id: number) => void;
@@ -32,8 +31,10 @@ export const OrderTransaction = (props: Props) => {
 
   const { vendor, vendorId } = useVendorData();
 
-  // const contentColor = color(theme.colors.text).alpha(0.8).rgb().string();
-  const contentColor = theme.colors.text;
+  const contentColor = color(theme.colors.text)
+    .alpha(0.8)
+    .rgb()
+    .string();
 
   return (
     <Surface style={styles.container}>
@@ -54,10 +55,14 @@ export const OrderTransaction = (props: Props) => {
           )}
         </View>
         <Title>Status</Title>
-        <Subheading style={{ marginBottom: 10 }}>{order.status}</Subheading>
+        <Subheading style={{ marginBottom: 10 }}>
+          {order.status}
+        </Subheading>
         <Title>Product</Title>
         <Paragraph>
-          {order.product.title ? order.product.title : order.product.toString()}
+          {order.product.title
+            ? order.product.title
+            : order.product.toString()}
         </Paragraph>
         <Title>Seller</Title>
         <Paragraph>
@@ -71,7 +76,7 @@ export const OrderTransaction = (props: Props) => {
           mode="text"
           uppercase
           color={theme.colors.primary}
-          onPress={() => console.log("Pressed")}
+          onPress={() => console.log('Pressed')}
         >
           View
         </Button>
@@ -89,7 +94,7 @@ export const OrderTransaction = (props: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingTop: 15,
     paddingRight: 15,
     paddingBottom: 15,
@@ -97,14 +102,14 @@ const styles = StyleSheet.create({
   leftColumn: {
     width: 100,
     marginRight: 10,
-    alignItems: "center",
+    alignItems: 'center',
   },
   rightColumn: {
     flex: 1,
   },
   topRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 10,
   },
 });
