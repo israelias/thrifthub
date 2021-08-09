@@ -2,6 +2,7 @@ import random
 
 import order.models as order_models
 import vendor.models as vendor_models
+from django.db.models import Q
 from django.utils.text import slugify
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import serializers, status
@@ -57,7 +58,7 @@ class VendorPreviewSerializer(serializers.ModelSerializer):
         ]
 
     def get_order_count(self, obj):
-        return order_models.Order.objects.filter(buyer=obj).count()
+        return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
 
     def get_product_count(self, obj):
         return Product.objects.filter(vendor=obj).count()
@@ -100,6 +101,39 @@ class VendorSlugSerializer(serializers.ModelSerializer):
         fields = ["name", "slug"]
 
 
+class ImagePostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ("product", "image")
+
+
+class ImageFullSerializer(FlexFieldsModelSerializer):
+    image = VersatileImageFieldSerializer(
+        sizes=[
+            ("full_size", "url"),
+            ("thumbnail", "thumbnail__240x180"),
+        ]
+    )
+
+    class Meta:
+        model = Image
+        fields = ["image", "alt_text", "is_feature", "product", "created_at", "name", "id"]
+        extra_kwargs = {
+            "image": {"required": True},
+        }
+
+    def create(self, validated_data):
+        instance = Image.objects.create(
+            product=validated_data.get("product"),
+            is_feature=validated_data.get("is_feature", False),
+            image=validated_data.get("image"),
+        )
+
+        instance.save()
+
+        return instance
+
+
 class ImageNewSerializer(FlexFieldsModelSerializer):
     image = VersatileImageFieldSerializer(
         sizes=[
@@ -110,7 +144,7 @@ class ImageNewSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = Image
-        fields = ["image", "alt_text", "is_feature"]
+        fields = ["image", "alt_text", "is_feature", "id"]
 
 
 class RawOrderStatusSerializer(serializers.BaseSerializer):
@@ -151,21 +185,24 @@ class ProductSerializer(serializers.ModelSerializer):
         return image_serializer.data.get("image")
 
 
+class OrderedProductDetailSerializer(FlexFieldsModelSerializer):
+    class Meta:
+        model = order_models.OrderDetail
+        fields = "__all__"
+
+
 class OrderedProductSerializer(FlexFieldsModelSerializer):
-    buyer = serializers.StringRelatedField()
-    product = serializers.StringRelatedField()
+    buyer = VendorPreviewSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
+    # product = serializers.StringRelatedField()
 
     class Meta:
         model = order_models.Order
-        fields = [
-            "id",
-            "buyer",
-            "status",
-            "product",
-        ]
+        fields = ["id", "buyer", "status", "product", "amount", "created_at", "updated_at", "order_detail"]
         expandable_fields = {
-            "buyer": VendorPreviewSerializer,
-            "product": ProductSerializer,
+            # "buyer": VendorPreviewSerializer,
+            # "product": ProductSerializer,
+            "orderdetail": OrderedProductDetailSerializer,
         }
 
 
@@ -197,19 +234,12 @@ class ProductPreviewSerializer(FlexFieldsModelSerializer):
             "vendor": VendorPreviewSerializer,
         }
 
- 
     def get_image(self, obj):
         images = Image.objects.filter(product=obj).first()
         if images:
             image_serializer = ImageNewSerializer(images)
             return image_serializer.data.get("image")
         return image_serializer.data
-
-
-class ImagePostSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Image
-        fields = ("product", "image")
 
 
 class ProductSimilarSerializer(FlexFieldsModelSerializer):
@@ -250,7 +280,7 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
     absolute_url = serializers.CharField(source="get_absolute_url", read_only=True)
     image = serializers.SerializerMethodField(read_only=True)
     # product_images = serializers.SerializerMethodField()
-    ordered_product = OrderedProductSerializer(many=True, read_only=True)
+    # ordered_product = OrderedProductSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
@@ -276,8 +306,13 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
             "category": CategoryFullSerializer,
             "vendor": VendorPreviewSerializer,
             "product_images": (ImageNewSerializer, {"many": True}),
+            "ordered_product": (OrderedProductSerializer, {"many": True}),
         }
-        extra_kwargs = {"product_images": {"required": False}, "is_available": {"required": False}}
+        extra_kwargs = {
+            "product_images": {"required": False},
+            "is_available": {"required": False},
+            "ordered_product": {"required": False},
+        }
 
     def get_similar_products(self, obj):
         similar_products = list(obj.category.products.exclude(id=obj.id))
@@ -298,7 +333,11 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
     def create(self, validated_data):
         vendor = self.context["request"].user.vendor
 
+        print("images field", self.context["request"].data["images"])
+
         product_image_data = dict((self.context["request"].data).lists())["images"]
+
+        print("images as dict", product_image_data)
 
         instance = Product.objects.create(
             vendor=vendor,
@@ -313,6 +352,7 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
 
         if product_image_data:
             for img_name in product_image_data:
+                print("each item in images", img_name)
                 modified_data = Image.objects.create(product=instance, image=img_name)
                 file_serializer = ImagePostSerializer(data=modified_data)
                 if file_serializer.is_valid():

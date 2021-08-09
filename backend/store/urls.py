@@ -8,6 +8,7 @@ app_name = "store"
 router = DefaultRouter()
 router.register(r"store", views.ProductViewSet, basename="product")
 router.register(r"category", views.CategoryViewSet, basename="category")
+router.register(r"images", views.ProductImagesViewSet, basename="images")
 
 urlpatterns = [
     path("", include(router.urls)),
@@ -17,4 +18,5 @@ urlpatterns = [
     ),
     path("store/vendor/<slug>/", views.ProductsByVendorView.as_view(), name="product-vendor-filter"),
     path("category/", views.CategoryListView.as_view(), name="category-filter"),
+    path("store/images/<id>/", views.ProductImagesByProductId.as_view(), name="product-images-filter"),
 ]

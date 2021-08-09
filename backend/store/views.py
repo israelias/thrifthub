@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render, reverse
+from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_flex_fields import FlexFieldsModelViewSet, is_expanded
 from rest_framework import filters, generics, viewsets
@@ -11,10 +11,11 @@ from rest_framework.response import Response
 from vendor.models import Vendor
 
 from . import models
-from .models import Category, Product, Image
+from .models import Category, Image, Product
 from .serializers import (
     CategoryFullSerializer,
     CategorySerializer,
+    ImageFullSerializer,
     ProductSerializer,
     ProductVersatileSerializer,
 )
@@ -41,84 +42,45 @@ class ProductViewSet(FlexFieldsModelViewSet):
     search_fields = ["title", "description"]
     permission_classes = (AllowAny,)
 
-    # def list(self, request):
-    #     pass
 
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-    #     serializer.is_valid(raise_exception=True)
-    #     self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)
-    #     return Response({"Success": "msb blablabla"}, status=status.HTTP_201_CREATED, headers=headers)
-    # def create(self, request, *args, **kwargs):
-    #     serializer = self.get_serializer(data=request.data)
-    #     if not serializer.is_valid(raise_exception=False):
-    #         return Response({"Fail": "blablal", status=status.HTTP_400_BAD_REQUEST)
+class ProductImagesViewSet(FlexFieldsModelViewSet):
+    """
+    Images Viewset
+    """
 
-    #     self.perform_create(serializer)
-    #     headers = self.get_success_headers(serializer.data)
-    #     return Response({"Success": "msb blablabla"}, status=status.HTTP_201_CREATED, headers=headers)
+    # http://localhost:8000/api/vendor/1/favorites/?omit=similar_products
 
-    # def retrieve(self, request, pk=None):
-    #     pass
+    serializer_class = ImageFullSerializer
+    queryset = Image.objects.all()
+    permission_classes = (AllowAny,)
 
-    # def update(self, request, pk=None):
-    #     product_images = request.data("images", None)
-    #     vendor = request.user.vendor
-    #     current_images = Image.objects.get_or_create(product=vendor)[0]
-    #     friend = Vendor.objects.get(id=request.data["other_vendor_id"])
-    #     if friends_obj:
-    #         friends_obj.vendors.add(friend)
 
-    #     product_image_data = dict((self.context["request"].data).lists())["image"]
+class ProductImagesByProductId(generics.ListAPIView):
 
-    #     instance = Product.objects.create(
-    #         vendor=vendor,
-    #         title=validated_data["title"],
-    #         description=validated_data["description"],
-    #         price=validated_data["price"],
-    #         condition=validated_data["condition"],
-    #         category=validated_data["category"],
-    #     )
+    serializer_class = ImageFullSerializer
+    permission_classes = (AllowAny,)
 
-    #     instance.save()
+    """
+    Returns product images that share product `id`
+    Endpoint: `api/store/images/<id>`
+    """
 
-    #     if product_image_data:
-    #         for img_name in product_image_data:
-    #             modified_data = Image.objects.create(product=instance, image=img_name)
-    #             file_serializer = ImagePostSerializer(data=modified_data)
-    #             if file_serializer.is_valid():
-    #                 file_serializer.save()
-    #     return Response(
-    #         data={"message": "Added to Friends"},
-    #         status=status.HTTP_200_OK,
-    #     )
-
-    # def post(self, request, id):
-    #     vendor = Vendor.objects.get(id=id)
-    #     favorites_obj = get_object_or_404(self.queryset, vendor=vendor)
-    #     product = Product.objects.get(id=request.data["product_id"])
-    #     if favorites_obj:
-    #         favorites_obj.favorites.add(product)
-    #     return Response(
-    #         data={"message": "Added to Favorites"},
-    #         status=status.HTTP_200_OK,
-    #     )
-
-    # def partial_update(self, request, pk=None):
-    #     pass
-
-    # def destroy(self, request, pk=None):
-    #     pass
+    def get_queryset(self):
+        return Image.objects.filter(product=self.kwargs["id"])
 
 
 class ProductsByVendorView(generics.ListAPIView):
     serializer_class = ProductSerializer
-    queryset = Product.objects.all()
+    # queryset = Product.objects.all()
     permission_classes = (AllowAny,)
 
+    """
+    Returns product that share vendor `slug`
+    Endpoint: `api/store/vendor/<slug>`
+    """
+
     def get_queryset(self):
-        return models.Product.objects.filter(vendor=Vendor.objects.get(slug=self.kwargs["slug"]))
+        return Product.objects.filter(vendor=Vendor.objects.get(slug=self.kwargs["slug"]))
 
 
 class ProductsByCategory(generics.ListAPIView):

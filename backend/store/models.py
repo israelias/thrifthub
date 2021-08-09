@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import models, transaction
 from django.db.models import Q
 from django.db.models.constraints import UniqueConstraint
-from django.db.models.signals import pre_delete, post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.text import slugify
@@ -158,8 +158,9 @@ class Image(models.Model):
         help_text=_("Upload a product image"),
         upload_to=upload_path,
         ppoi_field="image_ppoi",
-        null=True,
-        blank=True,
+        # null=True,
+        # blank=True,
+        default=settings.MEDIA_ROOT + "/images/default_placeholder.png",
         placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default_placeholder.png"),
     )
     image_ppoi = PPOIField("Image PPOI")
@@ -225,6 +226,12 @@ def warm_image_instances_post_save(sender, instance, **kwargs):
 class Favorite(models.Model):
     vendor = models.OneToOneField(Vendor, related_name="favorites", on_delete=models.CASCADE)
     favorites = models.ManyToManyField(Product, related_name="favorites")
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
+
+    class Meta:
+        ordering = ("-created_at",)
+        verbose_name = _("Favorite Product")
+        verbose_name_plural = _("Favorite Products")
 
     def __str__(self):
         return "%s's favorites" % self.vendor.name
