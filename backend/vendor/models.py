@@ -22,7 +22,8 @@ def upload_path(instance, filename):
 
 class Vendor(models.Model):
     name = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
     created_by = models.OneToOneField(User, related_name="vendor", on_delete=models.CASCADE)
     slug = models.SlugField(verbose_name=_("Vendor safe URL"), max_length=255, unique=True)
     online = models.BooleanField(default=False)
@@ -62,10 +63,7 @@ class Vendor(models.Model):
 def warm_vendor_image(sender, instance, **kwargs):
     """Ensures Vendor-specific images objects are created post-save"""
     vendor_img_warmer = VersatileImageFieldWarmer(
-        instance_or_queryset=instance,
-        rendition_key_set="default_avatar",
-        image_attr="image",
-        verbose=True
+        instance_or_queryset=instance, rendition_key_set="default_avatar", image_attr="image", verbose=True
     )
     num_created, failed_to_create = vendor_img_warmer.warm()
 

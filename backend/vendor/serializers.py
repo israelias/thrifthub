@@ -4,7 +4,7 @@ import order.models as order_models
 import order.serializers as order_serializers
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import serializers
@@ -69,6 +69,7 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
             "order_count",
             "product_count",
         ]
+        # extra_kwargs = {"image"}
 
     def get_friends(self, obj):
         try:
@@ -103,7 +104,7 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
         return product_serializer.data
 
     def get_order_count(self, obj):
-        return order_models.Order.objects.filter(buyer=obj).count()
+        return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
 
     def get_product_count(self, obj):
         return Product.objects.filter(vendor=obj).count()
@@ -155,7 +156,7 @@ class OtherVendorSerializer(serializers.ModelSerializer):
         return product_serializer.data
 
     def get_order_count(self, obj):
-        return order_models.Order.objects.filter(buyer=obj).count()
+        return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
 
     def get_product_count(self, obj):
         return Product.objects.filter(vendor=obj).count()
@@ -220,7 +221,7 @@ class VendorSerializer(serializers.ModelSerializer):
         ]
 
     def get_order_count(self, obj):
-        return order_models.Order.objects.filter(buyer=obj).count()
+        return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
 
     def get_product_count(self, obj):
         return Product.objects.filter(vendor=obj).count()
