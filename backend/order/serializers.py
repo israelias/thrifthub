@@ -19,13 +19,16 @@ from .models import Order, OrderDetail
 available = ("OFFERED", "DENIED", "PENDING")
 sold = ("PROCESSING", "ACCEPTED", "COMPLETED")
 
+
 class OrderFullSerializer(serializers.ModelSerializer):
     vendor = VendorPreviewSerializer(read_only=True)
     buyer = VendorPreviewSerializer(read_only=True)
     product = ProductPreviewSerializer(read_only=True)
+
     class Meta:
         model = Order
-        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at"]
+        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at", "updated_at"]
+
 
 class OrderDetailSerializer(FlexFieldsModelSerializer):
     class Meta:
@@ -34,13 +37,9 @@ class OrderDetailSerializer(FlexFieldsModelSerializer):
 
 
 class OrderSerializer(FlexFieldsModelSerializer):
-    # status = serializers.CharField(source="get_status_display", required=False)
-    # products = serializers.StringRelatedField(many=True)
-    # order_detail = serializers.SerializerMethodField("get_order_detail")
-
     class Meta:
         model = Order
-        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at"]
+        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at", "updated_at", "order_detail"]
         expandable_fields = {
             "vendor": VendorPreviewSerializer,
             "buyer": VendorPreviewSerializer,
