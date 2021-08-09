@@ -15,31 +15,31 @@ on:
 #     working-directory: ./backend
 jobs:
 
-  # Backend_Deploy:
-  #     runs-on: ubuntu-latest
-  #     defaults:
-  #       run:
-  #         working-directory: ./backend
-  #     if: "!contains(github.event.head_commit.message, '[ci skip]')"
-  #     name: Git Deploy job- A job to deploy django app to heroku using git
-  #     steps:
-  #       - name: Checkout
-  #         uses: actions/checkout@v2
-  #       - name: Deploy django to heroku
-  #         uses: nyakaz73/heroku-django-deploy@v0.68
-  #         with: 
-  #           heroku_app_name : ${{ secrets.HEROKU_APP_NAME }}
-  #           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-  #           heroku_email_address: "israelias.js@gmail.com"
-  #           working-directory: ./backend
-  #           use_git: true
-  #           force_push: true
+  Backend_Deploy:
+      runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: ./backend
+      if: "!contains(github.event.head_commit.message, '[ci skip]')"
+      name: Git Deploy job- A job to deploy django app to heroku using git
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v2
+        - name: Deploy django to heroku
+          uses: nyakaz73/heroku-django-deploy@v0.68
+          with: 
+            heroku_app_name : ${{ secrets.HEROKU_APP_NAME }}
+            heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+            heroku_email_address: "israelias.js@gmail.com"
+            working-directory: ./backend
+            use_git: true
+            force_push: true
 
-  #         #Use the output from the hello step
-  #       - name: Get the output status
-  #         run: echo "${{ steps.deploy.outputs.status }}"
-  #       - name: Getting the files in directory
-  #         run: pwd
+          #Use the output from the hello step
+        - name: Get the output status
+          run: echo "${{ steps.deploy.outputs.status }}"
+        - name: Getting the files in directory
+          run: pwd
 
   Expo_Web_Build:
       name: Export a an Expo web build for Vercel deployment
@@ -47,7 +47,7 @@ jobs:
       defaults:
         run:
           working-directory: ./frontend
-      # needs: Backend_Deploy
+      needs: Backend_Deploy
       steps:
         - uses: actions/checkout@v1
         - uses: actions/setup-node@v1
@@ -65,7 +65,7 @@ jobs:
   #       # - run: rm -fr .gitignore
   #       # - run: deploy
 
-        - run: cd web-build
+        # - run: cd web-build
 
         - uses: amondnet/vercel-action@v20
           with:
@@ -73,7 +73,7 @@ jobs:
          
               vercel-org-id: ${{ secrets.ORG_ID}}  
               vercel-project-id: ${{ secrets.PROJECT_ID}} 
-              # working-directory: web-build
+              working-directory: web-build
 
   # Frontend_Deploy:
   #     name: Deploy to Frontend To Vercel
