@@ -20,7 +20,40 @@ available = ("OFFERED", "DENIED", "PENDING")
 sold = ("PROCESSING", "ACCEPTED", "COMPLETED")
 
 
+class OrderPreviewSerializer(serializers.ModelSerializer):
+    vendor = VendorPreviewSerializer(read_only=True)
+    buyer = VendorPreviewSerializer(read_only=True)
+    product = ProductPreviewSerializer(read_only=True)
+
+    class Meta:
+        model = Order
+        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at", "updated_at"]
+
+
 class OrderDetailSerializer(FlexFieldsModelSerializer):
+    order = OrderPreviewSerializer(read_only=True)
+
+    class Meta:
+        model = OrderDetail
+        fields = [
+            "id",
+            "full_name",
+            "email",
+            "phone_number",
+            "country",
+            "zipcode",
+            "town_or_city",
+            "street_address1",
+            "street_address2",
+            "county",
+            "created_at",
+            "updated_at",
+            "stripe_pid",
+            "order",
+        ]
+
+
+class OrderDetailReadSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = OrderDetail
         fields = "__all__"
@@ -45,7 +78,7 @@ class OrderSerializer(FlexFieldsModelSerializer):
             "vendor": VendorPreviewSerializer,
             "buyer": VendorPreviewSerializer,
             "product": ProductPreviewSerializer,
-            "order_detail": OrderDetailSerializer,
+            "order_detail": OrderDetailReadSerializer,
         }
         extra_kwargs = {
             "amount": {"required": False},
