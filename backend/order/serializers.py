@@ -31,7 +31,7 @@ class OrderPreviewSerializer(serializers.ModelSerializer):
 
 
 class OrderDetailSerializer(FlexFieldsModelSerializer):
-    order = OrderPreviewSerializer(read_only=True)
+    # order = OrderPreviewSerializer(read_only=True)
 
     class Meta:
         model = OrderDetail
@@ -81,7 +81,6 @@ class OrderSerializer(FlexFieldsModelSerializer):
             "order_detail": OrderDetailReadSerializer,
         }
         extra_kwargs = {"amount": {"required": False}, "order_detail": {"required": False}}
-
 
     def validate(self, data):
         """
