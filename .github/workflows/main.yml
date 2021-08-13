@@ -65,7 +65,7 @@ jobs:
   #       # - run: rm -fr .gitignore
   #       # - run: deploy
 
-        # - run: cd web-build
+        - run: cd web-build
 
         - uses: amondnet/vercel-action@v20
           with:
@@ -73,7 +73,7 @@ jobs:
          
               vercel-org-id: ${{ secrets.ORG_ID}}  
               vercel-project-id: ${{ secrets.PROJECT_ID}} 
-              working-directory: web-build
+              # working-directory: web-build
 
   # Frontend_Deploy:
   #     name: Deploy to Frontend To Vercel
