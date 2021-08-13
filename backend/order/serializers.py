@@ -82,12 +82,6 @@ class OrderSerializer(FlexFieldsModelSerializer):
         }
         extra_kwargs = {"amount": {"required": False}, "order_detail": {"required": False}}
 
-    # def get_order_detail(self, obj):
-
-    #     order_detail = OrderDetail.objects.get(order=obj)
-
-    #     detail_serializer = OrderDetailSerializer(order_detail)
-    #     return detail_serializer.data
 
     def validate(self, data):
         """
