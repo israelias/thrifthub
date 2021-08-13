@@ -98,7 +98,7 @@ class CategoryFullSerializer(serializers.ModelSerializer):
 class VendorSlugSerializer(serializers.ModelSerializer):
     class Meta:
         model = vendor_models.Vendor
-        fields = ["name", "slug"]
+        fields = ["id", "name", "slug"]
 
 
 class ImagePostSerializer(serializers.ModelSerializer):
