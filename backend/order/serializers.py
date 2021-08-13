@@ -80,9 +80,7 @@ class OrderSerializer(FlexFieldsModelSerializer):
             "product": ProductPreviewSerializer,
             "order_detail": OrderDetailReadSerializer,
         }
-        extra_kwargs = {
-            "amount": {"required": False},
-        }
+        extra_kwargs = {"amount": {"required": False}, "order_detail": {"required": False}}
 
     # def get_order_detail(self, obj):
 
