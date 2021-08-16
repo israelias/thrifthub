@@ -86,7 +86,7 @@ class VendorPreviewSerializer(serializers.ModelSerializer):
 class CategoryPreviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ["name"]
+        fields = ["id", "name", "slug"]
 
 
 class CategoryFullSerializer(serializers.ModelSerializer):
@@ -261,6 +261,8 @@ class ProductSimilarSerializer(FlexFieldsModelSerializer):
             "is_available",
             "condition",
             "image",
+            "created_at",
+            "updated_at",
         ]
         expandable_fields = {
             "category": CategoryPreviewSerializer,
