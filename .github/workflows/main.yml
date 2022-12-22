@@ -59,7 +59,7 @@ jobs:
             cache-dependency-path: './frontend/yarn.lock'
             
         - name: 🏗 Setup Expo
-          uses: expo/expo-github-action@v7
+          uses: expo/expo-github-action@v5
           with:
             expo-version: 4.x
             expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
@@ -74,7 +74,7 @@ jobs:
           run: expo publish --release-channel=pr-${{ github.event.number }} --non-interactive
         
         - name: 💬 Comment preview
-          uses: expo/expo-github-action/preview-comment@v7
+          uses: expo/expo-github-action/preview-comment@v5
           with:
             channel: pr-${{ github.event.number }}
 
