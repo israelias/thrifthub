@@ -62,6 +62,8 @@ jobs:
           uses: expo/expo-github-action@v7
           with:
             expo-version: 4.x
+            expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
+            expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
             expo-token: ${{ secrets.EXPO_TOKEN }}
             expo-cache: true
             
