@@ -74,10 +74,10 @@ jobs:
         # - name: 🚀 Publish preview
           # run: expo publish --release-channel=pr-${{ github.event.number }} --non-interactive
         
-        - name: 💬 Comment preview
-          uses: expo/expo-github-action/preview-comment@v7
-          with:
-            channel: pr-${{ github.event.number }}
+        # - name: 💬 Comment preview
+          # uses: expo/expo-github-action/preview-comment@v7
+          # with:
+            # channel: pr-${{ github.event.number }}
 
         
         # DISABLE INCONSEQUENTIAL
