@@ -2,6 +2,7 @@
   "expo": {
     "name": "frontend",
     "slug": "frontend",
+    "owner": "israelias",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
