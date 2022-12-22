@@ -41,7 +41,7 @@ jobs:
 #           run: pwd
 
   Expo_Web_Build:
-      name: Export a an Expo web build for Vercel deployment
+      # name: Export a an Expo web build for Vercel deployment
       runs-on: ubuntu-latest
       defaults:
         run:
