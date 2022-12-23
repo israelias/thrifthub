@@ -57,7 +57,7 @@
     "react-native-pager-view": "5.0.12",
     "react-native-paper": "^4.9.2",
     "react-native-paper-form-builder": "^2.1.2",
-    "react-native-reanimated": "~2.2.0",
+    "react-native-reanimated": "~2.13.0",
     "react-native-safe-area-context": "3.2.0",
     "react-native-screens": "~3.4.0",
     "react-native-status-bar-height": "^2.6.0",
