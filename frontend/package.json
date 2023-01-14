@@ -80,7 +80,7 @@
     "@types/react-native": "~0.63.2",
     "@types/react-native-vector-icons": "^6.4.8",
     "@types/styled-components": "^5.1.11",
-    "@types/styled-components-react-native": "^5.1.1",
+    "@types/styled-components-react-native": "^5.2.0",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "babel-preset-expo": "^8.4.0",
