@@ -73,7 +73,7 @@
     "@babel/core": "^7.20.5",
     "@babel/plugin-transform-react-jsx-source": "^7.14.5",
     "@callstack/eslint-config": "^11.0.0",
-    "@expo/webpack-config": "^0.13.1",
+    "@expo/webpack-config": "^18.0.1",
     "@types/color": "^3.0.2",
     "@types/lodash": "^4.14.171",
     "@types/react": "~16.9.35",
