@@ -17,7 +17,7 @@ class Query(graphene.ObjectType):
     user_details = graphene.Field(UserType)
     # user_details = graphene.List(UserType)
 
-    def resolve_user_details(root, info, **kwargs):
+    def resolve_user_details(root, info, **kwargs) -> User:
         """
         The resolve_user_details function is a resolver function that returns the user details of the currently logged in user.
         It takes three arguments: root, info, and **kwargs. The root argument is required by all resolve functions and contains data about the query itself;

@@ -65,7 +65,7 @@ class ProductImagesByProductId(generics.ListAPIView):
     Endpoint: `api/store/images/<id>`
     """
 
-    def get_queryset(self):
+    def get_queryset(self) -> Image:
         """
         The get_queryset function is used to return a QuerySet of all the images associated with the product.
         The get_queryset function takes in self, which represents an instance of ProductDetailView and returns a QuerySet
@@ -90,7 +90,7 @@ class ProductsByVendorView(generics.ListAPIView):
     Endpoint: `api/store/vendor/<slug>`
     """
 
-    def get_queryset(self):
+    def get_queryset(self) -> Product:
         return Product.objects.filter(
             vendor=Vendor.objects.get(slug=self.kwargs["slug"])
         )
@@ -106,7 +106,7 @@ class ProductsByCategory(generics.ListAPIView):
     Endpoint: `api/store/category/<slug>`
     """
 
-    def get_queryset(self):
+    def get_queryset(self) -> Product:
         """
         The get_queryset function is a Django shortcut that allows you to return the queryset of objects for a given model.
         It takes one argument, which is the viewset class itself (in this case, it's ProductListView).
@@ -137,7 +137,7 @@ class ProductsByCategories(generics.ListAPIView):
     products per URL arg
     """
 
-    def get_queryset(self):
+    def get_queryset(self) -> Product:
         """
         The get_queryset function is used to return a filtered queryset of products.
         It takes the kwargs from the URL as input and returns a filtered queryset.

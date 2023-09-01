@@ -18,7 +18,7 @@ from .models import Friend, Vendor
 
 
 class RawProductSlugSerializer(serializers.BaseSerializer):
-    def to_representation(self, obj):
+    def to_representation(self, obj: Product) -> str:
         return obj.slug
 
 
@@ -71,7 +71,7 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
         ]
         # extra_kwargs = {"image"}
 
-    def get_friends(self, obj):
+    def get_friends(self, obj: Vendor) -> list:
         try:
             friend = Friend.objects.get(current_vendor=obj)
             friends = friend.vendors.all()
@@ -81,12 +81,12 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
         friends_serializer = VendorFriendSerializer(friends, many=True)
         return friends_serializer.data
 
-    def get_products(self, obj):
+    def get_products(self, obj: Vendor) -> list:
         my_products = Product.objects.filter(vendor=obj.id).order_by(Lower("title"))
         product_serializer = ProductSerializer(my_products, many=True)
         return product_serializer.data
 
-    def get_friends_products(self, obj):
+    def get_friends_products(self, obj: Vendor) -> list:
         try:
             friend = Friend.objects.get(current_vendor=obj)
             friends = friend.vendors.all()
@@ -97,16 +97,16 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
         product_serializer = ProductSerializer(friends_products, many=True)
         return product_serializer.data
 
-    def get_favorites(self, obj):
+    def get_favorites(self, obj: Vendor) -> list:
         favorites, created = Favorite.objects.get_or_create(vendor=obj)
         favorite_products = obj.favorites.favorites.all()
         product_serializer = ProductSerializer(favorite_products, many=True)
         return product_serializer.data
 
-    def get_order_count(self, obj):
+    def get_order_count(self, obj: Vendor) -> int:
         return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
 
-    def get_product_count(self, obj):
+    def get_product_count(self, obj: Vendor) -> int:
         return Product.objects.filter(vendor=obj).count()
 
 
@@ -150,18 +150,18 @@ class OtherVendorSerializer(serializers.ModelSerializer):
             "product_count",
         ]
 
-    def get_products(self, obj):
+    def get_products(self, obj: Vendor) -> list:
         their_products = Product.objects.filter(vendor=obj.id).order_by(Lower("title"))
         product_serializer = ProductSerializer(their_products, many=True)
         return product_serializer.data
 
-    def get_order_count(self, obj):
+    def get_order_count(self, obj: Vendor) -> int:
         return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
 
-    def get_product_count(self, obj):
+    def get_product_count(self, obj: Vendor) -> int:
         return Product.objects.filter(vendor=obj).count()
 
-    def get_favorites(self, obj):
+    def get_favorites(self, obj: Vendor) -> list:
         favorites, created = Favorite.objects.get_or_create(vendor=obj)
         favorite_products = obj.favorites.favorites.all()
         product_serializer = ProductSerializer(favorite_products, many=True)
@@ -220,13 +220,13 @@ class VendorSerializer(serializers.ModelSerializer):
             "slug",
         ]
 
-    def get_order_count(self, obj):
+    def get_order_count(self, obj: Vendor) -> int:
         return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
 
-    def get_product_count(self, obj):
+    def get_product_count(self, obj: Vendor) -> int:
         return Product.objects.filter(vendor=obj).count()
 
-    def get_favorites(self, obj):
+    def get_favorites(self, obj: Vendor) -> list:
         favorites, created = Favorite.objects.get_or_create(vendor=obj)
         favorite_products = obj.favorites.favorites.all()
         product_serializer = RawProductSlugSerializer(favorite_products, many=True)

@@ -48,7 +48,7 @@ class AccountRegisterDetailView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
 
     @swagger_auto_schema(responses={200: user_response})
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> Response:
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -75,7 +75,7 @@ class AccountLoginDetailView(generics.GenericAPIView):
     permission_classes = (AllowAny,)
 
     @swagger_auto_schema(responses={200: user_response})
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
@@ -122,7 +122,7 @@ class AccountLogoutView(views.APIView):
 
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    def post(self, request) -> Response:
 
         try:
 
@@ -158,7 +158,7 @@ class AccountLogoutAllView(views.APIView):
 
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    def post(self, request) -> Response:
         try:
             tokens = OutstandingToken.objects.filter(user_id=request.user.id)
             for token in tokens:
