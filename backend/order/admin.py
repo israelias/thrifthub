@@ -12,6 +12,13 @@ class OrderDetailInline(admin.StackedInline):
 
 @admin.register(OrderModel)
 class OrderAdmin(admin.ModelAdmin):
+    list_display = ("id", "product", "vendor", "buyer", "status")
+    search_fields = ("vendor", "buyer", "product")
+
+    filter_horizontal = ()
+    list_filter = ()
+    fieldsets = ()
+
     inlines = [
         OrderDetailInline,
     ]

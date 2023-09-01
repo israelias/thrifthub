@@ -52,4 +52,13 @@ class ProductInline(admin.StackedInline):
 # admin.site.register(User, UserAdmin)
 @admin.register(Vendor)
 class VendorAdmin(admin.ModelAdmin):
-    inlines = [ProductInline, VendorFavoriteInline, VendorFriendInline, OrderRequestsInline, OrdersMadeInline]
+    list_display = ["id", "name", "created_by"]
+    list_fiter = ["created_by", "category"]
+    search_fields = ["name", "created_by"]
+    inlines = [
+        ProductInline,
+        VendorFavoriteInline,
+        VendorFriendInline,
+        OrderRequestsInline,
+        OrdersMadeInline,
+    ]
