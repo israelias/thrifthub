@@ -66,6 +66,17 @@ class ProductImagesByProductId(generics.ListAPIView):
     """
 
     def get_queryset(self):
+        """
+        The get_queryset function is used to return a QuerySet of all the images associated with the product.
+        The get_queryset function takes in self, which represents an instance of ProductDetailView and returns a QuerySet
+        of all the images associated with that particular product.
+
+        Args:
+            self: Reference the class itself
+
+        Returns:
+            The images of the product with the id passed in
+        """
         return Image.objects.filter(product=self.kwargs["id"])
 
 
@@ -80,7 +91,9 @@ class ProductsByVendorView(generics.ListAPIView):
     """
 
     def get_queryset(self):
-        return Product.objects.filter(vendor=Vendor.objects.get(slug=self.kwargs["slug"]))
+        return Product.objects.filter(
+            vendor=Vendor.objects.get(slug=self.kwargs["slug"])
+        )
 
 
 class ProductsByCategory(generics.ListAPIView):
@@ -94,8 +107,21 @@ class ProductsByCategory(generics.ListAPIView):
     """
 
     def get_queryset(self):
+        """
+        The get_queryset function is a Django shortcut that allows you to return the queryset of objects for a given model.
+        It takes one argument, which is the viewset class itself (in this case, it's ProductListView).
+        The get_queryset function returns all of the products in a category and its descendants.
+
+        Args:
+            self: Access the attributes and methods of the class in python
+
+        Returns:
+            A queryset of all the products in a category
+        """
         return models.Product.objects.filter(
-            category__in=Category.objects.get(slug=self.kwargs["slug"]).get_descendants(include_self=True)
+            category__in=Category.objects.get(slug=self.kwargs["slug"]).get_descendants(
+                include_self=True
+            )
         )
 
 
@@ -112,6 +138,20 @@ class ProductsByCategories(generics.ListAPIView):
     """
 
     def get_queryset(self):
+        """
+        The get_queryset function is used to return a filtered queryset of products.
+        It takes the kwargs from the URL as input and returns a filtered queryset.
+        The category_slug variable is created by taking the value of 'hierarchy' from
+        the URL keyword arguments, splitting it on '/', and then creating a list with
+        all but the last item in that list (which would be our slug). This allows us to
+        iterate through all parent categories until we find our slug, which we use to filter.
+
+        Args:
+            self: Refer to the instance of the class
+
+        Returns:
+            The queryset of the products that are related to the category slug
+        """
 
         category_slug = self.kwargs.get("hierarchy", None)
         parent = None
@@ -126,14 +166,16 @@ class ProductsByCategories(generics.ListAPIView):
 
             try:
                 instance = models.Product.objects.filter(
-                    category__in=Category.objects.get(parent=parent, slug=category_slug[-1]).get_descendants(
-                        include_self=True
-                    )
+                    category__in=Category.objects.get(
+                        parent=parent, slug=category_slug[-1]
+                    ).get_descendants(include_self=True)
                 )
             except:
 
                 instance = models.Product.objects.filter(
-                    category__in=Category.objects.get(slug=category_slug[-1]).get_descendants(include_self=True)
+                    category__in=Category.objects.get(
+                        slug=category_slug[-1]
+                    ).get_descendants(include_self=True)
                 )
 
                 return instance
