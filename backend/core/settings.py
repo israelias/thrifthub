@@ -24,6 +24,7 @@ else:
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+print("base dir path", BASE_DIR)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -161,19 +162,19 @@ USE_THOUSAND_SEPARATOR = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = "/static/"
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+# STATIC_URL = "/static/"
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 # STATICFILES_DIRS = str(BASE_DIR / "static/")
 # STATICFILES_DIRS = [
 #     str(BASE_DIR / "static"),
 #     "/var/www/static/",
 # ]
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = str(BASE_DIR / "media/")
+# MEDIA_URL = "/media/"
+# MEDIA_ROOT = str(BASE_DIR / "media/")
 # MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+# DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 if "USE_AWS" in os.environ:
     # Cache control
@@ -183,10 +184,11 @@ if "USE_AWS" in os.environ:
     }
 
     # Bucket Config
-    AWS_STORAGE_BUCKET_NAME = "thrifthub"
+    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
     AWS_S3_REGION_NAME = "ap-southeast-1"
     AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    AWS_DEFAULT_ACL = None
     AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 
     # Static and media files
@@ -198,6 +200,14 @@ if "USE_AWS" in os.environ:
     # Override static and media URLs in production
     STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{STATICFILES_LOCATION}/"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/"
+else:
+    STATIC_URL = "/static/"
+    STATIC_ROOT = os.path.join(BASE_DIR, "static")
+    MEDIA_URL = "/media/"
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "staticfiles"),)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -228,7 +238,7 @@ REST_FRAMEWORK = {
 # Stripe
 STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY")
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
-STRIPE_WH_SECRET = os.getenv("STRIPE_WH_SECRET")
+STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET")
 
 SESSION_COOKIE_AGE = 86400
 CART_SESSION_ID = "cart"
