@@ -11,3 +11,4 @@ backend/media/__placeholder__
 backend/media/__sized__
 backend/media/images/
 backend/media/profiles
+*.pem
