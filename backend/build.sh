@@ -5,5 +5,5 @@ echo "installing"
 pip install -r requirements.txt
 echo "collecting static"
 python manage.py collectstatic --no-input
-echo "migrating"
+echo "migrating" 
 python manage.py migrate
