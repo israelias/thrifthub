@@ -27,12 +27,12 @@ class VendorFullSerializer(serializers.ModelSerializer):
 
 
 class RawProductSlugSerializer(serializers.BaseSerializer):
-    def to_representation(self, obj):
+    def to_representation(self, obj) -> str:
         return obj.slug
 
 
 class RawIdSerializer(serializers.BaseSerializer):
-    def to_representation(self, obj):
+    def to_representation(self, obj) -> str:
         return obj.id
 
 
@@ -57,29 +57,29 @@ class VendorPreviewSerializer(serializers.ModelSerializer):
             "orders_made",
         ]
 
-    def get_order_count(self, obj):
+    def get_order_count(self, obj) -> int:
         return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
 
-    def get_product_count(self, obj):
+    def get_product_count(self, obj) -> int:
         return Product.objects.filter(vendor=obj).count()
 
-    def get_favorites(self, obj):
+    def get_favorites(self, obj) -> int:
         favorites, created = Favorite.objects.get_or_create(vendor=obj)
         favorite_products = obj.favorites.favorites.all()
         product_serializer = RawProductSlugSerializer(favorite_products, many=True)
         return product_serializer.data
 
-    def get_order_requests(self, obj):
+    def get_order_requests(self, obj) -> int:
         order_requests = order_models.Order.objects.filter(vendor=obj)
         order_serializer = RawIdSerializer(order_requests, many=True)
         return order_serializer.data
 
-    def get_orders_made(self, obj):
+    def get_orders_made(self, obj) -> int:
         orders_made = order_models.Order.objects.filter(buyer=obj)
         order_serializer = RawIdSerializer(orders_made, many=True)
         return order_serializer.data
 
-    def get_product_count(self, obj):
+    def get_product_count(self, obj) -> int:
         return Product.objects.filter(vendor=obj).count()
 
 
@@ -122,7 +122,7 @@ class ImageFullSerializer(FlexFieldsModelSerializer):
             "image": {"required": True},
         }
 
-    def create(self, validated_data):
+    def create(self, validated_data) -> Image:
         instance = Image.objects.create(
             product=validated_data.get("product"),
             is_feature=validated_data.get("is_feature", False),
@@ -148,7 +148,7 @@ class ImageNewSerializer(FlexFieldsModelSerializer):
 
 
 class RawOrderStatusSerializer(serializers.BaseSerializer):
-    def to_representation(self, obj):
+    def to_representation(self, obj) -> str:
         return obj.status
 
 
@@ -177,7 +177,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "product_images",
         ]
 
-    def get_image(self, obj):
+    def get_image(self, obj) -> str:
         images = Image.objects.filter(product=obj).first()
         if not images:
             return {}
@@ -234,7 +234,7 @@ class ProductPreviewSerializer(FlexFieldsModelSerializer):
             "vendor": VendorPreviewSerializer,
         }
 
-    def get_image(self, obj):
+    def get_image(self, obj) -> str:
         images = Image.objects.filter(product=obj).first()
         if images:
             image_serializer = ImageNewSerializer(images)
@@ -269,7 +269,7 @@ class ProductSimilarSerializer(FlexFieldsModelSerializer):
             "vendor": VendorPreviewSerializer,
         }
 
-    def get_image(self, obj):
+    def get_image(self, obj) -> str:
         images = Image.objects.filter(product=obj).first()
         if images:
             image_serializer = ImageNewSerializer(images)
@@ -316,7 +316,7 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
             "ordered_product": {"required": False},
         }
 
-    def get_similar_products(self, obj):
+    def get_similar_products(self, obj) -> list:
         similar_products = list(obj.category.products.exclude(id=obj.id))
 
         if len(similar_products) >= 4:
@@ -325,14 +325,14 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
         product_serializer = ProductSimilarSerializer(similar_products, many=True)
         return product_serializer.data
 
-    def get_image(self, obj):
+    def get_image(self, obj) -> str:
         images = Image.objects.filter(product=obj).first()
         if images:
             image_serializer = ImageNewSerializer(images)
             return image_serializer.data.get("image")
         return image_serializer.data
 
-    def create(self, validated_data):
+    def create(self, validated_data) -> Product:
         vendor = self.context["request"].user.vendor
 
         print("images field", self.context["request"].data["images"])
@@ -362,7 +362,7 @@ class ProductVersatileSerializer(FlexFieldsModelSerializer):
 
         return instance
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data) -> Product:
         request = self.context["request"]
         vendor = request.user.vendor
 

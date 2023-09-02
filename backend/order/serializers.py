@@ -82,7 +82,7 @@ class OrderSerializer(FlexFieldsModelSerializer):
         }
         extra_kwargs = {"amount": {"required": False}, "order_detail": {"required": False}}
 
-    def validate(self, data):
+    def validate(self, data: dict) -> dict:
         """
         Check if product is avaialable or if it is already in the buyer's orders.
         Ensure an offer is never more than the price of the product.
@@ -112,7 +112,7 @@ class OrderSerializer(FlexFieldsModelSerializer):
 
         return data
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict) -> Order:
         request = self.context["request"]
         buyer = request.user.vendor
         # buyer = Vendor.objects.get(created_by=request.user.vendor)
@@ -138,7 +138,7 @@ class OrderSerializer(FlexFieldsModelSerializer):
 
         return instance
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data: dict) -> Order:
 
         user = self.context["request"].user.vendor
 

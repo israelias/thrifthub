@@ -24,7 +24,7 @@ class AccountRegisterSerializer(serializers.ModelSerializer):
         fields = ["id", "username", "email", "password"]
         extra_kwargs = {"password": {"write_only": True}}
 
-    def create(self, validated_data):
+    def create(self, validated_data: dict) -> User:
         print("SERIALIZER")
         user = User.objects.create_user(
             validated_data["username"],
@@ -42,13 +42,13 @@ class AccountChangePasswordSerializer(serializers.ModelSerializer):
         model = User
         fields = ("old_password", "password")
 
-    def validate_old_password(self, value):
+    def validate_old_password(self, value: str) -> str:
         user = self.context["request"].user
         if not user.check_password(value):
             raise serializers.ValidationError({"old_password": "Old password is not correct"})
         return value
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data: dict) -> User:
         user = self.context["request"].user
 
         if user.id != instance.id:
@@ -71,19 +71,19 @@ class AccountUpdateSerializer(serializers.ModelSerializer):
             "last_name": {"required": True},
         }
 
-    def validate_email(self, value):
+    def validate_email(self, value: str) -> str:
         user = self.context["request"].user
         if User.objects.exclude(id=user.id).filter(email=value).exists():
             raise serializers.ValidationError({"email": "This email is already in use."})
         return value
 
-    def validate_username(self, value):
+    def validate_username(self, value: str) -> str:
         user = self.context["request"].user
         if User.objects.exclude(id=user.id).filter(username=value).exists():
             raise serializers.ValidationError({"username": "This username is already in use."})
         return value
 
-    def update(self, instance, validated_data):
+    def update(self, instance, validated_data: dict) -> User:
         user = self.context["request"].user
 
         if user.id != instance.id:
@@ -105,7 +105,7 @@ class AccountLoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
 
-    def validate(self, data):
+    def validate(self, data: dict) -> dict:
         user = authenticate(**data)
         if user and user.is_active:
             return user

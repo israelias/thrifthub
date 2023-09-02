@@ -9,7 +9,7 @@ from vendor.models import Vendor
 
 
 @receiver(post_save, sender=User)
-def create_or_update_vendor(sender, instance, created, **kwargs):
+def create_or_update_vendor(sender, instance, created, **kwargs) -> None:
     print("RECEIVER")
     print("SENDER", sender.username)
     print("INSTANCE", instance)

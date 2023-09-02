@@ -46,7 +46,7 @@ class VendorDetailAuthView(generics.RetrieveAPIView):
     ]
     serializer_class = CurrentVendorSerializer
 
-    def get_object(self):
+    def get_object(self) -> Vendor:
         """
         The get_object function is used to retrieve the object that the view will
         render to JSON. In this case, it returns a vendor instance based on the primary
@@ -111,7 +111,7 @@ class VendorFavoriteListView(generics.ListCreateAPIView):
     queryset = Favorite.objects.all()
     permission_classes = (AllowAny,)
 
-    def get_queryset(self):
+    def get_queryset(self) -> list:
         """
         The get_queryset function is used to return a QuerySet of all the favorites for a particular vendor.
         It takes in the id of the vendor as an argument, and then uses that id to filter through all of our
@@ -128,7 +128,7 @@ class VendorFavoriteListView(generics.ListCreateAPIView):
         favorites_obj = get_object_or_404(self.queryset, vendor=vendor)
         return favorites_obj.favorites.all()
 
-    def post(self, request, id):
+    def post(self, request, id) -> Response:
         """
         The post function allows the user to add a product to their favorites list.
         It takes in an id of a vendor and the id of a product, and adds that product
@@ -152,7 +152,7 @@ class VendorFavoriteListView(generics.ListCreateAPIView):
             status=status.HTTP_200_OK,
         )
 
-    def delete(self, request, id):
+    def delete(self, request, id) -> Response:
         """
         The delete function is used to remove a product from the favorites list of a vendor.
         It takes in an id for the vendor and an id for the product as parameters. It then finds
@@ -187,7 +187,7 @@ class VendorFriendsListView(generics.ListCreateAPIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = Friend.objects.all()
 
-    def get_queryset(self):
+    def get_queryset(self) -> list:
         """
         The get_queryset function is used to return a QuerySet of all the vendors that are friends with the vendor
         that owns this view. This function is called by Django when it needs to retrieve data for this view.
@@ -202,7 +202,7 @@ class VendorFriendsListView(generics.ListCreateAPIView):
         friends_obj = Friend.objects.get_or_create(current_vendor=vendor)
         return friends_obj.vendors.all()
 
-    def post(self, request, id):
+    def post(self, request, id) -> Response:
         """
         The post function allows a vendor to add another vendor as a friend.
         It takes the id of the current vendor and the other_vendor_id, which is
@@ -226,7 +226,7 @@ class VendorFriendsListView(generics.ListCreateAPIView):
             status=status.HTTP_200_OK,
         )
 
-    def delete(self, request, id):
+    def delete(self, request, id) -> Response:
         """
         The delete function is used to remove a vendor from the friends list of another vendor.
         It takes in an id for the current_vendor and then removes that vendor from the other_vendor's friends list.

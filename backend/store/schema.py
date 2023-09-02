@@ -25,7 +25,7 @@ class ProductImageType(DjangoObjectType):
             "updated_at",
         )
 
-    def resolve_image(self, info):
+    def resolve_image(self, info) -> str:
         if self.image:
             self.image = info.context.build_absolute_uri(self.image.url)
         return self.image
@@ -57,20 +57,20 @@ class Query(graphene.ObjectType):
         ProductType, slug=graphene.String(required=True)
     )
 
-    def resolve_category_by_name(self, info, name):
+    def resolve_category_by_name(self, info, name) -> CategoryType:
         try:
             return Category.objects.get(name=name)
         except Category.DoesNotExist:
             return None
 
-    def resolve_all_Products_by_name(self, info, slug):
+    def resolve_all_Products_by_name(self, info, slug) -> ProductType:
         try:
             return Product.objects.get(slug=slug)
         except Product.DoesNotExist:
             return None
 
-    def resolve_all_Categories(self, info):
+    def resolve_all_Categories(self, info) -> CategoryType:
         return Category.objects.filter(level=1)
 
-    def resolve_all_Products(self, info):
+    def resolve_all_Products(self, info) -> ProductType:
         return Product.objects.all()

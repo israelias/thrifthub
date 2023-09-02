@@ -46,7 +46,7 @@ class Order(models.Model):
         verbose_name = _("Order")
         verbose_name_plural = _("Orders")
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         """
         If the Order instance is an immediate purchase and not an offer,
         set the amount to be the price of the product.
@@ -62,13 +62,13 @@ class Order(models.Model):
 
         super(Order, self).save(*args, **kwargs)
 
-    def get_price(self):
+    def get_price(self) -> float:
         return self.product.price
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("order:order_list", args=[self.id])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Product {self.product.title} ordered by {self.buyer.name}"
 
 
@@ -95,15 +95,15 @@ class OrderDetail(models.Model):
         verbose_name = _("Order Detail")
         verbose_name_plural = _("Order Details")
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("orderdetails:orderdetails_list", args=[self.id])
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Order Details of {self.full_name} on order {self.order.id}"
 
 
 @receiver(pre_delete, sender=Order)
-def reset_product_is_available(sender, instance, **kwargs):
+def reset_product_is_available(sender, instance, **kwargs) -> None:
     """
     Reset an product's availability if an order for that product is deleted.
 

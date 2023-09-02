@@ -22,11 +22,11 @@ from versatileimagefield.placeholder import (
 )
 
 
-def upload_path(instance, filename):
+def upload_path(instance, filename: str) -> str:
     return "/".join(["images", str(instance.name), filename])
 
 
-def rand_slug():
+def rand_slug() -> str:
     return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
 
 
@@ -54,15 +54,15 @@ class Category(MPTTModel):
         verbose_name = _("Category")
         verbose_name_plural = _("Categories")
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("store:category_list", args=[self.slug])
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if not self.slug:
             self.slug = slugify(rand_slug() + "-" + self.name)
         super(Category, self).save(*args, **kwargs)
 
-    def get_slug_list(self):
+    def get_slug_list(self) -> list:
         try:
             ancestors = self.get_ancestors(include_self=True)
         except:
@@ -129,20 +129,20 @@ class Product(models.Model):
         verbose_name = _("Product")
         verbose_name_plural = _("Products")
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("store:product-detail", args=[self.slug])
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
 
         if not self.slug:
             self.slug = slugify(self.title)
 
         super(Product, self).save(*args, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
-    def __unicode__(self):
+    def __unicode__(self) -> str:
         return self.title
 
 
@@ -185,23 +185,23 @@ class Image(models.Model):
         verbose_name_plural = _("Versatile Images")
         UniqueConstraint(fields=["is_feature"], condition=Q(is_feature=True), name="is_feature_is_unique")
 
-    def get_thumbnail(self):
+    def get_thumbnail(self) -> str:
         if self.image:
             thumbnail = self.make_thumbnail(self.image)
             return thumbnail
         else:
             return "https://via.placeholder.com/240x180.jpg"
 
-    def make_thumbnail(self, image, size=("240x180")):
+    def make_thumbnail(self, image, size=("240x180")) -> str:
         return image.thumbnail[size].url
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __unicode__(self):
+    def __unicode__(self) -> str:
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         if not self.name:
             if self.is_feature:
                 self.name = self.product.title + "-" + "feature" + "-" + rand_slug()
@@ -215,7 +215,7 @@ class Image(models.Model):
 
 
 @receiver(post_save, sender=Image)
-def warm_image_instances_post_save(sender, instance, **kwargs):
+def warm_image_instances_post_save(sender, instance, **kwargs) -> None:
     """Ensures Image objects are created post-save"""
     all_img_warmer = VersatileImageFieldWarmer(
         instance_or_queryset=instance, rendition_key_set="default_product", image_attr="image", verbose=True
@@ -233,12 +233,12 @@ class Favorite(models.Model):
         verbose_name = _("Favorite Product")
         verbose_name_plural = _("Favorite Products")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "%s's favorites" % self.vendor.name
 
 
 @receiver(pre_delete, sender=Product)
-def delete_category_if_null(sender, instance, **kwargs):
+def delete_category_if_null(sender, instance, **kwargs) -> None:
     """
     Delete category objects if it has no other related products.
 

@@ -100,7 +100,7 @@ class OrderItemCheckout(generics.CreateAPIView):
     Checkout POST.
     """
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> Response:
         body = request.POST.get("body")
         order_item = OrderModel.objects.create(
             product=body["product"],
