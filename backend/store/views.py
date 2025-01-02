@@ -1,13 +1,9 @@
-from django.shortcuts import get_object_or_404, redirect, render, reverse
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_flex_fields import FlexFieldsModelViewSet, is_expanded
-from rest_framework import filters, generics, viewsets
+from django.shortcuts import redirect, reverse
+from rest_flex_fields import FlexFieldsModelViewSet
+from rest_framework import filters, generics
 from rest_framework.permissions import (
     AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly,
 )
-from rest_framework.response import Response
 from vendor.models import Vendor
 
 from . import models
@@ -56,7 +52,6 @@ class ProductImagesViewSet(FlexFieldsModelViewSet):
 
 
 class ProductImagesByProductId(generics.ListAPIView):
-
     serializer_class = ImageFullSerializer
     permission_classes = (AllowAny,)
 
@@ -91,13 +86,23 @@ class ProductsByVendorView(generics.ListAPIView):
     """
 
     def get_queryset(self) -> Product:
+        """
+        The get_queryset function is used to return a queryset of all the products
+        associated with a particular vendor. The slug parameter is passed in from the URL,
+        and it's used to filter down to only products associated with that vendor.
+
+        Args:
+            self: Access the attributes and methods of the class
+
+        Returns:
+            All of the products that belong to a specific vendor
+        """
         return Product.objects.filter(
             vendor=Vendor.objects.get(slug=self.kwargs["slug"])
         )
 
 
 class ProductsByCategory(generics.ListAPIView):
-
     serializer_class = ProductSerializer
     permission_classes = (AllowAny,)
 
@@ -161,7 +166,6 @@ class ProductsByCategories(generics.ListAPIView):
             category_slug = category_slug.split("/")
 
             for slug in category_slug[:-1]:
-
                 parent = Category.objects.get(parent=parent, slug=slug)
 
             try:

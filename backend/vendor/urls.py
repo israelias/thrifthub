@@ -11,7 +11,6 @@ urlpatterns = [
     path("vendor/<id>/", views.OtherVendorDetailView.as_view()),
     path("vendor/<id>/favorites/", views.VendorFavoriteListView.as_view()),
     path("vendor/<id>/friends/", views.VendorFriendsListView.as_view()),
-
     # previous
     # path("vendors/<int:pk>/", views.VendorDetail.as_view(), name="vendor_profile"),
     # path("vendors/profile/", views.VendorProductListView.as_view(), name="vendors_profiles_test"),

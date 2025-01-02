@@ -17,10 +17,25 @@ from versatileimagefield.placeholder import (
 
 
 def upload_path(instance, filename: str) -> str:
+    """
+    The upload_path function is used to determine the location of uploaded files.
+    It takes two arguments: instance and filename. The instance argument contains a
+    field called name, which is set to the name of the user who created this profile.
+    The filename argument contains a field called file, which is set to whatever file
+    the user uploads as their profile picture.
+
+    Args:
+        instance: Access the instance of the model that is being saved
+        filename: Set the name of the file that is uploaded
+
+    Returns:
+        The path to the profile image
+    """
     return "/".join(["profiles", str(instance.name), filename])
 
 
 class Vendor(models.Model):
+    """It creates a class called Vendor that inherits from the Model class."""
     name = models.CharField(max_length=255)
     created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
@@ -69,6 +84,8 @@ def warm_vendor_image(sender, instance, **kwargs) -> None:
 
 
 class Friend(models.Model):
+    """It creates a class called Friend that inherits from the Model class."""
+
     vendors = models.ManyToManyField(Vendor, related_name="vendors")
     current_vendor = models.ForeignKey(Vendor, related_name="owner", null=True, on_delete=models.CASCADE)
 
@@ -77,10 +94,35 @@ class Friend(models.Model):
 
     @classmethod
     def make_friend(cls, current_vendor, other_vendor) -> None:
+        """
+        The make_friend function creates a Friend object and adds the other_vendor to the current_vendor's friends list.
+        If a Friend object already exists for current_vendor, then it just adds other_vendor to that friend's friends list.
+
+        Args:
+            cls: Refer to the current class
+            current_vendor: Set the current_vendor to the vendor that is currently logged in
+            other_vendor: Add the other vendor to the current_vendor's friends list
+
+        Returns:
+            A tuple of the friend object and a boolean value indicating whether or not the friend was created
+        """
         friend, created = cls.objects.get_or_create(current_vendor=current_vendor)
         friend.vendors.add(other_vendor)
 
     @classmethod
     def lose_friend(cls, current_vendor, other_vendor) -> None:
+        """
+        The lose_friend function removes the other_vendor from the current_vendor's list of friends.
+        It returns a tuple containing a boolean value indicating whether or not it was successful, and
+        a message to be displayed to the user.
+
+        Args:
+            cls: Create a new object of the class
+            current_vendor: Get the current vendor object from the database
+            other_vendor: Specify the vendor that is being removed from the friends list
+
+        Returns:
+            The friend object
+        """
         friend, created = cls.objects.get_or_create(current_vendor=current_vendor)
         friend.vendors.remove(other_vendor)

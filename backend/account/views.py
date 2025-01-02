@@ -7,7 +7,7 @@ register: Allows user to pick a username and password to create an account.
 from django.contrib.auth.models import User
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import generics, permissions, serializers, status, views
+from rest_framework import generics, status, views
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import (
@@ -32,7 +32,9 @@ from .serializers import (
     UserResponseSerializer,
 )
 
-test_param = openapi.Parameter("test", openapi.IN_QUERY, description="test manual param", type=openapi.TYPE_OBJECT)
+test_param = openapi.Parameter(
+    "test", openapi.IN_QUERY, description="test manual param", type=openapi.TYPE_OBJECT
+)
 user_response = openapi.Response("response description", UserResponseSerializer)
 
 
@@ -56,7 +58,9 @@ class AccountRegisterDetailView(generics.GenericAPIView):
         refresh = RefreshToken.for_user(user)
         return Response(
             {
-                "user": CurrentVendorSerializer(user.vendor, context=self.get_serializer_context()).data,
+                "user": CurrentVendorSerializer(
+                    user.vendor, context=self.get_serializer_context()
+                ).data,
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
             }
@@ -85,7 +89,9 @@ class AccountLoginDetailView(generics.GenericAPIView):
 
         return Response(
             {
-                "user": CurrentVendorSerializer(user.vendor, context=self.get_serializer_context()).data,
+                "user": CurrentVendorSerializer(
+                    user.vendor, context=self.get_serializer_context()
+                ).data,
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
             }
@@ -138,12 +144,16 @@ class AccountLogoutView(views.APIView):
             )
         except (TokenError, TokenBackendError):
             return Response(
-                data={"message": "Token has already been blacklisted"}, status=status.HTTP_205_RESET_CONTENT
+                data={"message": "Token has already been blacklisted"},
+                status=status.HTTP_205_RESET_CONTENT,
             )
         except InvalidToken:
             return Response(data={"message": "Token invalid"}, status=400)
         except AuthenticationFailed:
-            return Response(data={"message": "Authentication failed"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                data={"message": "Authentication failed"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -172,9 +182,13 @@ class AccountLogoutAllView(views.APIView):
             )
         except (TokenError, TokenBackendError):
             return Response(
-                data={"message": "Token has already been blacklisted"}, status=status.HTTP_205_RESET_CONTENT
+                data={"message": "Token has already been blacklisted"},
+                status=status.HTTP_205_RESET_CONTENT,
             )
         except InvalidToken:
             return Response(data={"message": "Token invalid"}, status=400)
         except AuthenticationFailed:
-            return Response(data={"message": "Authentication failed"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                data={"message": "Authentication failed"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )

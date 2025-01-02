@@ -1,18 +1,11 @@
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed, NotFound
-from rest_framework.response import Response
-from rest_framework.validators import UniqueTogetherValidator
 from store.models import Product
 from store.serializers import (
-    CategoryPreviewSerializer,
     ProductPreviewSerializer,
-    ProductSerializer,
-    ProductVersatileSerializer,
-    VendorFullSerializer,
     VendorPreviewSerializer,
 )
-from vendor.models import Vendor
 
 from .models import Order, OrderDetail
 
@@ -27,7 +20,16 @@ class OrderPreviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at", "updated_at"]
+        fields = [
+            "id",
+            "product",
+            "vendor",
+            "buyer",
+            "status",
+            "amount",
+            "created_at",
+            "updated_at",
+        ]
 
 
 class OrderDetailSerializer(FlexFieldsModelSerializer):
@@ -67,44 +69,87 @@ class OrderFullSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at", "updated_at", "order_detail"]
+        fields = [
+            "id",
+            "product",
+            "vendor",
+            "buyer",
+            "status",
+            "amount",
+            "created_at",
+            "updated_at",
+            "order_detail",
+        ]
 
 
 class OrderSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = Order
-        fields = ["id", "product", "vendor", "buyer", "status", "amount", "created_at", "updated_at", "order_detail"]
+        fields = [
+            "id",
+            "product",
+            "vendor",
+            "buyer",
+            "status",
+            "amount",
+            "created_at",
+            "updated_at",
+            "order_detail",
+        ]
         expandable_fields = {
             "vendor": VendorPreviewSerializer,
             "buyer": VendorPreviewSerializer,
             "product": ProductPreviewSerializer,
             "order_detail": OrderDetailReadSerializer,
         }
-        extra_kwargs = {"amount": {"required": False}, "order_detail": {"required": False}}
+        extra_kwargs = {
+            "amount": {"required": False},
+            "order_detail": {"required": False},
+        }
 
     def validate(self, data: dict) -> dict:
         """
-        Check if product is avaialable or if it is already in the buyer's orders.
-        Ensure an offer is never more than the price of the product.
+        The validate function checks if the buyer has already made an offer for this product.
+        It also ensures that the first offer is never more than the price of the product.
+
+        Args:
+            self: Access the current instance of the class
+            data: Pass in the validated data
+
+        Returns:
+            The data if it is valid
         """
+
         # If it's a post request
         instance = getattr(self, "instance", None)
         print("instance", instance)
         if self.context["request"]._request.method == "POST":
 
             # Reject offer if buyer has already have a standing offer for the product
-            if Order.objects.filter(buyer=data["buyer"], product=data["product"]).exists():
-                raise MethodNotAllowed({"message": "This product is already in your orders."})
+            if Order.objects.filter(
+                    buyer=data["buyer"], product=data["product"]
+            ).exists():
+                raise MethodNotAllowed(
+                    {"message": "This product is already in your orders."}
+                )
 
             # Ensure the first offer is never more than the price of the product
             if float(data["amount"]) > float(data["product"].price):
-                raise MethodNotAllowed({"message": f"Your offer must not be greater than {data['product'].price}"})
+                raise MethodNotAllowed(
+                    {
+                        "message": f"Your offer must not be greater than {data['product'].price}"
+                    }
+                )
 
         if self.context["request"]._request.method == "PUT":
             # Ensure updates to offer amounts are validated only on put requests
             if self.context["request"].user.vendor == instance.buyer:
                 if float(data["amount"]) > float(data["product"].price):
-                    raise MethodNotAllowed({"message": f"Your offer must not be greater than {data['product'].price}"})
+                    raise MethodNotAllowed(
+                        {
+                            "message": f"Your offer must not be greater than {data['product'].price}"
+                        }
+                    )
 
         # Reject offer if product is no longer available
         if not data["product"].is_available:
@@ -113,9 +158,21 @@ class OrderSerializer(FlexFieldsModelSerializer):
         return data
 
     def create(self, validated_data: dict) -> Order:
+        """
+        The create function creates a new order instance.
+        It takes in the validated_data and uses it to create an Order object.
+        The amount is taken from the product price, unless otherwise specified by the user.
+        If there is no change in status, then it will be marked as PROCESSING.
+
+        Args:
+            self: Reference the current instance of the model
+            validated_data: Pass in the data that has already been validated by the serializer
+
+        Returns:
+            The newly created object
+        """
         request = self.context["request"]
         buyer = request.user.vendor
-        # buyer = Vendor.objects.get(created_by=request.user.vendor)
 
         product = Product.objects.get(id=request.data.get("product"))
         amount = validated_data.get("amount", product.price)
@@ -139,6 +196,21 @@ class OrderSerializer(FlexFieldsModelSerializer):
         return instance
 
     def update(self, instance, validated_data: dict) -> Order:
+        """
+        The update function is used to update the status of an order.
+        It takes in a request and validated data as arguments.
+        The user who made the request is determined by checking if it was a vendor or buyer making the request.
+        If it was a vendor, then they can only update their own orders' statuses, otherwise if it was a buyer,
+        they can only update their own orders' amounts.
+
+        Args:
+            self: Access fields and methods of the serializer class
+            instance: Get the current object that is being updated
+            validated_data: Pass in the data that has been validated by the serializer
+
+        Returns:
+            The updated instance
+        """
 
         user = self.context["request"].user.vendor
 

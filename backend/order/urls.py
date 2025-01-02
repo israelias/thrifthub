@@ -7,7 +7,9 @@ app_name = "order"
 
 router = DefaultRouter()
 router.register(r"orders", views.VendorOrderViewSet, basename="vendor_order")
-router.register(r"orderdetail", views.VendorOrderDetailViewSet, basename="vendor_order_detail")
+router.register(
+    r"orderdetail", views.VendorOrderDetailViewSet, basename="vendor_order_detail"
+)
 
 urlpatterns = [
     path("", include(router.urls)),

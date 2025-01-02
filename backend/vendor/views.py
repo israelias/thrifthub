@@ -1,36 +1,21 @@
-import json
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
-from django.utils.text import slugify
-from order.models import Order
-from order.serializers import OrderSerializer
+from django.shortcuts import get_object_or_404
 from rest_framework import (
     filters,
     generics,
     permissions,
-    serializers,
     status,
-    views,
-    viewsets,
 )
 from rest_framework.permissions import (
     AllowAny,
-    IsAuthenticated,
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
-from store.models import Favorite, Image, Product
-from store.serializers import ProductSerializer, ProductVersatileSerializer
+from store.models import Favorite, Product
+from store.serializers import ProductVersatileSerializer
 
-from . import models
 from .models import Friend, Vendor
 from .serializers import (
     CurrentVendorSerializer,
-    OtherVendorSerializer,
-    VendorFavoritesSerializer,
-    VendorFriendSerializer,
-    VendorProductSerializer,
     VendorSerializer,
 )
 
@@ -124,6 +109,7 @@ class VendorFavoriteListView(generics.ListCreateAPIView):
         Returns:
             The favorites of a particular vendor
         """
+
         vendor = Vendor.objects.get(id=self.kwargs["id"])
         favorites_obj = get_object_or_404(self.queryset, vendor=vendor)
         return favorites_obj.favorites.all()

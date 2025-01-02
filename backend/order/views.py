@@ -1,11 +1,8 @@
-from django.shortcuts import render
-from rest_flex_fields import FlexFieldsModelViewSet, is_expanded
-from rest_framework import generics, status
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_flex_fields import FlexFieldsModelViewSet
+from rest_framework import generics
+from rest_framework.permissions import (AllowAny,)
 from rest_framework.response import Response
-from store.models import Product
 
-from . import models
 from .models import Order as OrderModel
 from .models import OrderDetail
 from .serializers import OrderDetailSerializer, OrderSerializer
@@ -101,6 +98,20 @@ class OrderItemCheckout(generics.CreateAPIView):
     """
 
     def post(self, request, *args, **kwargs) -> Response:
+        """
+        The post function creates an order item and a order detail.
+        The post function also checks if the user is authenticated, if not it returns a 401 error.
+
+
+        Args:
+            self: Reference the class itself
+            request: Get the current user
+            *args: Pass a variable number of arguments to a function
+            **kwargs: Pass any number of additional arguments to the view
+
+        Returns:
+            The orderdetail object
+        """
         body = request.POST.get("body")
         order_item = OrderModel.objects.create(
             product=body["product"],

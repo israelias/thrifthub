@@ -1,10 +1,9 @@
 import graphene
 import graphql_jwt
+from graphene_django import DjangoObjectType
 
 # from django.contrib.auth.models import User
 from .models import User
-from graphene_django import DjangoObjectType
-from graphql_jwt.decorators import login_required
 
 
 class UserType(DjangoObjectType):
@@ -15,6 +14,7 @@ class UserType(DjangoObjectType):
 
 class Query(graphene.ObjectType):
     user_details = graphene.Field(UserType)
+
     # user_details = graphene.List(UserType)
 
     def resolve_user_details(root, info, **kwargs) -> User:

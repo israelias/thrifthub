@@ -1,16 +1,9 @@
-import datetime
-
 import order.models as order_models
 import order.serializers as order_serializers
-from django.conf import settings
-from django.core.cache import cache
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.db.models.functions import Lower
-from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework import serializers
-from store import models as store_models
-from store import serializers as store_serializers
-from store.models import Category, Favorite, Image, Product
+from store.models import Favorite, Product
 from store.serializers import ImageNewSerializer, ProductSerializer
 from versatileimagefield.serializers import VersatileImageFieldSerializer
 
@@ -93,7 +86,9 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
         except:
             friends = None
             return []
-        friends_products = Product.objects.filter(vendor__in=friends).order_by("-created_at")
+        friends_products = Product.objects.filter(vendor__in=friends).order_by(
+            "-created_at"
+        )
         product_serializer = ProductSerializer(friends_products, many=True)
         return product_serializer.data
 
@@ -104,7 +99,11 @@ class CurrentVendorSerializer(serializers.ModelSerializer):
         return product_serializer.data
 
     def get_order_count(self, obj: Vendor) -> int:
-        return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
+        return (
+            order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj))
+            .distinct()
+            .count()
+        )
 
     def get_product_count(self, obj: Vendor) -> int:
         return Product.objects.filter(vendor=obj).count()
@@ -156,7 +155,11 @@ class OtherVendorSerializer(serializers.ModelSerializer):
         return product_serializer.data
 
     def get_order_count(self, obj: Vendor) -> int:
-        return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
+        return (
+            order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj))
+            .distinct()
+            .count()
+        )
 
     def get_product_count(self, obj: Vendor) -> int:
         return Product.objects.filter(vendor=obj).count()
@@ -221,7 +224,11 @@ class VendorSerializer(serializers.ModelSerializer):
         ]
 
     def get_order_count(self, obj: Vendor) -> int:
-        return order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj)).distinct().count()
+        return (
+            order_models.Order.objects.filter(Q(vendor=obj) | Q(buyer=obj))
+            .distinct()
+            .count()
+        )
 
     def get_product_count(self, obj: Vendor) -> int:
         return Product.objects.filter(vendor=obj).count()
