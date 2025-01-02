@@ -1,6 +1,4 @@
 from django.contrib import admin
-from store.models import Product
-from vendor.models import Vendor
 
 from .models import Order as OrderModel
 from .models import OrderDetail
