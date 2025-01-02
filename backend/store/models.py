@@ -1,10 +1,8 @@
-import datetime
-import os
 import random
 import string
 
 from django.conf import settings
-from django.db import models, transaction
+from django.db import models
 from django.db.models import Q
 from django.db.models.constraints import UniqueConstraint
 from django.db.models.signals import post_save, pre_delete
@@ -27,7 +25,9 @@ def upload_path(instance, filename: str) -> str:
 
 
 def rand_slug() -> str:
-    return "".join(random.choice(string.ascii_letters + string.digits) for _ in range(6))
+    return "".join(
+        random.choice(string.ascii_letters + string.digits) for _ in range(6)
+    )
 
 
 class Category(MPTTModel):
@@ -41,8 +41,12 @@ class Category(MPTTModel):
         max_length=255,
         unique=True,
     )
-    slug = models.SlugField(verbose_name=_("Category safe URL"), max_length=255, unique=True)
-    parent = TreeForeignKey("self", on_delete=models.CASCADE, null=True, blank=True, related_name="children")
+    slug = models.SlugField(
+        verbose_name=_("Category safe URL"), max_length=255, unique=True
+    )
+    parent = TreeForeignKey(
+        "self", on_delete=models.CASCADE, null=True, blank=True, related_name="children"
+    )
     ordering = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
@@ -94,14 +98,23 @@ class Product(models.Model):
         (1, _("Damaged")),
     )
 
-    category = models.ForeignKey(Category, related_name="products", on_delete=models.CASCADE)
-    vendor = models.ForeignKey(Vendor, related_name="products", on_delete=models.CASCADE)
+    category = models.ForeignKey(
+        Category, related_name="products", on_delete=models.CASCADE
+    )
+    vendor = models.ForeignKey(
+        Vendor, related_name="products", on_delete=models.CASCADE
+    )
     title = models.CharField(
         verbose_name=_("Title"),
         help_text=_("Required"),
         max_length=255,
     )
-    description = models.TextField(verbose_name=_("description"), help_text=_("Not Required"), blank=True, null=True)
+    description = models.TextField(
+        verbose_name=_("description"),
+        help_text=_("Not Required"),
+        blank=True,
+        null=True,
+    )
     slug = models.SlugField(max_length=255, unique=True, null=True, blank=True)
     price = models.DecimalField(
         verbose_name=_("Price"),
@@ -121,7 +134,9 @@ class Product(models.Model):
         default=True,
     )
     condition = models.PositiveIntegerField(choices=CONDITION_CHOICES, default=3)
-    created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
+    created_at = models.DateTimeField(
+        _("Created at"), auto_now_add=True, editable=False
+    )
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
 
     class Meta:
@@ -151,7 +166,9 @@ class Image(models.Model):
     The Product Versatile Image table.
     """
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="product_images")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="product_images"
+    )
     name = models.CharField(max_length=255, null=True, blank=True)
     image = VersatileImageField(
         "Image",
@@ -161,7 +178,9 @@ class Image(models.Model):
         # null=True,
         # blank=True,
         default=settings.MEDIA_ROOT + "/images/default_placeholder.png",
-        placeholder_image=OnDiscPlaceholderImage(path=settings.MEDIA_ROOT + "/images/default_placeholder.png"),
+        placeholder_image=OnDiscPlaceholderImage(
+            path=settings.MEDIA_ROOT + "/images/default_placeholder.png"
+        ),
     )
     image_ppoi = PPOIField("Image PPOI")
     alt_text = models.CharField(
@@ -176,14 +195,20 @@ class Image(models.Model):
         verbose_name=_("Feature Image"),
         help_text=_("Assign this as the feature image"),
     )
-    created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
+    created_at = models.DateTimeField(
+        _("Created at"), auto_now_add=True, editable=False
+    )
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
 
     class Meta:
         ordering = ["is_feature"]
         verbose_name = _("Versatile Image")
         verbose_name_plural = _("Versatile Images")
-        UniqueConstraint(fields=["is_feature"], condition=Q(is_feature=True), name="is_feature_is_unique")
+        UniqueConstraint(
+            fields=["is_feature"],
+            condition=Q(is_feature=True),
+            name="is_feature_is_unique",
+        )
 
     def get_thumbnail(self) -> str:
         if self.image:
@@ -218,15 +243,22 @@ class Image(models.Model):
 def warm_image_instances_post_save(sender, instance, **kwargs) -> None:
     """Ensures Image objects are created post-save"""
     all_img_warmer = VersatileImageFieldWarmer(
-        instance_or_queryset=instance, rendition_key_set="default_product", image_attr="image", verbose=True
+        instance_or_queryset=instance,
+        rendition_key_set="default_product",
+        image_attr="image",
+        verbose=True,
     )
     num_created, failed_to_create = all_img_warmer.warm()
 
 
 class Favorite(models.Model):
-    vendor = models.OneToOneField(Vendor, related_name="favorites", on_delete=models.CASCADE)
+    vendor = models.OneToOneField(
+        Vendor, related_name="favorites", on_delete=models.CASCADE
+    )
     favorites = models.ManyToManyField(Product, related_name="favorites")
-    created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
+    created_at = models.DateTimeField(
+        _("Created at"), auto_now_add=True, editable=False
+    )
 
     class Meta:
         ordering = ("-created_at",)
@@ -245,7 +277,9 @@ def delete_category_if_null(sender, instance, **kwargs) -> None:
     """
     # category = Category.objects.filter(products__in=instance)
     products = instance.category.products.filter(
-        category__in=Category.objects.get(slug=instance.category.slug).get_descendants(include_self=True)
+        category__in=Category.objects.get(slug=instance.category.slug).get_descendants(
+            include_self=True
+        )
     )
     if not products.exists():
         products.delete()

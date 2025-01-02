@@ -18,9 +18,19 @@ class Order(models.Model):
         ("COMPLETED", _("Payment Completed")),
     )
 
-    product = models.ForeignKey(Product, related_name="ordered_product", on_delete=models.CASCADE)
-    vendor = models.ForeignKey(Vendor, related_name="order_requests", on_delete=models.CASCADE, null=True, blank=True)
-    buyer = models.ForeignKey(Vendor, related_name="orders_made", on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, related_name="ordered_product", on_delete=models.CASCADE
+    )
+    vendor = models.ForeignKey(
+        Vendor,
+        related_name="order_requests",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    buyer = models.ForeignKey(
+        Vendor, related_name="orders_made", on_delete=models.CASCADE
+    )
 
     status = models.CharField(max_length=32, choices=ORDER_STATUS, default="PENDING")
 
@@ -29,7 +39,9 @@ class Order(models.Model):
         help_text=_("Maximum is the price of the product."),
         error_messages={
             "name": {
-                "max_length": _("The price must be between 0.01 and the price of the product"),
+                "max_length": _(
+                    "The price must be between 0.01 and the price of the product"
+                ),
             },
         },
         max_digits=8,
@@ -38,7 +50,9 @@ class Order(models.Model):
         blank=True,
     )
 
-    created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
+    created_at = models.DateTimeField(
+        _("Created at"), auto_now_add=True, editable=False
+    )
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
 
     class Meta:
@@ -83,12 +97,16 @@ class OrderDetail(models.Model):
     street_address2 = models.CharField(max_length=80, null=True, blank=True)
     county = models.CharField(max_length=80, null=True, blank=True)
 
-    created_at = models.DateTimeField(_("Created at"), auto_now_add=True, editable=False)
+    created_at = models.DateTimeField(
+        _("Created at"), auto_now_add=True, editable=False
+    )
     updated_at = models.DateTimeField(_("Updated at"), auto_now=True)
 
     stripe_pid = models.CharField(max_length=254, null=False, blank=False, default="")
 
-    order = models.ForeignKey(Order, related_name="order_detail", on_delete=models.CASCADE)
+    order = models.ForeignKey(
+        Order, related_name="order_detail", on_delete=models.CASCADE
+    )
 
     class Meta:
         ordering = ["-created_at"]
@@ -111,4 +129,3 @@ def reset_product_is_available(sender, instance, **kwargs) -> None:
 
     instance.product.is_available = True
     instance.product.save()
-
