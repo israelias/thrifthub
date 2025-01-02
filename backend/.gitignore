@@ -1,0 +1,13 @@
+venv
+__pycache__
+.vscode/
+.env
+env.py
+yarn-error.log
+core/versatileimagefield.py
+media/__placeholder__
+media/__sized__
+media/images/*
+media/profiles
+!media/images/default_avatar.png
+!media/images/default_placeholder.png
