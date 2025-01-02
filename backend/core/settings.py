@@ -13,61 +13,78 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 import dj_database_url
 
-if not os.path.exists("env.py"):
-    pass
-else:
-    import env
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-print("base dir path", BASE_DIR)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY")
+# Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.os.getenviron
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = "DEVELOPMENT" in os.environ
+# False if not in os.environ
+DEBUG = os.getenv("DEVELOPMENT")
 
-if "DEVELOPMENT" in os.environ:
+if DEBUG:
     ALLOWED_HOSTS = []
 else:
     # ALLOWED_HOSTS = ["thrifthub-backend.herokuapp.com", "localhost"]
     ALLOWED_HOSTS = ["*"]
 
-# Application definition
+"""
+Project Apps Definitions
+Django Apps - Django Internal Apps
+Third Party Apps - Apps installed via requirements.txt
+Project Apps - Project owned / created apps
+Installed Apps = Django Apps + Third Part apps + Projects Apps
+"""
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+]
+
+THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "dj_rest_auth",
     "django_countries",
-    "store",
-    "account",
-    "vendor",
-    "order",
     "corsheaders",
     "mptt",
     "versatileimagefield",
     "django_filters",
     "rest_framework",
     "drf_yasg",
-    # "knox",
-    "storages",
+    'storages',
     "graphene_django",
+    # "knox",
+    # 'import_export',
+    # 'django_extensions',
+    # 'djangoql',
+    # 'post_office',
+    # 'allauth',
+    # 'allauth.account',
 ]
+
+PROJECT_APPS = [
+    "store",
+    "account",
+    "vendor",
+    "order",
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -102,20 +119,19 @@ ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_MIN_LENGTH = 4
 
-
 WSGI_APPLICATION = "core.wsgi.application"
 
 SWAGGER_SETTINGS = {
     "DEFAULT_AUTO_SCHEMA_CLASS": "core.yasg.CompoundTagsSchema",
     "DEFAULT_GENERATOR_CLASS": "core.yasg.CustomOpenAPISchemaGenerator",
+    "DEFAULT_INFO": "core.yasg.api_info"
 }
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-
-if "DATABASE_URL" in os.environ:
-    DATABASES = {"default": dj_database_url.parse(os.environ.get("DATABASE_URL"))}
+if os.getenv("DATABASE_URL"):
+    DATABASES = {"default": dj_database_url.parse(os.getenv("DATABASE_URL"))}
 else:
     DATABASES = {
         "default": {
@@ -162,57 +178,33 @@ USE_THOUSAND_SEPARATOR = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-# STATIC_URL = "/static/"
-# STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
-# STATICFILES_DIRS = str(BASE_DIR / "static/")
-# STATICFILES_DIRS = [
-#     str(BASE_DIR / "static"),
-#     "/var/www/static/",
-# ]
-
-# MEDIA_URL = "/media/"
-# MEDIA_ROOT = str(BASE_DIR / "media/")
-# MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
-# DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
-
-if "USE_AWS" in os.environ:
+if os.getenv("USE_S3", False):
     # Cache control
-    AWS_S3_OBJECT_PARAMETERS = {
-        "Expires": "Thu, 31 Dec 2099 20:00:00 GMT",
-        "CacheControl": "max-age=94608000",
-    }
-
+    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": 'max-age=86400',}
     # Bucket Config
-    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
-    AWS_S3_REGION_NAME = "ap-southeast-1"
-    AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+    AWS_S3_REGION_NAME = "us-east-1"
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
     AWS_DEFAULT_ACL = None
     AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
 
     # Static and media files
-    STATICFILES_STORAGE = "storages.backends.s3boto3.S3StaticStorage"
+    STATICFILES_STORAGE = "core.storages.StaticStorage"
     STATICFILES_LOCATION = "static"
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    DEFAULT_FILE_STORAGE = "core.storages.MediaStorage"
     MEDIAFILES_LOCATION = "media"
 
-    STATIC_ROOT = "/static/"
     # Override static and media URLs in production
     STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{STATICFILES_LOCATION}/"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/"
 else:
-    STATIC_URL = "/static/"
-    # STATIC_ROOT = os.path.join(BASE_DIR, "static")
+    STATIC_URL = "/staticfiles/"
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
     MEDIA_URL = "/media/"
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
-# STATICFILES_DIRS = [
-#     str(BASE_DIR / "static"),
-#     "/var/www/static/",
-# ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -241,14 +233,14 @@ REST_FRAMEWORK = {
 }
 
 # Stripe
-STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY")
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
-STRIPE_WH_SECRET = os.environ.get("STRIPE_WH_SECRET")
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_WH_SECRET = os.getenv("STRIPE_WH_SECRET")
 
 SESSION_COOKIE_AGE = 86400
 CART_SESSION_ID = "cart"
 
-if "DEVELOPMENT" in os.environ:
+if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
     DEFAULT_FROM_EMAIL = "noreply@thrifthub.com"
 else:
@@ -256,9 +248,9 @@ else:
     EMAIL_USE_TLS = True
     EMAIL_PORT = 587
     EMAIL_HOST = "smtp.gmail.com"
-    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-    DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_HOST_USER")
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+    DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 
 
 VERSATILEIMAGEFIELD_SETTINGS = {
@@ -373,4 +365,20 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
     "ALGORITHM": "HS512",
     "SIGNING_KEY": SECRET_KEY,
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler'
+        },
+    },
+    'loggers': {
+        '': {  # 'catch all' loggers by referencing it with the empty string
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
 }
