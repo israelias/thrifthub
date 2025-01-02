@@ -20,19 +20,19 @@ class CompoundTagsSchema(SwaggerAutoSchema):
         return [" > ".join(operation_keys[:-1])]
 
 
-schema_view = get_schema_view(
-    openapi.Info(
+# https://appliku.com/post/django-rest-framework-swagger-and-typescript-api-c
+api_info = openapi.Info(
         title="ThriftHub API",
         default_version="v1",
         description="Test description",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="israelias.js@gmail.com"),
         license=openapi.License(name="BSD License"),
-    ),
-    public=True,
-    permission_classes=[permissions.AllowAny],
-    generator_class=CustomOpenAPISchemaGenerator,
-   
 )
 
-
+schema_view = get_schema_view(
+    info=api_info,
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+    generator_class=CustomOpenAPISchemaGenerator,
+)

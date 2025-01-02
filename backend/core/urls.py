@@ -19,8 +19,6 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
 from graphene_django.views import GraphQLView
 from graphql_jwt.decorators import jwt_cookie
 
@@ -35,13 +33,22 @@ urlpatterns_root = [
     path("", include("order.urls", namespace="order")),
 ]
 
-
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("graphql/", jwt_cookie(csrf_exempt(GraphQLView.as_view(graphiql=True)))),
-    url(r"^swagger(?P<format>\.json|\.yaml)$", schema_view.without_ui(cache_timeout=0), name="schema-json"),
-    url(r"^swagger/$", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
-    url(r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    url(
+        r"^swagger(?P<format>\.json|\.yaml)$",
+        schema_view.without_ui(cache_timeout=0),
+        name="schema-json",
+    ),
+    url(
+        r"^swagger/$",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    url(
+        r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"
+    ),
     path("", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     url(r"^api/", include(urlpatterns_root)),
 ]
