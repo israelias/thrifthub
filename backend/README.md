@@ -1,13 +1,229 @@
+# Thrifthub Backend Django E-Commerce API
+![](documentation/screenshots/thrifthub-backend_api.jpg?raw=true)
+
+This is a Django E-Commerce API. It is a RESTful API that allows users to add and like products, and make purchases with other vendors. The API is built using Django and Django REST framework, and it includes features such as user authentication, product management, order processing, and more. 
 
 
+## Quick Start
+* Create a virtual environment: `python -m venv venv`
+* Activate the virtual environment: `source venv/bin/activate`
+* Install the requirements: `pip install -r requirements.txt`
+  * Run the migrations: `python manage.py migrate`
+  * Create a superuser: `python manage.py createsuperuser`
+* Run the server: `python manage.py runserver`
+* Access the admin panel: `http://127.0.0.1:8000/admin/`
+* Access the API: `http://127.0.0.1:8000/api/`
+  * Access the StoreApp: `http://127.0.0.1:8000/api/store/`
+  * Access the VendorApp: `http://127.0.0.1:8000/api/vendor/`
+  * Access the OrdersApp: `http://127.0.0.1:8000/api/orders/`
+  * Follow flex-field syntax to include related fields: `http://127.0.0.1:8000/api/store/?expand=category,images`
+* Access the GraphQL Playground: `http://127.0.0.1:8000/graphql/`
+* Access the Swagger documentation: `http://127.0.0.1:8000/swagger/`
+* Access the Redoc documentation: `http://127.0.0.1:8000/redoc/`
 
-# TODO
-- Factory Data
-- Testing 
-- User, UserProfile, Favorites, Cart, classes
-- Vendor, VendorProfile, Favorites/Orders, Products/Cart classes
+## Basic Features of The App
 
+### VendorApp
+The `VendorApp` handles vendor-related functionalities, including vendor account management and friend relationships between vendors.
 
+- **Vendor Account**
+  - Allows users to register and manage vendor accounts.
+- **Friend**
+  - Enables vendors to add and manage friends.
+
+### StoreApp
+The `StoreApp` manages the product catalog, including product details, categories, and images.
+
+- **Product**
+  - Allows vendors to add, edit, and delete products.
+- **Category**
+  - Enables categorization of products for better organization.
+- **Image**
+  - Supports uploading and managing product images.
+
+### OrdersApp
+The `OrdersApp` handles customer orders, including order creation, status updates, and order details.
+
+- **Order**
+  - Manages customer orders, including order creation and status updates.
+- **OrderItem**
+  - Handles individual items within an order, including quantity and product details.
+
+## Models and Database Schema
+
+### VendorApp
+* **Vendor Model**  
+  * **name**: `CharField` - The name of the vendor.  
+  * **created_at**: `DateTimeField` - The date and time when the vendor was created.  
+  * **updated_at**: `DateTimeField` - The date and time when the vendor was last updated.  
+  * **created_by**: `OneToOneField` - The user who created the vendor.  
+  * **slug**: `SlugField` - A URL-safe slug for the vendor.  
+  * **online**: `BooleanField` - Indicates if the vendor is online.  
+  * **image**: `VersatileImageField` - The profile image of the vendor.  
+
+* **Friend Model**  
+  * **vendors**: `ManyToManyField` - The vendors who are friends.  
+  * **current_vendor**: `ForeignKey` - The current vendor who owns the friend list.  
+
+### StoreApp
+* **Category Model**  
+  * **name**: `CharField` - The name of the category.  
+  * **slug**: `SlugField` - A URL-safe slug for the category.  
+  * **parent**: `TreeForeignKey` - The parent category.  
+  * **ordering**: `IntegerField` - The order of the category.  
+  * **is_active**: `BooleanField` - Indicates if the category is active.  
+
+* **Product Model**  
+  * **category**: `ForeignKey` - The category of the product.  
+  * **vendor**: `ForeignKey` - The vendor who owns the product.  
+  * **title**: `CharField` - The title of the product.  
+  * **description**: `TextField` - The description of the product.  
+  * **slug**: `SlugField` - A URL-safe slug for the product.  
+  * **price**: `DecimalField` - The price of the product.  
+  * **is_available**: `BooleanField` - Indicates if the product is available.  
+  * **condition**: `PositiveIntegerField` - The condition of the product.  
+  * **created_at**: `DateTimeField` - The date and time when the product was created.  
+  * **updated_at**: `DateTimeField` - The date and time when the product was last updated.  
+
+* **Image Model**  
+  * **product**: `ForeignKey` - The product to which the image belongs.  
+  * **name**: `CharField` - The name of the image.  
+  * **image**: `VersatileImageField` - The image file.  
+  * **image_ppoi**: `PPOIField` - The primary point of interest in the image.  
+  * **alt_text**: `CharField` - The alternative text for the image.  
+  * **is_feature**: `BooleanField` - Indicates if the image is the feature image.  
+  * **created_at**: `DateTimeField` - The date and time when the image was created.  
+  * **updated_at**: `DateTimeField` - The date and time when the image was last updated.  
+
+* **Favorite Model**  
+  * **vendor**: `OneToOneField` - The vendor who owns the favorites.  
+  * **favorites**: `ManyToManyField` - The products that are favorited.  
+  * **created_at**: `DateTimeField` - The date and time when the favorite was created.  
+
+### OrdersApp
+* **Order Model**  
+  * **product**: `ForeignKey` - The product that is ordered.  
+  * **vendor**: `ForeignKey` - The vendor who owns the order.  
+  * **buyer**: `ForeignKey` - The vendor who made the order.  
+  * **status**: `CharField` - The status of the order.  
+  * **amount**: `DecimalField` - The amount offered for the order.  
+  * **created_at**: `DateTimeField` - The date and time when the order was created.  
+  * **updated_at**: `DateTimeField` - The date and time when the order was last updated.  
+
+* **OrderDetail Model**  
+  * **full_name**: `CharField` - The full name of the customer.  
+  * **email**: `EmailField` - The email address of the customer.  
+  * **phone_number**: `CharField` - The phone number of the customer.  
+  * **country**: `CountryField` - The country of the customer.  
+  * **zipcode**: `CharField` - The zip code of the customer.  
+  * **town_or_city**: `CharField` - The town or city of the customer.  
+  * **street_address1**: `CharField` - The first line of the street address.  
+  * **street_address2**: `CharField` - The second line of the street address.  
+  * **county**: `CharField` - The county of the customer.  
+  * **created_at**: `DateTimeField` - The date and time when the order detail was created.  
+  * **updated_at**: `DateTimeField` - The date and time when the order detail was last updated.  
+  * **stripe_pid**: `CharField` - The Stripe payment ID.  
+  * **order**: `ForeignKey` - The order to which the detail belongs. 
+
+## API Endpoints
+
+![](documentation/screenshots/thrifthub-backend_redoc.jpg?raw=true)
+
+### VendorApp
+
+* **Vendor Account**  
+  * **GET** `/vendor/`: Retrieve a list of all vendors.  
+  * **GET** `/vendor/<id>/`: Retrieve details of a specific vendor.  
+  * **POST** `/vendor/`: Create a new vendor account.  
+  * **PUT** `/vendor/<id>/`: Update a specific vendor account.  
+  * **DELETE** `/vendor/<id>/`: Delete a specific vendor account.  
+
+* **Friend**  
+  * **GET** `/vendor/<id>/friends/`: Retrieve a list of friends for a specific vendor.  
+  * **POST** `/vendor/<id>/friends/`: Add a new friend for a specific vendor.  
+  * **DELETE** `/vendor/<id>/friends/<friend_id>/`: Remove a friend from a specific vendor.  
+
+### StoreApp
+
+* **Product**  
+  * **GET** `/store/`: Retrieve a list of all products.  
+  * **GET** `/store/<id>/`: Retrieve details of a specific product.  
+  * **POST** `/store/`: Add a new product.  
+  * **PUT** `/store/<id>/`: Update a specific product.  
+  * **DELETE** `/store/<id>/`: Delete a specific product.  
+
+* **Category**  
+  * **GET** `/store/category/`: Retrieve a list of all categories.  
+  * **GET** `/store/category/<slug>/`: Retrieve products by category.  
+  * **POST** `/store/category/`: Add a new category.  
+  * **PUT** `/store/category/<slug>/`: Update a specific category.  
+  * **DELETE** `/store/category/<slug>/`: Delete a specific category.  
+
+* **Image**  
+  * **GET** `/store/images/`: Retrieve a list of all product images.  
+  * **GET** `/store/images/<id>/`: Retrieve images for a specific product.  
+  * **POST** `/store/images/`: Upload a new product image.  
+  * **DELETE** `/store/images/<id>/`: Delete a specific product image.  
+
+### OrdersApp
+
+* **Order**  
+  * **GET** `/orders/`: Retrieve a list of all orders.  
+  * **GET** `/orders/<id>/`: Retrieve details of a specific order.  
+  * **POST** `/orders/`: Create a new order.  
+  * **PUT** `/orders/<id>/`: Update a specific order.  
+  * **DELETE** `/orders/<id>/`: Delete a specific order.  
+
+* **OrderItem**  
+  * **GET** `/orderdetail/`: Retrieve a list of all order items.  
+  * **GET** `/orderdetail/<id>/`: Retrieve details of a specific order item.  
+  * **POST** `/orderdetail/`: Add a new order item.  
+  * **PUT** `/orderdetail/<id>/`: Update a specific order item.  
+  * **DELETE** `/orderdetail/<id>/`: Delete a specific order item.  
+
+## OpenAPI (Swagger) Documentation
+![](documentation/screenshots/thrifthub-backend_swagger-spec.jpg?raw=true)
+The Django application uses the `drf_yasg` package to generate OpenAPI (Swagger) documentation for the API. This setup helps in generating and customizing the API documentation.
+
+### Key Components
+* **CustomOpenAPISchemaGenerator**:
+   * Customizes the schema generation process by setting a base path (/api/v1.0) for all API endpoints, useful for versioning the API.
+* **CompoundTagsSchema**:
+  * Customizes the tags used in the Swagger documentation by combining operation keys to create compound tags, which helps organize the API documentation more effectively.
+* **api_info**:
+  * Contains metadata about the API, such as the title, version, description, terms of service, contact email, and license information. This information is displayed in the generated Swagger documentation.
+* **schema_view**:
+  * Sets up the schema view using the `get_schema_view` function from `drf_yasg`. It uses the custom schema generator (`CustomOpenAPISchemaGenerator`), the API metadata (`api_info`), and allows public access to the documentation (`permissions.AllowAny`).
+
+## GraphQL and Graphene
+![](documentation/screenshots/thrifthub-backend_graphql.jpg?raw=true)
+
+The Django application uses GraphQL with the graphene-django package to create a flexible and efficient API. This setup allows clients to perform complex queries and mutations on the Django models using GraphQL.  
+
+### Key Components
+* **Schema Definition**:  
+  * Defines the structure of the API, including the types of data that can be queried and the available operations (queries and mutations).
+* **Types**:  
+  * Represents the data models in the API. DjangoObjectType is used to create GraphQL types from Django models.
+* **Queries**:  
+  * Defines the read operations that clients can perform, specifying the data that can be fetched and the arguments that can be used to filter the data.
+* **Mutations**:
+  * Defines the write operations that clients can perform, allowing clients to create, update, or delete data.
+
+### Example Components
+* `*`**Type**:
+  * Defines a GraphQL type for the `*` model.
+* **Query**:
+  * Defines the available queries for the `*` model.
+* **Mutation**:
+  * Defines the available mutations for `*` using `graphql_jwt`.
+* **Schema**:
+  * Combines the queries and mutations into a single schema.
+
+This setup provides a flexible and efficient API for interacting with the Django models using GraphQL.
+
+### GraphQL Playground
+The GraphQL endpoint is available at `/graphql/` and allows clients to perform queries and mutations on the Django models using GraphQL.
 
 #### Stripe
 Stripe makes it easy to be PCI compliant. With a proper integration, you will never have access to your customers' payment information.
@@ -27,6 +243,9 @@ You can find a simple tutorial for creating charges [here](https://stripe.com/do
 If you don't plan on charging the same customer multiple times (or if you don't mind asking them to provide their card information every time), then you don't necessarily need to store anything in your own database. When you create the charge, you will be immediately informed of the result (success or failure) and can take the necessary actions.
 
 ## References
+- [Hello GraphQL](https://docs.graphene-python.org/projects/django/en/latest/tutorial-plain/)
+- [Django + Graphene](https://www.fullstack.com/labs/resources/blog/django-graphene-from-rest-to-graphql)
+- [Test Cases](https://rajansahu713.medium.com/mastering-the-art-of-django-test-cases-fa7b0322c9fb)
 - [Using PathLib](https://adamj.eu/tech/2020/03/16/use-pathlib-in-your-django-project/)
 - [Categories with django-mptt](https://djangopy.org/package-of-week/categories-with-django-mptt/)
 - [Django-Rest Flex-Fields](https://github.com/rsinger86/drf-flex-fields#query-optimization-experimental)
