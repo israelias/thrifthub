@@ -1,56 +1,56 @@
 [![runs with Expo Go](https://img.shields.io/badge/Runs%20with%20Expo%20Go-000.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000)](https://expo.io/client)
 
 [![runs with Expo Go](https://img.shields.io/badge/Runs%20with%20Expo%20Go-4630EB.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000)](https://expo.io/client)
-# MS4 Thrift-Hub
-An online thriftstore.
+# ThriftHub
+An Online Marketplace Application
 
 
-An app that allows users to post second-hand goods and connect with members interested in such goods.
+An app that allows users to post second-hand goods and connect with vendors interested in such goods.
 
 
 [TOC levels=3]: # "## Contents"
+
 ## Contents
 - [UX](#ux)
   - [User Stories](#user-stories)
   - [Wireframes](#wireframes)
-  - [Design](#design)
 - [Features](#features)
   - [Existing Features](#existing-features)
   - [Features Left to Implement](#features-left-to-implement)
 - [Technologies](#technologies)
   - [Frameworks and Libraries](#frameworks-and-libraries)
   - [Programs and Software](#programs-and-software)
-- [Notes](#notes)
 - [Testing](#testing)
 - [Deployment](#deployment)
 - [Cloning This Repository](#cloning-this-repository)
 - [Credits](#credits)
-  - [Code](#code)
-  - [Content and Media](#content-and-media)
   - [Acknowledgements](#acknowledgements)
+  - [License](#license)
 
 ## UX
 ### User Stories
 #### New Visitor Goals
-- As a new vistor, I want to have a good understanding of what the website does.
-- As a new visitor, I want to be able to register for an account.
+- As a new visitor, I want to have a clear understanding of what the platform offers.
+- As a new visitor, I want to be able to register for an account easily.
+
 #### Returning Visitor Goals
-- As a Returning Visitor, I want to be able to log in securely.
-- As a Returning Visitor, I want to be able to create a listing.
-- As a Returning Visitor, I want to be able to see my listing.
-- As a Returning Visitor, I want to be able to edit my listing.
-- As a Returning Visitor, I want to be able to delete my listing.
-- As a Returning Visitor, I want to be able to sell my listing.
-- As a Returning Visitor, I want to be able to connect with who is purchasing my listing.
-- As a Returning Visitor, I want to be able to collect payment from who is purchasing my listing.
-- As a Returning Visitor, I want to be able to cancel the purchase of my listing.
+- As a returning visitor, I want to log in securely.
+- As a returning visitor, I want to create a listing for my second-hand goods.
+- As a returning visitor, I want to view my active and inactive listings.
+- As a returning visitor, I want to edit the details of my listings.
+- As a returning visitor, I want to delete listings that are no longer available.
+- As a returning visitor, I want to mark a listing as sold.
+- As a returning visitor, I want to connect with the buyer of my listing to coordinate the sale.
+- As a returning visitor, I want to process payments securely with buyers.
+- As a returning visitor, I want the option to cancel a purchase agreement.
+
 #### Frequent Visitor Goals
-- As a Frequent Visitor, I want to be able to search listings I have created.
-- As a Frequent Visitor, I want to be able to search listings created by others.
-- As a Frequent Visitor, I want to be able to save listings created by others.
-- As a Frequent Visitor, I want to be able to see my saved listings created by others.
-- As a Frequent Visitor, I want to be able to remove listings created by others I have previously saved.
-- As a Frequent Visitor, I want to  able to delete my account.
+- As a frequent visitor, I want to search for listings I have created.
+- As a frequent visitor, I want to explore listings created by other users.
+- As a frequent visitor, I want to save listings that interest me for future reference.
+- As a frequent visitor, I want to view my saved listings easily.
+- As a frequent visitor, I want to remove saved listings that are no longer relevant.
+- As a frequent visitor, I want to delete my account if I no longer need it.
 
 ### Wireframes
 #### Concept
@@ -96,34 +96,64 @@ The project can be understood as a social network with <em><b>collections</b></e
 </details>
 <hr>
 
-### Design
-
-#### Theme
-
-
-#### Colors
-
+<br>
+<p align="right"><a href="#readme-top">back to top</a></p>
 
 ## Features
 ### Existing Features
 
-#### User Registration
-- The website features the ability to `sign up`, `sign in` and `sign out` in order to conditionally access existing features. A user is based on the `user` model, which requires `username`, `email` and `password` for new users and only the latter two for existing users. For security, only usernames are stored in `local storage` while `tokens` are stored in memory. To ensure `sign out` across multiple open windows, a logout event triggers a `storage event listener` which clears tokens and usernames in the memory of the current window. 
-- ##### Actions:
--  Ability to create an account. *(any User)*
--  Ability to sign in to an account. *(Registered Owner)*
--  Ability to sign out of an account. *(Registed Owner)*
-#### Products
-- The website features the ability to create, update and delete a product listing. A product listing is based on the `Product` model and each field is represented as either a `form` field or a `section` in an `article` depending on whether a product is being edited or being featured. 
-- ##### Actions:
--  Ability to create, edit and delete a product listing. *(Registered Owner)*
-- Ability to `save` and `un-save` a product listing. *(Registered User)*
+#### Store
+- The `Store` features all product-related capabilities for vendors. This includes managing product listings, categorizing products, and uploading product images. Vendors can organize their store to showcase their items in an easy-to-navigate way.
+  
+  ##### Capabilities:
+  - **Product Management**: Vendors can add, edit, and delete products from their store.
+  - **Category Organization**: Products can be grouped into categories for better browsing.
+  - **Image Upload**: Vendors can upload and manage product images for each listing.
+  
+  ##### Actions:
+  - Ability to add, edit, and delete products. *(Registered Vendor)*
+  - Ability to categorize products and create subcategories. *(Registered Vendor)*
+  - Ability to upload and manage product images. *(Registered Vendor)*
+  - Ability to `save` and `un-save` a product listing. *(Registered User)*
 
+
+#### Vendor Registration
+- A `Vendor` is attached to each user in order to manage and track their sales. Vendors can also interact with their buyers, including managing product listings and fulfilling orders. The website features the ability to `sign up`, `sign in` and `sign out` in order to conditionally access existing features. A user is based on the `user` model, which requires `username`, `email` and `password` for new users and only the latter two for existing users. For security, only usernames are stored in `local storage` while `tokens` are stored in memory. To ensure `sign out` across multiple open windows, a logout event triggers a `storage event listener` which clears tokens and usernames in the memory of the current window. 
+  ##### Capabilities:
+  - **Vendor Registration**: Users can register as vendors to sell their products.
+  - **Account Management**: Vendors can update their profiles, manage their contact information, and track their sales.
+  - **Order Fulfillment**: Vendors can manage their orders, including processing and shipping.
+  - **Friendship**: Vendors can add and manage connections with other vendors for networking and collaboration.
+  
+  ##### Actions:
+  - Ability to register as a vendor. *(New User)*
+  - Ability to sign in to an account. *(Registered Vendor)*
+  - Ability to sign out of an account. *(Registered Vendor)*
+  - Ability to edit and update vendor account information. *(Registered Vendor)*
+  - Ability to connect with other vendors by adding them as friends. *(Registered Vendor)*
+  - Ability to view and manage orders. *(Registered Vendor)*
+  - Ability to track and manage sales history. *(Registered Vendor)*
+
+#### Order
+- The `Order` section is responsible for handling the purchasing process. Customers can view their orders, check out, and monitor the status of their orders. Vendors are notified when orders are placed and can update the status of these orders.
+  
+  ##### Capabilities:
+  - **Order Creation**: Customers can place orders for products listed by vendors.
+  - **Order Status**: Vendors can update the status of the orders (e.g., processing, shipped, completed).
+  - **Order History**: Customers and vendors can view past orders.
+  
+  ##### Actions:
+  - Ability to place orders for products. *(Registered User)*
+  - Ability to update the status of orders. *(Registered Vendor)*
+  - Ability to view order history. *(Registered User, Registered Vendor)*
+
+
+### Features Left to Implement
 #### Collections
-- The website features the ability to group any and all existing products into named collections aka `bulk deals`. A collection is based on the `collection` model, which is a name and a list of product listings. Each field is represented as either a `form` field or a `header` followed by a `ul` depending on whether a collection is in edit or display mode. 
+- The website should feature the ability to group any and all existing products into named collections aka `bulk deals`. A collection is based on the `collection` model, which is a name and a list of product listings. Each field is represented as either a `form` field or a `header` followed by a `ul` depending on whether a collection is in edit or display mode. 
 - ##### Actions:
 -  Ability to create, edit and delete a named collection. *(Registered Owner)*
--  Ability to add and remove snippets to/from a collection. *(Registered Owner)*
+-  Ability to add and remove listings to/from a collection. *(Registered Owner)*
 
 #### Search
 - `search_text` indices are attached to the title and description fields of the `product` cluster. The frontend UI of the search feature is designed to return product listings that match a query. Additionally, the ability to query by `tags` and `product_type` is enabled by filtering these existing fields in the database.
@@ -134,22 +164,17 @@ The project can be understood as a social network with <em><b>collections</b></e
  -  Ability to `save` or `un-save` product listings from search. *(Registered User)*
  -  Ability to perform `crud` operations on product listings from search. *(Registered Owner)*
 
-### Features Left to Implement
-- Add query params to all resources
-- User profile page
-- Ability to add friends
-
 ## Technologies
 ### Frameworks and Libraries
-  - ### [`cd frontend`](https://github.com/israelias/django-react-ecommerce/tree/master/frontend)
-    Please visit the [frontend](https://github.com/israelias/django-react-ecommerce/tree/master/frontend) sub directory for details on ReactJS Typescript frameworks and libraries.\
+  - ### [`cd frontend`](https://github.com/israelias/thrifthub/tree/master/frontend)
+    Please visit the [frontend](https://github.com/israelias/thrifthub/tree/master/frontend) sub directory for details on ReactNative Typescript frameworks and libraries.
 
-[Go to frontend](https://github.com/israelias/django-react-ecommerce/tree/master/frontend)
+[Go to frontend](https://github.com/israelias/thrifthub/tree/master/frontend)
 
-  - ### [`cd backend`](https://github.com/israelias/django-react-ecommerce/tree/master/backend)
-    Please visit the [backend](https://github.com/israelias/django-react-ecommerce/tree/master/backend) root directory for details on Python-Django frameworks and libraries.
+  - ### [`cd backend`](https://github.com/israelias/thrifthub/tree/master/backend)
+    Please visit the [backend](https://github.com/israelias/thrifthub/tree/master/backend) root directory for details on Python-Django frameworks and libraries.
 
-[Go to backend](https://github.com/israelias/django-react-ecommerce/tree/master/backend)
+[Go to backend](https://github.com/israelias/thrifthub/tree/master/backend)
 
 ### Programs and Software
 - [VSCode:](https://www.vscode.com/) Visual Studiio Code 2020.3.2 by [Microsoft](https://www.microsoft.com/) is the IDE used to locally construct the project
@@ -157,227 +182,187 @@ The project can be understood as a social network with <em><b>collections</b></e
 - [GitHub:](https://github.com/) GitHub is used to store the project's code and directory upon concurrent `push`es via Git.
 - [Adobe InDesign:](https://www.adobe.com/sea/products/xd.html) Adobe InDesign is used to mock wireframes.
 
-## Notes
-- ....
+<p align="right"><a href="#readme-top">back to top</a></p>
 
 ## Testing
 ### User Testing
--  As a new vistor, I want to have a good understanding of what the website does
+- **As a new visitor, I want to have a good understanding of what the website does**
     - User arrives at home page.
-      - The screen for `Cheathub` appears with a description of its functionality.
+      - The screen for `Marketplace` appears with a description of its functionality.
       - User reads description.
     - User continues.
- 
-- As a new visitor, I want to be able to register for an account.
-    - User is clicks `Switch to sign up `
-        - The sign up form appears
-            - The username field is in focus
-            - User types types a username, email and password.
-              - The username is taken.
-              - An error toast alert appears.
-            - User modifies username
-        - User is redirected to his/her `collections` profile.
-    - User continues
+  
+- **As a new visitor, I want to be able to register for an account**
+    - User clicks `Sign up`.
+      - The sign-up form appears.
+        - The username field is in focus.
+        - User types a username, email, and password.
+          - If the username is taken, an error toast alert appears.
+        - User modifies the username.
+      - User is redirected to their `profile` page.
+    - User continues.
     - Review:
     - A user is able to securely create an account.
-- As a Returning Visitor, I want to be able to log in securely.
-    - User clicks `Switch to sign in`
-      - The sign in form appears
-            - The email field is in focus
-            - User types types email and password.
-            - User hits enter.
-            - A success toast alert appears.
-        - User is redirected to his/her `collections` profile.
-    - User continues
+
+- **As a Returning Visitor, I want to be able to log in securely**
+    - User clicks `Sign in`.
+      - The sign-in form appears.
+        - The email field is in focus.
+        - User enters email and password.
+        - User presses enter.
+        - A success toast alert appears.
+      - User is redirected to their `profile` page.
+    - User continues.
   
-- As a Returning Visitor, I want to be able to create a product listing
-    - User clicks `Add new product`
+- **As a Returning Visitor, I want to be able to create a product listing**
+    - User clicks `Add New Product`.
       - A form appears.
         - The title field is in focus.
-          - User inputs `title`, `description`, `tags`
-          - User uploads images.
-        - User clicks submit.
+        - User enters title, description, tags, and uploads images.
+        - User clicks `Submit`.
           - A success toast alert appears.
-      - User is redirected to his/her `collections` profile.
-    - User continues
+      - User is redirected to their `profile` page.
+    - User continues.
     - Review:
-    - ... 
-- As a Returning Visitor, I want to be able to see my product listing.
-    - User arrives at `Collections` profile.
-      - A product listing appears.
-        - User sees product listing interface with his/her 
-    - User continues
-    - Review:
-    - ... 
-- As a Returning Visitor, I want to be able to edit my product listing.
-    - User clicks `Edit this product`
-      - A form appears.
-        - The title field is in focus.
-          - User modifies `description`
-          - User updates image.
-          - User adds optional `source` url.
-          - User adds additional optional `tags`
-        - User clicks submit.
-          - A success toast alert appears.
-      - User is redirected to his/her `collections` profile.
-    - User continues
- 
-- As a Returning Visitor, I want to be able to delete my product listing(s).
-    - User clicks `Edit this product`
-      - A form appears.
-        - The title field is in focus.
-          - User clicks `Delete`
-            - Modal appears
-            - The cancel button is in focus
-            - User confirms
-          - The modal is closed
-          - A success toast alert appears.
-      - User is redirected to his/her `collections` profile.
-    - User continues
+    - A user is able to successfully create a product listing.
 
-- As a Returning Visitor, I want to be able to create a collection of my product listings.
-    - User clicks `Add New Collection`
+- **As a Returning Visitor, I want to be able to see my product listing**
+    - User arrives at `Profile` page.
+      - A product listing appears in the user's collection.
+    - User continues.
+    - Review:
+    - A user is able to view their own product listings.
+
+- **As a Returning Visitor, I want to be able to edit my product listing**
+    - User clicks `Edit this product`.
+      - A form appears.
+        - The title field is in focus.
+        - User modifies the description, updates the image, and adds a source URL.
+        - User adds additional tags.
+        - User clicks `Submit`.
+          - A success toast alert appears.
+      - User is redirected to their `profile` page.
+    - User continues.
+    - Review:
+    - A user is able to successfully edit their product listing.
+
+- **As a Returning Visitor, I want to be able to delete my product listing(s)**
+    - User clicks `Edit this product`.
+      - A form appears.
+        - The title field is in focus.
+        - User clicks `Delete`.
+          - A confirmation modal appears.
+          - The cancel button is in focus.
+          - User confirms deletion.
+          - The modal closes, and a success toast alert appears.
+      - User is redirected to their `profile` page.
+    - User continues.
+
+- **As a Returning Visitor, I want to be able to create a collection of my product listings**
+    - User clicks `Add New Collection`.
       - A form appears.
         - The `name` field is in focus.
-          - User inputs names collection
-          - User selects existing listings to add.
-        - User clicks submit.
+        - User enters a collection name and selects product listings to add.
+        - User clicks `Submit`.
           - A success toast alert appears.
-      - User is redirected to his/her `collections` profile.
-    - User continues
-- As a Returning Visitor, I want to be able to see collections of my product listings.
-    - User arrives at `Collections` profile.
-      - A `collections` card appears.
-        - User sees `collection` interface that includes product listings added.
-    - User continues
+      - User is redirected to their `profile` page.
+    - User continues.
 
-- As a Returning Visitor, I want to be able to edit collections of my product listings.
-    - User clicks `Edit this Collection`
+- **As a Returning Visitor, I want to be able to see collections of my product listings**
+    - User arrives at `Profile` page.
+      - A `Collections` card appears with product listings inside.
+    - User continues.
+
+- **As a Returning Visitor, I want to be able to edit collections of my product listings**
+    - User clicks `Edit this Collection`.
       - A form appears.
         - The `name` field is in focus.
-          - User renames collection.
-          - User uses `select` input add more products.
-          - User uses `select` input to remove previous products.
-        - User clicks submit.
+        - User renames the collection and adds/removes products using `select` inputs.
+        - User clicks `Submit`.
           - A success toast alert appears.
-      - User is redirected to his/her `collections` profile.
-      - An updated `collection` appears.
-    - User continues
+      - User is redirected to their `profile` page.
+      - The updated collection appears.
+    - User continues.
 
-- As a Returning Visitor, I want to be able to delete a collection of my product listing(s).
-    - User clicks `Edit this Collection`
+- **As a Returning Visitor, I want to be able to delete a collection of my product listing(s)**
+    - User clicks `Edit this Collection`.
       - A form appears.
         - The name field is in focus.
-          - User clicks `Delete`
-            - Modal appears
-            - The cancel button is in focus
-            - User confirms
-          - The modal is closed
-          - A success toast alert appears.
-      - User is redirected to his/her `collections` profile.
-    - User continues
+        - User clicks `Delete`.
+          - A confirmation modal appears.
+          - The cancel button is in focus.
+          - User confirms deletion.
+          - The modal closes, and a success toast alert appears.
+      - User is redirected to their `profile` page.
+    - User continues.
 
-- As A Returning Visitor, I want to be able to connect with someone interested in my product listing.
-    - ...
-      - ...
-        - ....
-        - ...
-          - ...
-          - ...
-    - User continues
+- **As a Returning Visitor, I want to be able to connect with someone interested in my product listing**
+    - User clicks `Interested Buyer`.
+      - A chat or message option appears with the buyer.
+        - User communicates with the interested buyer.
+    - User continues.
 
-- As A Returning Visitor, I want to be able to collect payment from someone purchasing my product.
-    - ...
-      - ...
-        - ....
-        - ...
-          - ...
-          - ...
-    - User continues
+- **As a Returning Visitor, I want to be able to collect payment from someone purchasing my product**
+    - User clicks `View Transaction`.
+      - A payment gateway appears.
+        - User processes the payment.
+    - User continues.
 
-- As A Returning Visitor, I want to be able to cancel a transaction.
-    - ...
-      - ...
-        - ....
-        - ...
-          - ...
-          - ...
-    - User continues
+- **As a Returning Visitor, I want to be able to cancel a transaction**
+    - User clicks `Cancel Transaction`.
+      - A confirmation modal appears.
+      - User confirms the cancellation.
+    - User continues.
 
-- As A Returning Visitor, I want to be able to connect with someone with a product I am interested in purchasing.
-    - ...
-      - ...
-        - ....
-        - ...
-          - ...
-          - ...
-    - User continues
+- **As a Returning Visitor, I want to be able to connect with someone with a product I am interested in purchasing**
+    - User clicks `Contact Seller`.
+      - A chat or message option appears with the seller.
+    - User continues.
 
-- As A Returning Visitor, I want to be able to make payment to someone I am purchasing a product from.
-    - ...
-      - ...
-        - ....
-        - ...
-          - ...
-          - ...
-    - User continues
+- **As a Returning Visitor, I want to be able to make payment to someone I am purchasing a product from**
+    - User clicks `Proceed to Payment`.
+      - A payment gateway appears.
+        - User processes the payment.
+    - User continues.
 
-- As a Frequent Visitor, I want to be able to search product listings I have created.
-    - User clicks `Products`
-      - User is rerouted to `Products` page.
-      - A feed of all product listings appear.
-      - The `Product Search` input appears.   
-      - The `search` field is in focus.
-        - User types a `search text`
-          - The listings return products that match `search text`
-        - User uses `select` input to query by `product_type`
-          - The listings return products of `product_type`
-        - User uses `select` input to query by `tags`
-          - The listings return products that include input `tag`
-        - User clickes `Show All`
-          - The listings return most recent products posted.
-        - User scrolls to end of page 
-          - The `pagination` buttons appear
-          - User clicks `Next`
-            - Listings for next page appear.
-      - User continues
+- **As a Frequent Visitor, I want to be able to search product listings I have created**
+    - User clicks `Search Products`.
+      - A feed of all product listings appears.
+      - A `Product Search` input field appears.
+        - User types search text.
+        - Listings return products matching the search text.
+        - User filters by `product_type` or `tags`.
+        - User clicks `Show All` to see most recent products.
+        - Pagination buttons appear, and the user clicks `Next` for additional pages.
+    - User continues.
 
-- As a Frequent Visitor,  I want to be able to save product listings created by others.
-    - User is in `Products` page.
-      - A feed of all product listings appear.
-        - User finds a product listing.
-        - User clicks `Save`  
-          - A success toast appears 
-    - User continues
+- **As a Frequent Visitor, I want to be able to save product listings created by others**
+    - User clicks `Save Product`.
+      - A success toast appears.
+    - User continues.
 
-- I want to be able to see my saved product listings created by others.
-    - User is in `Collections` page.
+- **As a Frequent Visitor, I want to be able to see my saved product listings created by others**
+    - User clicks `Saved Listings`.
       - A collection named `Saves` appears.
-        - User finds all saved products as a collection.
-    - User continues
-- As a Frequent Visitor, I want to be able to un-save product listings created by others I have previously saved.
-    - User is in `Products` page.
-      - A feed of all product lustings appear.
-        - User finds a product listing.
-        - User clicks `UnSave`  
-          - A success toast appears 
-        - User clicks `Collections`
-        - The faves collection appears.
-        - User sees updated Saves.
-    - User continues
+        - User sees all saved products.
+    - User continues.
 
-- As a Frequent Visitor, I want to be able to delete my account.
-    - User is clicks `Delete my account`
-      - Modal appears
-          - The cancel button is in focus
-            - User confirms
-          - The modal is closed
-        - Page is redirected to `/`
-        - User is no longer able to log in with credentials
-    - User continues
+- **As a Frequent Visitor, I want to be able to un-save product listings created by others I have previously saved**
+    - User clicks `Unsave Product`.
+      - A success toast appears.
+    - User continues.
+
+- **As a Frequent Visitor, I want to be able to delete my account**
+    - User clicks `Delete My Account`.
+      - A confirmation modal appears.
+      - User confirms the deletion.
+      - The modal closes, and the user is redirected to the homepage.
+      - The user is no longer able to log in with their credentials.
+    - User continues.
     - Review:
-    - A user is able to securely remove his/her history from the database.
+    - A user is able to securely remove their account from the database.
 
+<p align="right"><a href="#readme-top">back to top</a></p>
 
 ### Code Testing
 #### Frontend
@@ -407,25 +392,32 @@ The project can be understood as a social network with <em><b>collections</b></e
 - Opera 72
 - Safari 14
 
+<p align="right"><a href="#readme-top">back to top</a></p>
+
 ## Deployment
 
-- The project frontend is written in [Typescript]() developed with [React](https://reactjs.org/), bootstrapped with [Create React App](https://github.com/facebook/create-react-app) and deployed with [Vercel](https://nextjs.org/docs/deployment). The backend is written in [Python](), developed with [Django Rest Framework]() to serve a restful database via [PostGres](). 
-  ### [`cd frontend`](https://github.com/israelias/django-react-ecommerce/tree/master/frontend)
-  Please visit the [frontend](https://github.com/israelias/django-react-ecommerce/tree/master/frontend) root directory for details on deployment steps.
-  ### [`cd backend`](https://github.com/israelias/django-react-ecommerce/tree/master/backend)
-  Please visit the [backend](https://github.com/israelias/django-react-ecommerce/tree/master/backend) root directory for details on deployment steps.
+- The project frontend is written in [Typescript]() [ReactNative](), bootstrapped with [Expo]() and deployed with [Snack](). The backend is written in [Python](), developed with [Django Rest Framework]() to serve a restful database via [PostGres](). 
+  ### [`cd frontend`](https://github.com/israelias/thrifthub/tree/master/frontend)
+  Please visit the [frontend](https://github.com/israelias/thrifthub/tree/master/frontend) root directory for details on deployment steps.
+  ### [`cd backend`](https://github.com/israelias/thrifthub/tree/master/backend)
+  Please visit the [backend](https://github.com/israelias/thrifthub/tree/master/backend) root directory for details on deployment steps.
 
 ## Cloning This Repo
-- Clone this repo by running `git clone httpsL//github.com/israelias/django-react-ecommerce`
-- at the jump, `cd` to the name of this repo:
-`cd django-react-ecommerce`
-  ### [`cd frontend`](https://github.com/israelias/cheathub/tree/master/frontend)
-  Please visit the [frontend](https://github.com/israelias/cheathub/tree/master/frontend) root directory for details on required modules via `yarn install` and to start the frontend development server on `localhost:3000`.
-  ### [`cd backend`](https://github.com/israelias/cheathub/tree/master/backend)
-  Please visit the [backend](https://github.com/israelias/cheathub/tree/master/backend) root directory for details on required modules via `requirements.txt` and to start the backend development server on `localhost:8000`.
+- Clone this repo by running 
+  ```bash
+  git clone git@github.com:israelias/thrifthub.git
+  ```
+- at the jump, `cd` to the dir:
+  ```bash
+  cd thrifthub
+  ```
+  ### [`cd frontend`](https://github.com/israelias/thrifthub/tree/master/frontend)
+  Please visit the [frontend](https://github.com/israelias/thrifthub/tree/master/frontend) root directory for details on required modules via `yarn install` and to start the frontend development server on `localhost:3000`.
+  ### [`cd backend`](https://github.com/israelias/thrifthub/tree/master/backend)
+  Please visit the [backend](https://github.com/israelias/thrifthub/tree/master/backend) root directory for details on required modules via `requirements.txt` and to start the backend development server on `localhost:8000`.
 
-[Go to frontend](https://github.com/israelias/django-react-ecommerce/tree/master/frontend)\
-[Go to backend](https://github.com/israelias/django-react-ecommerce/tree/master/backend)
+
+<p align="right"><a href="#readme-top">back to top</a></p>
 
 ## Credits
 
@@ -435,7 +427,7 @@ The project can be understood as a social network with <em><b>collections</b></e
 ### Acknowledgments
 #### ESLint and Typescript Configuration
 - [ESlint Typescript with Prettier](https://dev.to/benweiser/how-to-set-up-eslint-typescript-prettier-with-create-react-app-3675) 
-- [Create-React-App: Typescript, ESLint & Prettier with Airbnb style guides on VSCode](https://medium.com/react-courses/react-create-react-app-v3-4-1-a55f3e7a8d6d)
+- [Typescript, ESLint & Prettier with Airbnb style guides on VSCode](https://medium.com/react-courses/react-create-react-app-v3-4-1-a55f3e7a8d6d)
 - [Airbnb Javascript style guide — Key takeaway](https://medium.com/docon/airbnb-javascript-style-guide-key-takeaways-ffd0370c053)
 -[Config ESLint, Prettier in Typescript React App](https://rajduraisamy.medium.com/config-eslint-prettier-in-typescript-react-app-c92ebf14a896)
 #### ReactJS and Typescript References
@@ -449,3 +441,8 @@ The project can be understood as a social network with <em><b>collections</b></e
 - Aaron Sinnot
 - Code Institute tutors
 - Fellow Code Institute students
+
+## License
+[MIT License](/LICENSE) Copyright (c) 2021 Joem Elias Sanez
+
+<p align="right"><a href="#readme-top">back to top</a></p>
