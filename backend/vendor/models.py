@@ -80,7 +80,7 @@ def warm_vendor_image(sender, instance, **kwargs) -> None:
     vendor_img_warmer = VersatileImageFieldWarmer(
         instance_or_queryset=instance, rendition_key_set="default_avatar", image_attr="image", verbose=True
     )
-    num_created, failed_to_create = vendor_img_warmer.warm()
+    vendor_img_warmer.warm()
 
 
 class Friend(models.Model):

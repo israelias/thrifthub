@@ -21,6 +21,7 @@ from django.urls import include, path
 from django.views.decorators.csrf import csrf_exempt
 from graphene_django.views import GraphQLView
 from graphql_jwt.decorators import jwt_cookie
+from rest_framework.documentation import include_docs_urls
 
 from .yasg import schema_view
 
@@ -49,6 +50,7 @@ urlpatterns = [
     url(
         r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"
     ),
+    path("docs/", include_docs_urls(title="ThriftHub API")),
     path("", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
     url(r"^api/", include(urlpatterns_root)),
 ]

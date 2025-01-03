@@ -56,6 +56,7 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
+    'drf_api_logger',
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "dj_rest_auth",
@@ -95,6 +96,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'drf_api_logger.middleware.api_logger_middleware.APILoggerMiddleware',
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -177,8 +179,15 @@ USE_THOUSAND_SEPARATOR = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
+STATIC_URL = "/staticfiles/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-if os.getenv("USE_S3", False):
+MEDIA_URL = "/media/"
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+MEDIAFILES_LOCATION = 'media'
+MEDIA_ROOT = str(BASE_DIR / "media/")
+
+if os.getenv("USE_S3"):
     # Cache control
     AWS_S3_OBJECT_PARAMETERS = {"CacheControl": 'max-age=86400',}
     # Bucket Config
@@ -198,13 +207,6 @@ if os.getenv("USE_S3", False):
     # Override static and media URLs in production
     STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{STATICFILES_LOCATION}/"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIAFILES_LOCATION}/"
-else:
-    STATIC_URL = "/staticfiles/"
-    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-    MEDIA_URL = "/media/"
-
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -322,18 +324,19 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-#     "http://127.0.0.1:8001",
-#     "https://thrifthub.vercel.app",
-#     "https://thrift-hub.vercel.app",
-#     "https://thrifthub-dev.vercel.app",
-#     "https://thrifthub-prod.vercel.app",
-#     "https://thrifthub-test.vercel.app",
-#     "http://localhost:19006",
-#     "http://192.168.1.3:19006/",
-#     "http://192.168.1.3:19006/",
-# ]
+CORS_ORIGIN_WHITELIST = [
+    "https://thrifthub-backend.onrender.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:8001",
+    "https://thrifthub.vercel.app",
+    "https://thrift-hub.vercel.app",
+    "https://thrifthub-dev.vercel.app",
+    "https://thrifthub-prod.vercel.app",
+    "https://thrifthub-test.vercel.app",
+    "http://localhost:19006",
+    "http://192.168.1.3:19006",
+    "http://192.168.1.3:19006",
+]
 
 # CORS_ALLOWED_ORIGIN_REGEXES = [
 #     r"^https://\w+\.thrifthub\.app$",
@@ -347,16 +350,6 @@ AUTHENTICATION_BACKENDS = [
 # CORS_EXPOSE_HEADERS = ["Content-Type", "X-CSRFToken", "Authorization"]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
-# CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOWED_ORIGIN_REGEXES
-# CORS_ALLOW_METHODS = [
-#     "DELETE",
-#     "GET",
-#     "OPTIONS",
-#     "PATCH",
-#     "POST",
-#     "PUT",
-# ]
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=15),
@@ -368,17 +361,32 @@ SIMPLE_JWT = {
 }
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler'
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "general.log",
+            "formatter": "verbose",
         },
     },
-    'loggers': {
-        '': {  # 'catch all' loggers by referencing it with the empty string
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
+    "loggers": {
+        "": {
+            "handlers": ["console", "file"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "DEBUG"),
+        }
+    },
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} ({levelname})- {name}- {message}",
+            "style": "{",
+        }
     },
 }
+
+DRF_API_LOGGER_DATABASE = os.getenv("DRF_API_LOGGER_DATABASE", False)
+DRF_LOGGER_QUEUE_MAX_SIZE = int(os.getenv("DRF_LOGGER_QUEUE_MAX_SIZE", 50))  # Default to 50 if not specified.
+DRF_LOGGER_INTERVAL = int(os.getenv("DRF_LOGGER_INTERVAL", 10))  # In Seconds, Default to 10 seconds if not specified.
+DRF_API_LOGGER_DEFAULT_DATABASE = os.getenv("DRF_API_LOGGER_DEFAULT_DATABASE", "default")
+DRF_API_LOGGER_PATH_TYPE = os.getenv("DRF_API_LOGGER_PATH_TYPE", "FULL_PATH")

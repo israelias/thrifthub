@@ -27,7 +27,7 @@ api_info = openapi.Info(
         description="Test description",
         terms_of_service="https://www.google.com/policies/terms/",
         contact=openapi.Contact(email="israelias.js@gmail.com"),
-        license=openapi.License(name="BSD License"),
+        license=openapi.License(name="MIT License"),
 )
 
 schema_view = get_schema_view(
