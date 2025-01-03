@@ -2,6 +2,7 @@ aniso8601==7.0.0
 appdirs==1.4.4
 asgiref==3.3.4
 black==21.5b2
+bleach==6.2.0
 boto3==1.17.109
 botocore==1.20.109
 certifi==2021.5.30
@@ -29,6 +30,7 @@ django-truncate==0.1
 django-versatileimagefield==2.1
 djangorestframework==3.12.4
 djangorestframework-simplejwt==4.7.2
+drf-api-logger==1.1.16
 drf-flex-fields==0.9.1
 drf-yasg==1.20.0
 dynaconf==3.1.4
@@ -81,3 +83,4 @@ typing-extensions==3.10.0.0
 uritemplate==3.0.1
 urllib3==1.26.6
 validators==0.18.2
+webencodings==0.5.1

@@ -386,7 +386,7 @@ LOGGING = {
 }
 
 DRF_API_LOGGER_DATABASE = os.getenv("DRF_API_LOGGER_DATABASE", False)
-DRF_LOGGER_QUEUE_MAX_SIZE = int(os.getenv("DRF_LOGGER_QUEUE_MAX_SIZE", 50))  # Default to 50 if not specified.
-DRF_LOGGER_INTERVAL = int(os.getenv("DRF_LOGGER_INTERVAL", 10))  # In Seconds, Default to 10 seconds if not specified.
-DRF_API_LOGGER_DEFAULT_DATABASE = os.getenv("DRF_API_LOGGER_DEFAULT_DATABASE", "default")
+# DRF_LOGGER_QUEUE_MAX_SIZE = int(os.getenv("DRF_LOGGER_QUEUE_MAX_SIZE", 50))  # Default to 50 if not specified.
+# DRF_LOGGER_INTERVAL = int(os.getenv("DRF_LOGGER_INTERVAL", 10))  # In Seconds, Default to 10 seconds if not specified.
+# DRF_API_LOGGER_DEFAULT_DATABASE = os.getenv("DRF_API_LOGGER_DEFAULT_DATABASE", "default")
 DRF_API_LOGGER_PATH_TYPE = os.getenv("DRF_API_LOGGER_PATH_TYPE", "FULL_PATH")

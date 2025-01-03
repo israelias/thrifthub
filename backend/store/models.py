@@ -21,7 +21,7 @@ from versatileimagefield.placeholder import (
 
 
 def upload_path(instance, filename: str) -> str:
-    return "/".join(["images", str(instance.name), filename])
+    return "/".join([str(instance.name), filename])
 
 
 def rand_slug() -> str:
@@ -29,6 +29,8 @@ def rand_slug() -> str:
         random.choice(string.ascii_letters + string.digits) for _ in range(6)
     )
 
+def get_default_image():
+    return settings.MEDIA_ROOT + "/images/default_placeholder.png"
 
 class Category(MPTTModel):
     """
@@ -177,7 +179,7 @@ class Image(models.Model):
         ppoi_field="image_ppoi",
         # null=True,
         # blank=True,
-        default=settings.MEDIA_ROOT + "/images/default_placeholder.png",
+        default=get_default_image,
         placeholder_image=OnDiscPlaceholderImage(
             path=settings.MEDIA_ROOT + "/images/default_placeholder.png"
         ),
