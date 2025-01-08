@@ -1,7 +1,31 @@
 {
+  "name": "thrifthub",
+  "version": "1.0.0",
+  "description": "A Django and React Native marketplace for thrift shopping",
   "private": true,
+  "author": "Joem Elias Sanez",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/israelias/thrifthub/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/israelias/thrifthub.git"
+  },
+  "homepage": "https://github.com/israelias/thrifthub#readme",
   "workspaces": [
-    "backend/*",
-    "frontend/*"
-  ]
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "configure:path": "node configurePath.js",
+    "configure:backend": "node configureBackend.js",
+    "setup:backend": "yarn configure:path && yarn configure:backend",
+    "start:backend": "yarn workspace backend start",
+    "start:frontend": "yarn workspace frontend start",
+    "dev": "concurrently \"yarn start:backend\" \"yarn start:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0"
+  }
 }
