@@ -5,21 +5,48 @@ This is a Django E-Commerce API. It is a RESTful API that allows users to add an
 
 
 ## Quick Start
-* Create a virtual environment: `python -m venv venv`
-* Activate the virtual environment: `source venv/bin/activate`
-* Install the requirements: `pip install -r requirements.txt`
-  * Run the migrations: `python manage.py migrate`
-  * Create a superuser: `python manage.py createsuperuser`
-* Run the server: `python manage.py runserver`
-* Access the admin panel: `http://127.0.0.1:8000/admin/`
-* Access the API: `http://127.0.0.1:8000/api/`
-  * Access the StoreApp: `http://127.0.0.1:8000/api/store/`
-  * Access the VendorApp: `http://127.0.0.1:8000/api/vendor/`
-  * Access the OrdersApp: `http://127.0.0.1:8000/api/orders/`
-  * Follow flex-field syntax to include related fields: `http://127.0.0.1:8000/api/store/?expand=category,images`
-* Access the GraphQL Playground: `http://127.0.0.1:8000/graphql/`
-* Access the Swagger documentation: `http://127.0.0.1:8000/swagger/`
-* Access the Redoc documentation: `http://127.0.0.1:8000/redoc/`
+1. Create a virtual environment:
+    ```bash
+   python -m venv venv
+    ```
+2. Activate the virtual environment:
+   * On MacOS/Linux:
+    ```bash
+    source venv/bin/activate
+     ```
+    * On Windows:
+    ```bash
+    venv\Scripts\activate
+    ```
+3. Install the requirements:
+    ```bash
+    pip install -r requirements.txt
+    ```
+4. Run the migrations:
+    ```bash
+    python manage.py migrate
+    ```
+5. Create a superuser:
+    ```bash
+    python manage.py createsuperuser
+    ```
+6. Run the server:
+    ```bash
+    python manage.py runserver
+    ```
+7. Access the application:
+    * Admin Panel: `http://127.0.0.1:8000/admin/`
+    * API root: `http://127.0.0.1:8000/api/`
+      * StoreApp: `http://127.0.0.1:8000/api/store/`
+      * VendorApp: `http://127.0.0.1:8000/api/vendor/`
+      * OrdersApp: `http://127.0.0.1:8000/api/orders/`
+    * Expand related fields: `http://127.0.0.1:8000/api/store/?expand=category,images`
+8. Access the documentation:
+   * Swagger: `http://127.0.0.1:8000/swagger/`
+   * Redoc: `http://127.0.0.1:8000/redoc/`
+   * DRF: `http://127.0.0.1:8000/docs/`
+9. Access the GraphQL Playground:
+    * GraphQL: `http://127.0.0.1:8000/graphql/`
 
 ## Basic Features of The App
 
@@ -225,7 +252,7 @@ This setup provides a flexible and efficient API for interacting with the Django
 ### GraphQL Playground
 The GraphQL endpoint is available at `/graphql/` and allows clients to perform queries and mutations on the Django models using GraphQL.
 
-#### Stripe
+## Stripe
 Stripe makes it easy to be PCI compliant. With a proper integration, you will never have access to your customers' payment information.
 
 A typical payment flow with Stripe can be divided in two steps:
@@ -241,6 +268,104 @@ The token represents a card, but hides the PCI sensitive information (i.e. the w
 You can find a simple tutorial for creating charges [here](https://stripe.com/docs/payments/charges-api).
 
 If you don't plan on charging the same customer multiple times (or if you don't mind asking them to provide their card information every time), then you don't necessarily need to store anything in your own database. When you create the charge, you will be immediately informed of the result (success or failure) and can take the necessary actions.
+
+## Steps to Configure AWS S3 Bucket
+1. **Create an AWS Account**: If you don't have an AWS account, [sign up here](https://aws.amazon.com/).
+
+2. **Create an S3 Bucket**:
+   - Navigate to the [S3 Management Console](https://s3.console.aws.amazon.com/s3/).
+   - Click "Create bucket" and follow the prompts to set up your bucket.
+
+3. **Set Bucket Permissions**:
+   - **Bucket Policy**: Ensure your bucket policy allows the necessary access. Here's an example policy that grants public read access to all objects in the bucket:
+     ```json
+     {
+         "Version": "2012-10-17",
+         "Statement": [
+             {
+                 "Effect": "Allow",
+                 "Principal": "*",
+                 "Action": "s3:GetObject",
+                 "Resource": "arn:aws:s3:::your-bucket-name/*"
+             }
+         ]
+     }
+     ```
+     Replace `your-bucket-name` with the name of your S3 bucket.
+
+4. **Configure CORS (Cross-Origin Resource Sharing)**:
+   - In the S3 console, select your bucket.
+   - Go to the "Permissions" tab and scroll to "Cross-origin resource sharing (CORS)".
+   - Click "Edit" and add the following JSON configuration:
+     ```json
+     [
+         {
+             "AllowedHeaders": ["*"],
+             "AllowedMethods": ["GET", "POST", "PUT", "DELETE"],
+             "AllowedOrigins": ["*"],
+             "ExposeHeaders": []
+         }
+     ]
+     ```
+     This configuration allows all origins to access your bucket using the specified methods. Adjust the `AllowedOrigins` and `AllowedMethods` as per your application's requirements. For more details, refer to the [AWS S3 CORS documentation](https://docs.aws.amazon.com/AmazonS3/latest/userguide/cors.html).
+
+5. **Create an IAM User**:
+   - Navigate to the [IAM Management Console](https://console.aws.amazon.com/iam/).
+   - Create a new user with programmatic access.
+   - Attach the `AmazonS3FullAccess` policy to the user. For more granular control, consider creating a custom policy:
+     ```json
+     {
+         "Version": "2012-10-17",
+         "Statement": [
+             {
+                 "Effect": "Allow",
+                 "Action": "s3:*",
+                 "Resource": [
+                     "arn:aws:s3:::your-bucket-name",
+                     "arn:aws:s3:::your-bucket-name/*"
+                 ]
+             }
+         ]
+     }
+     ```
+     Replace `your-bucket-name` with your actual bucket name. This policy grants full access to the specified bucket and its contents.
+
+6. **Obtain Access Credentials**:
+   - After creating the IAM user, note the **Access Key ID** and **Secret Access Key**. Store these securely, as they are required for configuring your Django application.
+
+7. **Required Packages**:
+   - Use pip to install the necessary packages if you haven't already:
+     ```bash
+     pip install boto3 django-storages
+     ```
+     - `boto3` is the Amazon Web Services (AWS) SDK for Python, which allows Python developers to write software that makes use of Amazon services.
+     - `django-storages` is a collection of custom storage backends for Django, including S3 storage.
+
+8. **Follow Configuration of Django Settings**:
+   - In `core/settings.py`, add `'storages'` to your `INSTALLED_APPS`:
+     ```python
+     INSTALLED_APPS = [
+         # other apps
+         'storages',
+     ]
+     ```
+   - Check the following settings if `USE_S3` is set to `True`:
+     ```python
+     AWS_ACCESS_KEY_ID = 'your-access-key-id'
+     AWS_SECRET_ACCESS_KEY = 'your-secret-access-key'
+     AWS_STORAGE_BUCKET_NAME = 'your-bucket-name'
+     AWS_S3_REGION_NAME = 'your-region'  # e.g., 'us-east-1'
+     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+     # Static files
+     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+     # Media files
+     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+     ```
+     Replace the placeholder values with your actual AWS credentials and bucket details. This configuration tells Django to use S3 for storing static and media files.
 
 ## References
 - [Hello GraphQL](https://docs.graphene-python.org/projects/django/en/latest/tutorial-plain/)
