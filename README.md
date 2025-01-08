@@ -1,12 +1,248 @@
-[![runs with Expo Go](https://img.shields.io/badge/Runs%20with%20Expo%20Go-000.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000)](https://expo.io/client)
 
-[![runs with Expo Go](https://img.shields.io/badge/Runs%20with%20Expo%20Go-4630EB.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000)](https://expo.io/client)
+<div style="display: flex; justify-content: space-between;">
+  <a href="https://expo.io/client">
+    <img src="https://img.shields.io/badge/Runs%20with%20Expo%20Go-000.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000" alt="runs with Expo Go">
+  </a>
+  <a href="https://expo.io/client">
+    <img src="https://img.shields.io/badge/Runs%20with%20Expo%20Go-4630EB.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000" alt="runs with Expo Go">
+  </a>
+</div>
+
+<!-- Anchor for Back To Top -->
+<a id="readme-top"></a>
+
 # ThriftHub
 An Online Marketplace Application
 
+ThriftHub is a platform that allows users to post second-hand goods and connect with vendors interested in such items.
 
-An app that allows users to post second-hand goods and connect with vendors interested in such goods.
+## Getting Started
 
+This project is structured as a monorepo, managing both the frontend and backend applications. 
+To streamline the setup process, several scripts are provided to configure and run the applications efficiently.
+
+### Root `package.json` Scripts
+
+- **`configure:path`**: Executes [`configurePath.js`](configurePath.js), to ensure environment paths are correctly set up for the backend.
+
+- **`configure:backend`**: Runs [`configureBackend.js`](configureBackend.js), to prepare the Django backend environment by setting up required Python packages and configurations.
+
+- **`setup:backend`**: Sequentially runs `configure:path` and `configure:backend` to prepare the backend environment.
+
+- **`start:backend`**: Initiates the backend server by invoking the start script defined in the backend's [`package.json`](backend/package.json).
+
+- **`start:frontend`**: Starts the frontend application by calling the start script defined in the frontend's [`package.json`](frontend/package.json).
+
+- **`dev`**: Utilizes `concurrently` to run both the backend and frontend servers simultaneously, allowing for concurrent development.
+
+### [`backend/package.json`](backend/package.json) Script
+
+- **`start`**: Executes `start.sh`, a shell script that initializes the backend server. This script typically activates the virtual environment, applies database migrations, and starts the Django development server.
+
+### [`frontend/package.json`](frontend/package.json) Script
+
+- **`start`**: Launches the frontend application using the `expo start` command.
+
+### Setup Instructions
+To set up the project as a monorepo:
+
+**Prerequisites**
+
+- Ensure [Yarn](https://yarnpkg.com/) is installed on your system.
+
+**Installation Steps**
+
+1. **Clone the Repository**:
+   ```bash
+   git clone git@github.com:israelias/thrifthub.git
+   cd thrifthub
+   ```
+
+2. **Install Dependencies**:
+   ```bash
+   yarn install
+   ```
+   This command installs all dependencies for both backend and frontend projects, leveraging Yarn Workspaces for efficient management.
+
+3. **Configure the backend**
+    ```bash
+    yarn setup:backend
+    ```
+    This script prepares the backend environment by setting up required environment variables and configurations.
+4. **Start the Development Servers**:
+   ```bash
+   yarn dev
+   ```
+   This command runs both the backend and frontend servers concurrently, allowing you to develop and test the applications simultaneously.
+   ```
+   
+**TODO** 
+The frontend web-build at [thrifthub-frontend](https://thifthub.vercel.app) is currently still consuming a dead heroku backend.
+See [`frontend/src/config.ts`](frontend/src/constants/backend.constants.ts) for the current backend URL. The new production backend is hosted at [thrifthub-backend](https://thrifthub-backend.onrender.com/)  and should be updated in the `const API_URL` variable.
+
+- [ ] Adjust `const API_URL` in [`frontend/src/config.ts`](frontend/src/constants/backend.constants.ts) to variably match the backend server's URL for development and production environments. 
+
+
+### Configuration Scripts
+
+To streamline the setup process, several scripts are provided to configure the project efficiently. These scripts are designed to prepare the backend environment, set up paths, and ensure the project is ready for development.
+
+* `configurePath.js`: This script sets up necessary path configurations for the backend, ensuring that all file and directory paths are correctly established.
+* `configureBackend.js`: This script prepares the backend environment by setting up required environment variables and configurations, ensuring the backend is ready for development and production.
+* `start.sh`: A shell script that initiates the backend server, handling any necessary pre-start tasks and ensuring the server runs with the appropriate settings.
+  * Activates the virtual environment.
+  * Applies database migrations.
+  * Starts the Django development server.
+
+
+By following these instructions, you can set up and run the project efficiently within a monorepo structure.
+
+<hr>
+
+<details><summary><em><b>Directory Structure </b></em> (tree)    </summary>
+<br>
+
+```
+.
+├── backend
+│   ├── account
+│   │   ├── migrations
+│   │   ├── tests
+│   │   │   ├── test_models.py
+│   │   │   ├── test_serializers.py
+│   │   │   ├── test_urls.py
+│   │   │   └── test_views.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── schema.py
+│   │   ├── serializers.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   │   ├── database_schema.txt
+│   │   ├── payments_schema.txt
+│   │   └── screenshots
+│   ├── order
+│   │   ├── migrations
+│   │   ├── tests
+│   │   │   ├── test_models.py
+│   │   │   ├── test_serializers.py
+│   │   │   ├── test_urls.py
+│   │   │   └── test_views.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── cart.py
+│   │   ├── models.py
+│   │   ├── schema.py
+│   │   ├── serializers.py
+│   │   ├── types.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── store
+│   │   ├── migrations
+│   │   ├── tests
+│   │   │   ├── test_models.py
+│   │   │   ├── test_serializers.py
+│   │   │   ├── test_urls.py
+│   │   │   └── test_views.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── schema.py
+│   │   ├── serializers.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   └── vendor
+│   │   ├── migrations
+│   │   ├── tests
+│   │   │   ├── test_models.py
+│   │   │   ├── test_serializers.py
+│   │   │   ├── test_urls.py
+│   │   │   └── test_views.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── schema.py
+│   │   ├── serializers.py
+│   │   ├── urls.py
+│   │   └── views.py
+│   ├── core
+│   │   ├── asgi.py
+│   │   ├── schema.py
+│   │   ├── settings.py
+│   │   ├── storages.py
+│   │   ├── urls.py
+│   │   ├── wsgi.py
+│   │   └── yasg.py
+│   ├── documentation
+│   ├── media
+│   ├── static
+│   ├── staticfiles
+│   ├── manage.py
+│   ├── requirements.txt
+│   ├── Procfile
+│   ├── package.json
+│   ├── start.sh
+│   └── README.md
+├── frontend
+│   ├── src
+│   │   ├── components
+│   │   │   ├── account
+│   │   │   ├── products
+│   │   │   ├── orders
+│   │   │   └── common
+│   │   ├── context
+│   │   │   ├── user.context.tsx
+│   │   │   ├── products.context.tsx
+│   │   │   ├── vendor.context.tsx
+│   │   │   └── authorization.context.tsx
+│   │   ├── navigation
+│   │   │   ├── accountStackNavigator.tsx
+│   │   │   ├── productStackNavigator.tsx
+│   │   │   ├── orderStackNavigator.tsx
+│   │   │   └── coreNavigator.tsx
+│   │   ├── screens
+│   │   │   ├── account
+│   │   │   ├── products
+│   │   │   ├── orders
+│   │   │   └── vendor
+│   │   ├── hooks
+│   │   ├── assets
+│   │   ├── services
+│   │   ├── utils
+│   │   ├── constants
+│   │   ├── types.ts
+│   │   └──core.tsx
+│   ├── native
+│   │   └── AppLoader.tsx
+│   ├── web-build
+│   ├── assets
+│   ├── babel.config.js
+│   ├── globals.d.ts
+│   ├── app.json
+│   ├── tsconfig.json
+│   ├── types.tsx
+│   ├── App.tsx
+│   ├── README.md
+│   ├── package.json
+│   └── yarn.lock
+├── .gitignore
+├── LICENSE
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+├── SECURITY.md
+├── README.md
+├── configureBackend.js
+├── configurePath.js
+├── package.json
+└── yarn.lock
+```
+
+<br>
+</details>
+<hr>
+
+<p align="right"><a href="#readme-top">back to top</a></p>
 
 [TOC levels=3]: # "## Contents"
 
@@ -22,7 +258,6 @@ An app that allows users to post second-hand goods and connect with vendors inte
   - [Programs and Software](#programs-and-software)
 - [Testing](#testing)
 - [Deployment](#deployment)
-- [Cloning This Repository](#cloning-this-repository)
 - [Credits](#credits)
   - [Acknowledgements](#acknowledgements)
   - [License](#license)
@@ -401,23 +636,6 @@ The project can be understood as a social network with <em><b>collections</b></e
   Please visit the [frontend](https://github.com/israelias/thrifthub/tree/master/frontend) root directory for details on deployment steps.
   ### [`cd backend`](https://github.com/israelias/thrifthub/tree/master/backend)
   Please visit the [backend](https://github.com/israelias/thrifthub/tree/master/backend) root directory for details on deployment steps.
-
-## Cloning This Repo
-- Clone this repo by running 
-  ```bash
-  git clone git@github.com:israelias/thrifthub.git
-  ```
-- at the jump, `cd` to the dir:
-  ```bash
-  cd thrifthub
-  ```
-  ### [`cd frontend`](https://github.com/israelias/thrifthub/tree/master/frontend)
-  Please visit the [frontend](https://github.com/israelias/thrifthub/tree/master/frontend) root directory for details on required modules via `yarn install` and to start the frontend development server on `localhost:3000`.
-  ### [`cd backend`](https://github.com/israelias/thrifthub/tree/master/backend)
-  Please visit the [backend](https://github.com/israelias/thrifthub/tree/master/backend) root directory for details on required modules via `requirements.txt` and to start the backend development server on `localhost:8000`.
-
-
-<p align="right"><a href="#readme-top">back to top</a></p>
 
 ## Credits
 
