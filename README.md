@@ -1,12 +1,29 @@
 
 <div style="display: flex; justify-content: space-between;">
-  <a href="https://expo.io/client">
-    <img src="https://img.shields.io/badge/Runs%20with%20Expo%20Go-000.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000" alt="runs with Expo Go">
-  </a>
-  <a href="https://expo.io/client">
+    <a href="https://expo.io/client">
     <img src="https://img.shields.io/badge/Runs%20with%20Expo%20Go-4630EB.svg?style=flat-square&logo=EXPO&labelColor=f3f3f3&logoColor=000" alt="runs with Expo Go">
   </a>
+  <a href="CODE_OF_CONDUCT.md">
+    <img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg?plastic&logo=appveyor&style=flat-square" alt="Thrifthub">
+  </a>
+  <a href="https://www.djangoproject.com/">
+  <img src="https://img.shields.io/badge/Django%20Rest%20Framework-0C4B33.svg?style=flat-square&logo=django&style=flat-square&logoColor=0C4B33&labelColor=fff" alt="framework: Django">
+</a>
 </div>
+
+[//]: # (  <a href="https://github.com/israelias/cheathub/commits/master/">)
+
+[//]: # (    <img src="https://img.shields.io/github/commit-activity/m/israelias/thrifthub/master?style=flat-square&logoColor=000&label=co&labelColor=fafafa&color=4630EB" alt="GitHub commit activity">)
+
+[//]: # (  </a>)
+
+[//]: # (  <a href="https://github.com/israelias/thrifthub/stargazers">)
+
+[//]: # (    <img src="https://img.shields.io/github/stars/israelias/thrifthub?style=flat-square&labelColor=000&color=4630EB" alt="GitHub Repo stars">)
+
+[//]: # (  </a>)
+
+
 
 <!-- Anchor for Back To Top -->
 <a id="readme-top"></a>
