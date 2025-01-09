@@ -63,11 +63,11 @@ To streamline the setup process, several scripts are provided to configure and r
 ### Setup Instructions
 To set up the project as a monorepo:
 
-**Prerequisites**
+#### **Prerequisites**
 
 - Ensure [Yarn](https://yarnpkg.com/) is installed on your system.
 
-**Installation Steps**
+#### **Installation Steps**
 
 1. **Clone the Repository**:
    ```bash
@@ -91,9 +91,9 @@ To set up the project as a monorepo:
    yarn dev
    ```
    This command runs both the backend and frontend servers concurrently, allowing you to develop and test the applications simultaneously.
-   ```
    
-**TODO** 
+#### **TODO** 
+
 The frontend web-build at [thrifthub-frontend](https://thifthub.vercel.app) is currently still consuming a dead heroku backend.
 See [`frontend/src/config.ts`](frontend/src/constants/backend.constants.ts) for the current backend URL. The new production backend is hosted at [thrifthub-backend](https://thrifthub-backend.onrender.com/)  and should be updated in the `const API_URL` variable.
 
@@ -276,7 +276,8 @@ By following these instructions, you can set up and run the project efficiently 
 - [Testing](#testing)
 - [Deployment](#deployment)
 - [Credits](#credits)
-  - [Acknowledgements](#acknowledgements)
+  - [Content and Media](#content-and-media) 
+- [Acknowledgments](#acknowledgments)
   - [License](#license)
 
 ## UX
@@ -670,12 +671,6 @@ The project can be understood as a social network with <em><b>collections</b></e
 
 #### DRF with React/NextJS frontend References
 - [Next JS | Django Rest Framework - Build an ecommerce store](https://www.youtube.com/watch?v=AuRmc9OTC1s)
-
-
-### Mentoring
-- Aaron Sinnot
-- Code Institute tutors
-- Fellow Code Institute students
 
 ## License
 [MIT License](/LICENSE) Copyright (c) 2021 Joem Elias Sanez
