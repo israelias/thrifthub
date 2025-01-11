@@ -1,22 +1,13 @@
-export const DEFAULT_AVATAR =
-  "https://thrifthub.s3.ap-southeast-1.amazonaws.com/media/images/default_avatar.png";
-export const DEFAULT_PLACEHOLDER =
-  "https://thrifthub.s3.ap-southeast-1.amazonaws.com/media/images/default_avatar.png";
-
-export const MOBILE_SPLASHSCREEN =
-  "https://thrifthub.s3.ap-southeast-1.amazonaws.com/static/frontend/splash.png";
-
-export const DEFAULT_ICON =
-  "https://thrifthub.s3.ap-southeast-1.amazonaws.com/static/frontend/icon.png";
-
-export const DEFAULT_ADAPTIVE_ICON =
-  "https://thrifthub.s3.ap-southeast-1.amazonaws.com/static/frontend/adaptive-icon.png";
-
+export const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8000";
+export const API = `${BACKEND_URL}/api`;
+export const DEFAULT_AVATAR = `${BACKEND_URL}/media/images/default_avatar.png` || require("../assets/images/default_avatar.png");
+export const DEFAULT_PLACEHOLDER = `${BACKEND_URL}/media/images/default_placeholder.png` || require("../assets/images/default_placeholder.png");
+export const MOBILE_SPLASHSCREEN = require('../assets/splash.png');
+export const DEFAULT_ICON = require('../assets/icon.png');
+export const DEFAULT_ADAPTIVE_ICON = require('../assets/adaptive-icon.png');
 export const PRODUCT_ENDPONT = "store";
 export const CATEGORY_ENDPOINT = "category";
 export const VENDOR_ENDPOINT = "vendor";
 export const ORDER_ENDPOINT = "orders";
 export const ORDERDETAILS_ENDPONT = "orderdetail";
-export const API = "https://thrifthub-backend.herokuapp.com/api";
-export const HOME_PRODUCTS_QUERY =
-  'store/?expand=product_images,vendor,product,category&include=vendor.name';
+export const HOME_PRODUCTS_QUERY = 'store/?expand=product_images,vendor,product,category&include=vendor.name';
